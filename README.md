@@ -1,6 +1,6 @@
 # Realtime Call Translator
 
-[![Русская версия](https://img.shields.io/badge/lang-русский-blue)](README.ru.md)
+[![README на русском](https://img.shields.io/badge/README-Russian-blue)](README.ru.md)
 
 Real-time speech translator for video/voice calls. Translates both sides of the conversation live — you speak your language, the other person hears theirs, and vice versa.
 
@@ -20,8 +20,8 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 **One-command setup** (macOS with Homebrew):
 
 ```bash
-git clone https://github.com/youruser/realtime-call-translator.git
-cd realtime-call-translator
+git clone https://github.com/LetovKai/call-translator.git
+cd call-translator
 ./setup.sh
 ```
 

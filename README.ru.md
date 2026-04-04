@@ -20,8 +20,8 @@
 **Установка одной командой** (macOS с Homebrew):
 
 ```bash
-git clone https://github.com/youruser/realtime-call-translator.git
-cd realtime-call-translator
+git clone https://github.com/LetovKai/call-translator.git
+cd call-translator
 ./setup.sh
 ```
 
