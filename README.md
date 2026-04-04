@@ -30,22 +30,16 @@ The script installs all dependencies, downloads voice models for English and Rus
 Then:
 
 ```bash
-# Edit .env with your API keys
-nano .env
-
-# Run
 ./run.sh
 ```
 
-Open **http://127.0.0.1:5050** in **Google Chrome** — the web UI opens with settings where you configure everything. See [USAGE.md](USAGE.md) for a full guide on controls, voice management, and audio setup.
+Open **http://127.0.0.1:5050** in **Google Chrome**. Settings open automatically on first launch — enter your API keys and configure languages there. See [USAGE.md](USAGE.md) for the full guide.
 
 > **Browser:** Use **Chrome** — audio monitor and BlackHole routing work correctly. Safari has audio output limitations that prevent monitor playback. Other browsers are untested.
 
-> You need two free API keys:
+> You need two free API keys (free tiers available):
 > - [Deepgram](https://console.deepgram.com) — speech-to-text
 > - [Groq](https://console.groq.com) — translation (LLM)
->
-> Enter them in **Settings** (gear icon in the web UI) or in the `.env` file.
 
 ---
 
