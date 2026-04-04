@@ -10,6 +10,7 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 
 ![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+![GitHub stars](https://img.shields.io/github/stars/LetovKai/call-translator)
 
 > **Note:** macOS only (14+). Uses CoreAudio and cpal for audio capture. Windows/Linux support is not available yet — contributions welcome!
 
