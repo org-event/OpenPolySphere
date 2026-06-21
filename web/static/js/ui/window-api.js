@@ -8,7 +8,7 @@ import { saveAndRestart } from '../engine/restart.js';
 import { toggleMonitor } from '../audio/monitor.js';
 import { toggleTabCapture } from '../audio/tab-capture.js';
 import { openSettings, closeSettings, toggleSection } from '../settings/panel.js';
-import { downloadWhisperModel } from '../settings/stt.js';
+import { downloadWhisperModel, requestAppleSpeechAuth } from '../settings/stt.js';
 import {
   downloadTranslationModels,
   downloadPolishModel,
@@ -40,6 +40,7 @@ const handlers = {
   closeSettings,
   toggleSection,
   downloadWhisperModel,
+  requestAppleSpeechAuth,
   downloadTranslationModels,
   downloadPolishModel,
   testLocalTranslation,

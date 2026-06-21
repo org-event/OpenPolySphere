@@ -262,12 +262,26 @@ fn passes_language_check(text: &str, expected_lang: &str) -> bool {
     if total == 0 {
         return false;
     }
+    if apple_stt_enabled() {
+        // Apple Speech on a fixed locale — allow Russian/English code-switching.
+        return total >= 2;
+    }
     match expected_lang {
         // RU mic: need real Cyrillic, not English/Spanish/Swedish hallucinations.
         "ru" => cyrillic >= 2 && cyrillic * 100 / total >= 50,
         "en" => latin >= 2 && latin * 100 / total >= 50,
         _ => true,
     }
+}
+
+fn apple_stt_enabled() -> bool {
+    matches!(
+        std::env::var("STT_BACKEND")
+            .unwrap_or_else(|_| "local".into())
+            .to_lowercase()
+            .as_str(),
+        "apple" | "system" | "macos"
+    )
 }
 
 fn letter_count(text: &str, pred: fn(char) -> bool) -> usize {

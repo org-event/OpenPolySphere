@@ -49,6 +49,7 @@ impl Default for Settings {
         fields.insert("translation_polish".into(), Value::Bool(true));
         fields.insert("translation_polish_backend".into(), Value::String("local".into()));
         fields.insert("stt_backend".into(), Value::String("local".into()));
+        fields.insert("deepgram_model".into(), Value::String("nova-3".into()));
         fields.insert("whisper_model".into(), Value::String("auto".into()));
         fields.insert("stt_device".into(), Value::String(String::new()));
         fields.insert("translation_model".into(), Value::String(String::new()));
@@ -164,6 +165,15 @@ impl Settings {
         let v = self.str_field("stt_backend");
         if v.is_empty() {
             "local".into()
+        } else {
+            v.to_lowercase()
+        }
+    }
+
+    pub fn deepgram_model(&self) -> String {
+        let v = self.str_field("deepgram_model");
+        if v.is_empty() {
+            "nova-3".into()
         } else {
             v.to_lowercase()
         }
@@ -288,6 +298,7 @@ pub fn apply_env(settings: &Settings, models_base: &Path) {
     std::env::set_var("TRANSLATOR_MODELS_DIR", models_base);
     std::env::set_var("DEEPGRAM_API_KEY", settings.str_field("deepgram_api_key"));
     std::env::set_var("STT_BACKEND", settings.stt_backend());
+    std::env::set_var("TRANSLATOR_DEEPGRAM_MODEL", settings.deepgram_model());
     std::env::set_var("TRANSLATOR_WHISPER_MODEL", settings.whisper_model());
     std::env::set_var("TRANSLATOR_STT_DEVICE", settings.stt_device());
     std::env::set_var("TRANSLATION_BACKEND", settings.translation_backend());
@@ -391,6 +402,8 @@ pub fn local_translation_status() -> serde_json::Value {
     let (polish_model, polish_ready) = audio_core::translation::polish_model_status();
     let polish_disabled = if !polish_enabled {
         ""
+    } else if backend == "apple" {
+        "Not used with Apple Translation"
     } else if audio_core::translation::is_session_disabled() {
         "Polish unavailable for this session"
     } else if polish_backend == "local" && !polish_ready {
@@ -398,10 +411,26 @@ pub fn local_translation_status() -> serde_json::Value {
     } else {
         ""
     };
+    let apple = {
+        let settings = Settings::load().unwrap_or_default();
+        audio_core::translation::apple_translation_availability(
+            &settings.str_field("my_language"),
+            &settings.str_field("their_language"),
+        )
+    };
+    let ready = match backend.as_str() {
+        "openrouter" | "cloud" | "llm" => false,
+        "apple" | "system" | "macos" => apple
+            .get("ready")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false),
+        _ => all,
+    };
     serde_json::json!({
         "backend": backend,
         "pairs": map,
-        "ready": all && backend != "openrouter",
+        "ready": ready,
+        "apple": apple,
         "polish_enabled": polish_enabled,
         "polish_backend": polish_backend,
         "polish_model": polish_model,
@@ -418,17 +447,39 @@ pub fn stt_status() -> serde_json::Value {
     let device = settings.stt_device();
     let selected = settings.whisper_model();
     let backend = settings.stt_backend();
+    let deepgram_model = settings.deepgram_model();
+    let my_lang = settings.str_field("my_language");
+    let apple = audio_core::stt::apple::apple_speech_availability(&my_lang);
     let (model, _) = audio_core::stt::local::whisper_model_status();
     let installed = audio_core::stt::local::list_all_installed_whisper_variants();
     let selected_ready = audio_core::stt::local::is_variant_ready_for(&selected, &device);
     let device_ready = !audio_core::stt::local::list_installed_whisper_variants_for(&device).is_empty();
+    let ready = match backend.as_str() {
+        "deepgram" | "cloud" => {
+            !settings.str_field("deepgram_api_key").trim().is_empty()
+                || env_deepgram_key().is_some()
+        }
+        "apple" | "system" | "macos" => apple
+            .get("ready")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false),
+        _ => device_ready && selected_ready,
+    };
     serde_json::json!({
         "backend": backend,
         "device": device,
-        "model": model,
+        "model": if backend == "deepgram" {
+            format!("deepgram-{deepgram_model}")
+        } else if backend == "apple" || backend == "system" || backend == "macos" {
+            format!("apple-speech-{my_lang}")
+        } else {
+            model
+        },
+        "deepgram_model": deepgram_model,
         "selected": selected,
         "installed": installed,
-        "ready": (device_ready && selected_ready && backend != "deepgram"),
+        "ready": ready,
         "metal_available": cfg!(target_os = "macos"),
+        "apple": apple,
     })
 }

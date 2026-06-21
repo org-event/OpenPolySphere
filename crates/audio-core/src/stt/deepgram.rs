@@ -1,10 +1,10 @@
-//! Speech-to-text via Deepgram Nova-3 streaming WebSocket API.
+//! Speech-to-text via Deepgram streaming WebSocket API.
 
 use std::io::ErrorKind;
 use std::time::Instant;
 
 use anyhow::{bail, Context, Result};
-use log::{debug, info, warn};
+use log::{info, warn};
 use serde::Deserialize;
 use tungstenite::client::IntoClientRequest;
 use tungstenite::stream::MaybeTlsStream;
@@ -12,14 +12,39 @@ use tungstenite::{connect, Message, WebSocket};
 
 use super::SttResult;
 
+const DEFAULT_MODEL: &str = "nova-3";
+
+pub fn deepgram_model_from_env() -> String {
+    sanitize_deepgram_model(
+        &std::env::var("TRANSLATOR_DEEPGRAM_MODEL")
+            .or_else(|_| std::env::var("DEEPGRAM_MODEL"))
+            .unwrap_or_else(|_| DEFAULT_MODEL.into()),
+    )
+}
+
+/// Allow only Deepgram model slugs (letters, digits, hyphen).
+pub fn sanitize_deepgram_model(model: &str) -> String {
+    let m = model.trim().to_lowercase();
+    if m.is_empty()
+        || !m
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    {
+        warn!("Invalid Deepgram model '{model}', using {DEFAULT_MODEL}");
+        return DEFAULT_MODEL.into();
+    }
+    m
+}
+
 pub struct DeepgramStt {
     api_key: String,
     language: String,
     endpointing_ms: u32,
+    model: String,
 }
 
 impl DeepgramStt {
-    pub fn new(api_key: String, language: String, endpointing_ms: u32) -> Self {
+    pub fn new(api_key: String, language: String, endpointing_ms: u32, model: String) -> Self {
         let language = match language.as_str() {
             "pt" => "pt-BR",
             "no" => "nb",
@@ -30,20 +55,21 @@ impl DeepgramStt {
             api_key,
             language,
             endpointing_ms,
+            model: sanitize_deepgram_model(&model),
         }
     }
 
     pub fn create_session(&self, sample_rate: u32) -> Result<DeepgramSession> {
         let url = format!(
             "wss://api.deepgram.com/v1/listen\
-             ?model=nova-3\
+             ?model={}\
              &language={}\
              &encoding=linear16\
              &sample_rate={}\
              &channels=1\
              &interim_results=true\
              &endpointing={}",
-            self.language, sample_rate, self.endpointing_ms
+            self.model, self.language, sample_rate, self.endpointing_ms
         );
 
         let mut request = url
@@ -57,14 +83,14 @@ impl DeepgramStt {
         );
 
         info!(
-            "Connecting to Deepgram (lang={}, {}Hz, endpointing={}ms)...",
-            self.language, sample_rate, self.endpointing_ms
+            "Connecting to Deepgram (model={}, lang={}, {}Hz, endpointing={}ms)...",
+            self.model, self.language, sample_rate, self.endpointing_ms
         );
 
         let (mut ws, _) = connect(request).context("Failed to connect to Deepgram WebSocket")?;
         set_nonblocking(&mut ws)?;
 
-        info!("Deepgram session connected");
+        info!("Deepgram session connected ({})", self.model);
         Ok(DeepgramSession {
             ws,
             audio_sent_secs: 0.0,
@@ -106,7 +132,7 @@ impl DeepgramSession {
         loop {
             match self.ws.read() {
                 Ok(Message::Text(text)) => {
-                    debug!("Deepgram: {}", &text[..text.len().min(200)]);
+                    log::debug!("Deepgram: {}", &text[..text.len().min(200)]);
                     match serde_json::from_str::<DgResponse>(&text) {
                         Ok(resp) if resp.is_final == Some(true) => {
                             let transcript = resp
@@ -135,7 +161,7 @@ impl DeepgramSession {
                             }
                         }
                         Ok(_) => {}
-                        Err(e) => debug!("Deepgram parse error: {}", e),
+                        Err(e) => log::debug!("Deepgram parse error: {}", e),
                     }
                 }
                 Ok(_) => {}

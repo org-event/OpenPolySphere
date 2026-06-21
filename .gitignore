@@ -1,6 +1,12 @@
 # Rust
 /target/
 
+# Swift helper build
+/tools/apple-translate/.build/
+/tools/apple-speech/.build/
+/tools/apple-speech-auth/.build/
+/tools/apple-speech-auth/LiveTranslator.app/
+
 # Models (large, downloaded separately)
 /models/
 

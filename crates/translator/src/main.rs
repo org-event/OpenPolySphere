@@ -24,8 +24,8 @@ use tower_http::services::{ServeDir, ServeFile};
 use crate::db::Db;
 use crate::engine_service::{recreate_engine, EngineService};
 use crate::events::SideState;
-use crate::paths::{base_dir, web_static_dir};
-use crate::settings::Settings;
+use crate::paths::{base_dir, models_dir, web_static_dir};
+use crate::settings::{apply_env, Settings};
 
 #[derive(Parser)]
 #[command(name = "translator", about = "Call Translator — all-Rust server")]
@@ -68,6 +68,19 @@ async fn serve() -> Result<()> {
 
     let db = Arc::new(Db::open()?);
     let settings = Settings::load()?;
+
+    #[cfg(target_os = "macos")]
+    {
+        let stt = settings.stt_backend();
+        if matches!(stt.as_str(), "apple" | "system" | "macos") {
+            apply_env(&settings, &models_dir());
+            info!("Apple STT configured — requesting speech recognition permission if needed");
+            if let Err(e) = audio_core::stt::apple::apple_speech_ensure_authorized() {
+                log::warn!("Apple Speech authorization: {e:#}");
+            }
+        }
+    }
+
     let side = Arc::new(SideState::default());
     let (sse_tx, _) = broadcast::channel(512);
     let engine = recreate_engine(&settings, db.clone(), side.clone(), sse_tx.clone())?;

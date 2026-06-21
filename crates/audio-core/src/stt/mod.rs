@@ -1,12 +1,13 @@
-//! Speech-to-text: local Whisper (Metal/whisper.cpp or CPU/CTranslate2) or Deepgram cloud.
+//! Speech-to-text: local Whisper, Apple Speech (macOS), or Deepgram cloud.
 
+pub mod apple;
 mod deepgram;
 pub mod local;
 
 use anyhow::{bail, Context, Result};
 use log::info;
 
-pub use deepgram::{DeepgramSession, DeepgramStt};
+pub use deepgram::{deepgram_model_from_env, DeepgramSession, DeepgramStt};
 
 /// Transcript with STT latency info.
 pub struct SttResult {
@@ -16,6 +17,7 @@ pub struct SttResult {
 
 enum SttBackend {
     Local,
+    Apple,
     Deepgram,
 }
 
@@ -36,8 +38,25 @@ impl SttEngine {
                 if deepgram_api_key.trim().is_empty() {
                     bail!("STT_BACKEND=deepgram but DEEPGRAM_API_KEY is not set");
                 }
-                info!("STT backend: Deepgram (cloud)");
+                info!(
+                    "STT backend: Deepgram (cloud, model={})",
+                    deepgram_model_from_env()
+                );
                 SttBackend::Deepgram
+            }
+            "apple" | "system" | "macos" => {
+                info!("STT backend: Apple Speech (system, on-device)");
+                #[cfg(target_os = "macos")]
+                {
+                    apple::apple_speech_ensure_authorized()
+                        .context("Apple Speech authorization")?;
+                    apple::apple_speech_backend().context("Failed to load Apple Speech STT")?;
+                    SttBackend::Apple
+                }
+                #[cfg(not(target_os = "macos"))]
+                {
+                    bail!("STT_BACKEND=apple but Apple Speech is only available on macOS");
+                }
             }
             _ => {
                 let device = local::stt_device_name();
@@ -57,12 +76,29 @@ impl SttEngine {
     pub fn create_session(&self, sample_rate: u32, language: &str) -> Result<SttSession> {
         match self.backend {
             SttBackend::Deepgram => {
+                let model = deepgram_model_from_env();
                 let stt = DeepgramStt::new(
                     self.deepgram_api_key.clone(),
                     language.to_string(),
                     self.endpointing_ms,
+                    model,
                 );
                 Ok(SttSession::Deepgram(stt.create_session(sample_rate)?))
+            }
+            SttBackend::Apple => {
+                #[cfg(target_os = "macos")]
+                {
+                    let backend = apple::apple_speech_backend()?;
+                    Ok(SttSession::Local(local::LocalWhisperSession::from_backend(
+                        backend,
+                        language.to_string(),
+                        self.endpointing_ms,
+                    )))
+                }
+                #[cfg(not(target_os = "macos"))]
+                {
+                    bail!("Apple Speech STT is only available on macOS")
+                }
             }
             SttBackend::Local => {
                 let engine = local::shared_engine()?;

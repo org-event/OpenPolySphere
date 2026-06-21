@@ -108,6 +108,7 @@ pub fn api_routes() -> Router<Arc<AppState>> {
         .route("/api/translation-models", get(translation_models))
         .route("/api/translation-status", get(translation_status))
         .route("/api/stt-status", get(stt_status_route))
+        .route("/api/apple-speech-authorize", post(apple_speech_authorize))
         .route("/api/download-whisper-model", post(download_whisper))
         .route("/api/download-translation-models", post(download_translate))
         .route("/api/download-polish-model", post(download_polish))
@@ -311,6 +312,13 @@ async fn translation_status() -> Json<Value> {
 
 async fn stt_status_route() -> Json<Value> {
     Json(stt_status())
+}
+
+async fn apple_speech_authorize() -> Json<Value> {
+    match audio_core::stt::apple::apple_speech_request_authorization() {
+        Ok(v) => Json(v),
+        Err(e) => Json(json!({ "error": e.to_string() })),
+    }
 }
 
 async fn download_whisper(Json(body): Json<WhisperDownloadBody>) -> impl IntoResponse {

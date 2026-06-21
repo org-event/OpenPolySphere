@@ -401,6 +401,12 @@ impl Engine {
         let tts_echo_suppress = Arc::new(AtomicBool::new(false));
 
         info!("Loading STT engine...");
+        let stt_mode = std::env::var("STT_BACKEND")
+            .unwrap_or_else(|_| "local".into())
+            .to_lowercase();
+        if matches!(stt_mode.as_str(), "apple" | "system" | "macos") {
+            info!("Apple STT selected — speech recognition permission dialog may appear now");
+        }
         let stt_engine = Arc::new(
             SttEngine::new(
                 self.config.deepgram_api_key.clone(),

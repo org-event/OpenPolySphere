@@ -1,5 +1,5 @@
 import { state } from '../core/state.js';
-import { sttBackendValue, updateSttEngineUI, refreshSttStatus, whisperModelValue } from './stt.js';
+import { sttBackendValue, updateSttEngineUI, refreshSttStatus, whisperModelValue, deepgramModelValue } from './stt.js';
 import {
   translationBackendValue,
   updateTranslationEngineUI,
@@ -18,13 +18,25 @@ export function populateForm(s) {
   if (!s.deepgram_api_key && s._deepgram_from_env) dg.placeholder = 'Set via .env file';
   if (!s.openrouter_api_key && s._openrouter_from_env) or.placeholder = 'Set via OPENROUTER_API_KEY in .env';
 
-  const useLocalCb = document.getElementById('cfg-use-local-model');
-  if (useLocalCb) {
-    useLocalCb.checked = (s.translation_backend || 'local') !== 'openrouter';
+  const backendSel = document.getElementById('cfg-translation-backend');
+  if (backendSel) {
+    const backend = s.translation_backend || 'local';
+    backendSel.value =
+      backend === 'openrouter' || backend === 'cloud' || backend === 'llm'
+        ? 'openrouter'
+        : backend === 'apple' || backend === 'system' || backend === 'macos'
+          ? 'apple'
+          : 'local';
   }
-  const useLocalSttCb = document.getElementById('cfg-use-local-stt');
-  if (useLocalSttCb) {
-    useLocalSttCb.checked = (s.stt_backend || 'local') !== 'deepgram';
+  const sttBackendSel = document.getElementById('cfg-stt-backend');
+  if (sttBackendSel) {
+    const sttBackend = s.stt_backend || 'local';
+    sttBackendSel.value =
+      sttBackend === 'deepgram' || sttBackend === 'cloud'
+        ? 'deepgram'
+        : sttBackend === 'apple' || sttBackend === 'system' || sttBackend === 'macos'
+          ? 'apple'
+          : 'local';
   }
   const whisperSel = document.getElementById('cfg-whisper-model');
   if (whisperSel) {
@@ -36,6 +48,10 @@ export function populateForm(s) {
     if (!s.stt_device && !s._default_stt_device) {
       sttDevSel.value = 'metal';
     }
+  }
+  const dgModelSel = document.getElementById('cfg-deepgram-model');
+  if (dgModelSel) {
+    dgModelSel.value = s.deepgram_model || 'nova-3';
   }
   const polishCb = document.getElementById('cfg-translation-polish');
   if (polishCb) {
@@ -67,6 +83,7 @@ export function readForm() {
       (() => document.getElementById('cfg-openrouter').value)
     )().trim(),
     stt_backend: sttBackendValue(),
+    deepgram_model: deepgramModelValue(),
     stt_device: document.getElementById('cfg-stt-device')?.value || '',
     whisper_model: whisperModelValue(),
     translation_backend: translationBackendValue(),

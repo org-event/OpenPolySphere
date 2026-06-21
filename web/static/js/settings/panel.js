@@ -5,7 +5,7 @@ import {
   refreshTranslationStatus,
   updateTranslationEngineUI,
   loadTranslationModels,
-  isLocalTranslation,
+  translationBackendValue,
 } from './translation.js';
 
 function closeLogsPanel() {
@@ -21,7 +21,7 @@ export function openSettings() {
   refreshSttStatus();
   updateTranslationEngineUI();
   updateSttEngineUI();
-  if (!isLocalTranslation()) {
+  if (translationBackendValue() === 'openrouter') {
     loadTranslationModels().catch((e) => console.warn('loadTranslationModels failed', e));
   }
   startLevelMonitoring();

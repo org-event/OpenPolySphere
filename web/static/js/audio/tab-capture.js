@@ -38,8 +38,11 @@ export async function toggleTabCapture() {
   }
 
   const lang = dgLang(state.currentSettings.their_language || 'en');
+  const dgModel = state.currentSettings.deepgram_model || 'nova-3';
   const url =
-    'wss://api.deepgram.com/v1/listen?model=nova-3&language=' +
+    'wss://api.deepgram.com/v1/listen?model=' +
+    encodeURIComponent(dgModel) +
+    '&language=' +
     lang +
     '&interim_results=true&endpointing=' +
     (state.currentSettings.endpointing_ms || 300);

@@ -13,11 +13,14 @@ use anyhow::Result;
 use log::info;
 
 pub use common::is_whisper_hallucination;
+pub use common::TranscribeOutcome;
+pub use common::WhisperBackend;
 pub use common::WhisperVariant;
+pub use common::WHISPER_SAMPLE_RATE;
 
 use common::{
     default_stt_device, is_ct2_ready, is_variant_ready_for_device, list_ggml_installed,
-    models_base_dir, stt_device, variant_dir, WhisperBackend,
+    models_base_dir, stt_device, variant_dir,
 };
 
 pub struct LocalWhisperEngine {
@@ -72,8 +75,16 @@ pub struct LocalWhisperSession {
 
 impl LocalWhisperSession {
     pub fn new(engine: Arc<LocalWhisperEngine>, language: String, endpointing_ms: u32) -> Self {
+        Self::from_backend(engine.backend(), language, endpointing_ms)
+    }
+
+    pub fn from_backend(
+        backend: Arc<dyn WhisperBackend>,
+        language: String,
+        endpointing_ms: u32,
+    ) -> Self {
         Self {
-            inner: common::LocalWhisperSession::new(engine.backend(), language, endpointing_ms),
+            inner: common::LocalWhisperSession::new(backend, language, endpointing_ms),
         }
     }
 

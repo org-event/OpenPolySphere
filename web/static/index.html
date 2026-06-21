@@ -52,10 +52,14 @@
       <div class="sp-section-body">
         <div class="sp-field">
           <div class="sp-label">Speech-to-text (STT)</div>
-          <label class="sp-check sp-check-prominent">
-            <input type="checkbox" id="cfg-use-local-stt" checked>
-            <span><strong>Local model</strong> — Whisper on this Mac</span>
-          </label>
+          <div class="sp-label" style="margin-top:4px">Engine</div>
+          <div class="sp-input-row">
+            <select class="sp-input" id="cfg-stt-backend">
+              <option value="local">Local — Whisper (Metal / CPU)</option>
+              <option value="apple" id="cfg-stt-backend-apple" hidden>Apple — system speech recognition (on-device)</option>
+              <option value="deepgram">Deepgram — cloud streaming</option>
+            </select>
+          </div>
           <div class="translation-engine-badge local" id="stt-engine-badge">Active: Local Whisper</div>
           <div id="stt-local-panel">
             <div class="sp-label" style="margin-top:8px">Whisper model</div>
@@ -81,7 +85,27 @@
             </div>
             <div class="sp-hint" id="stt-model-hint">Metal uses AMD/Intel GPU via whisper.cpp. CPU uses CTranslate2.</div>
           </div>
+          <div id="stt-apple-panel" style="display:none">
+            <div class="sp-hint" id="stt-apple-status">Checking Apple Speech...</div>
+            <div class="sp-input-row" style="margin-top:8px">
+              <button type="button" class="sp-test-btn" id="btn-apple-speech-auth" onclick="requestAppleSpeechAuth()">Allow Speech Recognition</button>
+            </div>
+            <div class="sp-hint">Uses macOS Speech framework. Click the button to trigger the system permission dialog, then allow <strong>Terminal</strong> or <strong>Cursor</strong> in System Settings → Privacy & Security → Speech Recognition.</div>
+          </div>
           <div id="stt-cloud-panel" style="display:none">
+            <div class="sp-label" style="margin-top:8px">Deepgram model</div>
+            <div class="sp-input-row">
+              <select class="sp-input" id="cfg-deepgram-model">
+                <option value="nova-3">Nova-3 — best quality (default)</option>
+                <option value="nova-2">Nova-2 — faster, still accurate</option>
+                <option value="nova">Nova — older generation</option>
+                <option value="enhanced">Enhanced — legacy, balanced</option>
+                <option value="base">Base — lowest latency, lower quality</option>
+                <option value="whisper-large">Whisper Large — via Deepgram</option>
+              </select>
+            </div>
+            <div class="sp-hint" id="stt-deepgram-hint">Streaming STT over WebSocket. Try Nova-2 or Base if you need lower latency.</div>
+            <div class="sp-hint" id="stt-cloud-status"></div>
             <div class="sp-label" style="margin-top:12px">Deepgram API Key</div>
             <div class="sp-input-row">
               <input class="sp-input sp-key" id="cfg-deepgram" type="text" placeholder="Enter Deepgram key..." autocomplete="one-time-code" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
@@ -92,10 +116,14 @@
         </div>
         <div class="sp-field">
           <div class="sp-label">Translation</div>
-          <label class="sp-check sp-check-prominent" id="cfg-use-local-wrap">
-            <input type="checkbox" id="cfg-use-local-model" checked>
-            <span><strong>Local model</strong> — Opus-MT (ru↔en, on this Mac)</span>
-          </label>
+          <div class="sp-label" style="margin-top:4px">Engine</div>
+          <div class="sp-input-row">
+            <select class="sp-input" id="cfg-translation-backend">
+              <option value="local">Local — Opus-MT (ru↔en, CTranslate2)</option>
+              <option value="apple" id="cfg-translation-backend-apple" hidden>Apple — system translation (on-device)</option>
+              <option value="openrouter">OpenRouter — cloud LLM</option>
+            </select>
+          </div>
           <div class="translation-engine-badge local" id="translation-engine-badge">Local: Opus-MT ru↔en</div>
           <div id="translation-local-panel">
             <div class="sp-hint" id="translation-local-status">Checking models...</div>
@@ -110,6 +138,13 @@
               <span><strong>AI polish</strong> — local Qwen2.5-0.5B fixes STT/MT errors before TTS</span>
             </label>
             <div class="sp-hint" id="translation-polish-hint">Same stack as Whisper/Opus-MT (CTranslate2). Adds ~1–3 s per phrase on CPU.</div>
+          </div>
+          <div id="translation-apple-panel" style="display:none">
+            <div class="sp-hint" id="translation-apple-status">Checking Apple Translation...</div>
+            <div class="sp-input-row" style="margin-top:8px">
+              <button type="button" class="sp-test-btn" id="btn-test-translate-apple" onclick="testLocalTranslation()">Test</button>
+            </div>
+            <div class="sp-hint">Uses macOS Translation API (macOS 15+). Language packs must be installed — System Settings → General → Language & Region, or the Translate app. Works offline once installed.</div>
           </div>
           <div id="translation-cloud-panel" style="display:none">
             <div class="sp-label" style="margin-top:12px">OpenRouter API Key</div>
