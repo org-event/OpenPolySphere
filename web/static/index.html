@@ -64,14 +64,22 @@
                 <option value="auto">Auto — fastest installed</option>
                 <option value="tiny">Tiny — ~75 MB, lowest latency</option>
                 <option value="base">Base — ~145 MB</option>
+                <option value="base-q8_0">Base Q8_0 — ~148 MB, best Metal quality</option>
                 <option value="small">Small — ~460 MB, best quality</option>
+              </select>
+            </div>
+            <div class="sp-label" style="margin-top:8px">Compute device</div>
+            <div class="sp-input-row">
+              <select class="sp-input" id="cfg-stt-device">
+                <option value="metal">Metal GPU (whisper.cpp) — recommended on Mac</option>
+                <option value="cpu">CPU (CTranslate2) — fallback</option>
               </select>
             </div>
             <div class="sp-hint" id="stt-local-status">Checking model...</div>
             <div class="sp-input-row" style="margin-top:8px">
               <button type="button" class="sp-test-btn" id="btn-download-stt" onclick="downloadWhisperModel()">Download selected</button>
             </div>
-            <div class="sp-hint" id="stt-model-hint">Runs on CPU (Accelerate on Apple Silicon).</div>
+            <div class="sp-hint" id="stt-model-hint">Metal uses AMD/Intel GPU via whisper.cpp. CPU uses CTranslate2.</div>
           </div>
           <div id="stt-cloud-panel" style="display:none">
             <div class="sp-label" style="margin-top:12px">Deepgram API Key</div>
@@ -92,15 +100,16 @@
           <div id="translation-local-panel">
             <div class="sp-hint" id="translation-local-status">Checking models...</div>
             <div class="sp-input-row" style="margin-top:8px">
-              <button type="button" class="sp-test-btn" id="btn-download-translate" onclick="downloadTranslationModels()">Download models</button>
+              <button type="button" class="sp-test-btn" id="btn-download-translate" onclick="downloadTranslationModels()">Opus-MT</button>
+              <button type="button" class="sp-test-btn" id="btn-download-polish" onclick="downloadPolishModel()">Polish model</button>
               <button type="button" class="sp-test-btn" id="btn-test-translate" onclick="testLocalTranslation()">Test</button>
             </div>
-            <div class="sp-hint">Pure machine translation — no API limits, no chatbot replies.</div>
+            <div class="sp-hint">Opus-MT (~600 MB) + optional Qwen2.5-0.5B polish (~400 MB), all CTranslate2 on this Mac.</div>
             <label class="sp-check" style="margin-top:10px" id="cfg-translation-polish-wrap">
               <input type="checkbox" id="cfg-translation-polish" checked>
-              <span><strong>AI polish</strong> — fix STT/MT errors via OpenRouter (uses key from .env)</span>
+              <span><strong>AI polish</strong> — local Qwen2.5-0.5B fixes STT/MT errors before TTS</span>
             </label>
-            <div class="sp-hint" id="translation-polish-hint">Opus-MT draft → LLM corrects wording before TTS. Adds ~0.5–1.5 s latency.</div>
+            <div class="sp-hint" id="translation-polish-hint">Same stack as Whisper/Opus-MT (CTranslate2). Adds ~1–3 s per phrase on CPU.</div>
           </div>
           <div id="translation-cloud-panel" style="display:none">
             <div class="sp-label" style="margin-top:12px">OpenRouter API Key</div>
@@ -379,6 +388,6 @@
 </footer>
 
 <script src="/static/js/tooltips.js"></script>
-<script type="module" src="/static/js/main.js?v=12"></script>
+<script type="module" src="/static/js/main.js?v=15"></script>
 </body>
 </html>

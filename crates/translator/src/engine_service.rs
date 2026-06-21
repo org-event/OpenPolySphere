@@ -273,5 +273,6 @@ pub fn recreate_engine(
     sse_tx: tokio::sync::broadcast::Sender<String>,
 ) -> Result<Arc<EngineService>> {
     audio_core::stt::local::invalidate_engine_cache();
+    audio_core::translation::invalidate_polish_cache();
     EngineService::new(settings, db, side, sse_tx).context("create engine")
 }

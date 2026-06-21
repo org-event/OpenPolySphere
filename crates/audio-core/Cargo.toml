@@ -27,11 +27,14 @@ ureq = { version = "2.12.1", features = ["json"] }
 tungstenite = { version = "0.21.0", features = ["native-tls"] }
 base64 = "0.22.1"
 
+[target.'cfg(target_os = "macos")'.dependencies]
+whisper-rs = { version = "0.16", features = ["metal"] }
+
 [target.'cfg(all(target_os = "macos", target_arch = "aarch64"))'.dependencies]
-ct2rs = { version = "0.9", default-features = false, features = ["sentencepiece", "accelerate", "ruy", "whisper"] }
+ct2rs = { version = "0.9", default-features = false, features = ["sentencepiece", "tokenizers", "accelerate", "ruy", "whisper"] }
 
 [target.'cfg(all(target_os = "macos", target_arch = "x86_64"))'.dependencies]
-ct2rs = { version = "0.9", default-features = false, features = ["sentencepiece", "openblas", "ruy", "whisper"] }
+ct2rs = { version = "0.9", default-features = false, features = ["sentencepiece", "tokenizers", "openblas", "ruy", "whisper"] }
 
 [target.'cfg(not(target_os = "macos"))'.dependencies]
-ct2rs = { version = "0.9", default-features = false, features = ["sentencepiece", "openblas", "ruy", "whisper"] }
+ct2rs = { version = "0.9", default-features = false, features = ["sentencepiece", "tokenizers", "openblas", "ruy", "whisper"] }

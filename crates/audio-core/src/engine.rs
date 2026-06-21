@@ -740,7 +740,7 @@ fn run_pipeline(
     let proc_sample_rate = sample_rate;
     let _proc_handle = std::thread::spawn(move || {
         while let Ok((text, stt_ms)) = proc_rx.recv() {
-            if local::is_whisper_hallucination(&text) {
+            if local::is_whisper_hallucination(&text, &proc_source_lang) {
                 info!("[{}] Hallucination dropped before translate: '{}'", proc_direction, text);
                 continue;
             }

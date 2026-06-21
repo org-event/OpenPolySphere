@@ -1,10 +1,11 @@
 import { showToast } from '../core/toast.js';
 
 const WHISPER_HINTS = {
-  auto: 'Auto picks the smallest downloaded model (tiny → base → small).',
-  tiny: 'Tiny — ~75 MB. Fastest STT (~0.8–1.2 s). Good for live calls.',
+  auto: 'Auto: Metal prefers base-q8_0 → base → tiny. CPU picks smallest CT2 installed.',
+  tiny: 'Tiny — ~75 MB. Fastest STT. Good for live calls.',
   base: 'Base — ~145 MB. Balance of speed and accuracy.',
-  small: 'Small — ~460 MB. Best accuracy, slowest (~2–3 s STT).',
+  'base-q8_0': 'Base Q8_0 — ~148 MB. Higher-precision GGML quant for Metal GPU (recommended).',
+  small: 'Small — ~460 MB. Best accuracy, slowest on CPU.',
 };
 
 export function isLocalStt() {
@@ -20,10 +21,21 @@ export function whisperModelValue() {
   return document.getElementById('cfg-whisper-model')?.value || 'auto';
 }
 
+export function sttDeviceValue() {
+  return document.getElementById('cfg-stt-device')?.value || 'cpu';
+}
+
 export function updateWhisperHint() {
   const hint = document.getElementById('stt-model-hint');
   const sel = whisperModelValue();
-  if (hint) hint.textContent = WHISPER_HINTS[sel] || WHISPER_HINTS.auto;
+  const dev = sttDeviceValue();
+  const devNote =
+    dev === 'cpu'
+      ? 'CPU mode: CTranslate2 (no GPU).'
+      : 'Metal mode: whisper.cpp on GPU (AMD Radeon / Intel).';
+  if (hint) {
+    hint.textContent = (WHISPER_HINTS[sel] || WHISPER_HINTS.auto) + ' ' + devNote;
+  }
 }
 
 export function updateSttEngineUI() {
@@ -37,8 +49,11 @@ export function updateSttEngineUI() {
     badge.className = 'translation-engine-badge ' + (useLocal ? 'local' : 'cloud');
     if (useLocal) {
       const sel = whisperModelValue();
+      const dev = sttDeviceValue() === 'cpu' ? 'CPU' : 'Metal GPU';
       badge.textContent =
-        sel === 'auto' ? 'Active: Local Whisper (auto)' : 'Active: Local Whisper ' + sel;
+        sel === 'auto'
+          ? 'Active: Whisper ' + dev + ' (auto)'
+          : 'Active: Whisper ' + sel.replace('-q8_0', ' q8') + ' · ' + dev;
     } else {
       badge.textContent = 'Active: Deepgram (cloud)';
     }
@@ -59,20 +74,28 @@ export async function refreshSttStatus() {
     const installed = (data.installed || []).join(', ') || 'none';
     const active = data.model || '—';
     const selected = data.selected || 'auto';
+    const device = data.device || sttDeviceValue();
+    const devLabel = device === 'cpu' ? 'CPU' : 'Metal GPU';
     if (data.ready) {
       el.innerHTML =
         '<span style="color:var(--green)">Active: ' +
         active +
+        ' · ' +
+        devLabel +
         '</span><br><span style="color:var(--text3)">Selected: ' +
         selected +
         ' · Installed: ' +
         installed +
         '</span>';
     } else {
+      const need = selected === 'auto' ? 'tiny' : selected;
+      const fmt = device === 'cpu' ? 'CT2' : 'GGML';
       el.innerHTML =
         '<span style="color:var(--yellow)">Need whisper-' +
-        (selected === 'auto' ? 'tiny' : selected) +
-        '. Click Download selected.</span><br>' +
+        need +
+        ' (' +
+        fmt +
+        '). Click Download selected.</span><br>' +
         '<span style="color:var(--text3)">Installed: ' +
         installed +
         '</span>';
@@ -110,6 +133,10 @@ export function initSttListeners() {
     updateSttEngineUI();
   });
   document.getElementById('cfg-whisper-model')?.addEventListener('change', () => {
+    updateSttEngineUI();
+    refreshSttStatus();
+  });
+  document.getElementById('cfg-stt-device')?.addEventListener('change', () => {
     updateSttEngineUI();
     refreshSttStatus();
   });

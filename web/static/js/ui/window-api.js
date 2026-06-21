@@ -11,6 +11,7 @@ import { openSettings, closeSettings, toggleSection } from '../settings/panel.js
 import { downloadWhisperModel } from '../settings/stt.js';
 import {
   downloadTranslationModels,
+  downloadPolishModel,
   testLocalTranslation,
   loadTranslationModels,
 } from '../settings/translation.js';
@@ -40,6 +41,7 @@ const handlers = {
   toggleSection,
   downloadWhisperModel,
   downloadTranslationModels,
+  downloadPolishModel,
   testLocalTranslation,
   loadTranslationModels,
   testKey,

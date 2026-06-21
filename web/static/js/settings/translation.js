@@ -21,12 +21,8 @@ export function updateTranslationEngineUI() {
     badge.className = 'translation-engine-badge ' + (useLocal ? 'local' : 'cloud');
     if (useLocal) {
       const polishOn = document.getElementById('cfg-translation-polish')?.checked !== false;
-      const hasKey =
-        !!(state.currentSettings?.openrouter_api_key || state.currentSettings?._openrouter_from_env);
-      if (polishOn && hasKey) {
-        badge.textContent = 'Active: Opus-MT + AI polish ru↔en';
-      } else if (polishOn && !hasKey) {
-        badge.textContent = 'Active: Opus-MT (polish needs OpenRouter key)';
+      if (polishOn) {
+        badge.textContent = 'Active: Opus-MT + local polish ru↔en';
       } else {
         badge.textContent = 'Active: Local Opus-MT ru↔en';
       }
@@ -52,7 +48,19 @@ export async function refreshTranslationStatus() {
       el.innerHTML =
         '<span style="color:var(--yellow)">Switch off “Local model” to use OpenRouter</span>';
     } else if (data.ready) {
-      el.innerHTML = '<span style="color:var(--green)">Ready — ' + lines.join(', ') + '</span>';
+      let polishNote =
+        data.polish_enabled && !data.polish_active && data.polish_disabled_reason
+          ? ' · <span style="color:var(--yellow)">Polish: ' +
+            data.polish_disabled_reason +
+            '</span>'
+          : data.polish_enabled && data.polish_active
+            ? ' · polish: ' + (data.polish_model || 'Qwen2.5-0.5B')
+            : '';
+      el.innerHTML =
+        '<span style="color:var(--green)">Ready — ' +
+        lines.join(', ') +
+        polishNote +
+        '</span>';
     } else {
       el.innerHTML =
         '<span style="color:var(--yellow)">Models missing: ' +
@@ -79,7 +87,25 @@ export async function downloadTranslationModels() {
     showToast('Download failed: ' + e.message);
   }
   btn.classList.remove('loading');
-  btn.textContent = 'Download models';
+  btn.textContent = 'Opus-MT';
+}
+
+export async function downloadPolishModel() {
+  const btn = document.getElementById('btn-download-polish');
+  if (!btn || btn.classList.contains('loading')) return;
+  btn.classList.add('loading');
+  btn.textContent = 'Downloading...';
+  try {
+    const r = await fetch('/api/download-polish-model', { method: 'POST' });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'download failed');
+    showToast('Polish model installed — Save & restart engine');
+    await refreshTranslationStatus();
+  } catch (e) {
+    showToast('Download failed: ' + e.message);
+  }
+  btn.classList.remove('loading');
+  btn.textContent = 'Polish model';
 }
 
 export async function testLocalTranslation() {

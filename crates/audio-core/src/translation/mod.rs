@@ -5,6 +5,10 @@ mod model;
 mod normalize;
 mod openrouter;
 mod polish;
+mod polish_model;
+
+pub use polish::{is_session_disabled, polish_backend_label, reset_session};
+pub use polish_model::{invalidate_engine_cache as invalidate_polish_cache, model_status as polish_model_status};
 
 use anyhow::Result;
 use log::info;
@@ -101,15 +105,21 @@ impl TranslationEngine {
         let polish_enabled = std::env::var("TRANSLATION_POLISH")
             .map(|v| v != "0" && v.to_lowercase() != "false")
             .unwrap_or(true);
+        polish::reset_session();
         let polisher = if polish_enabled {
             match polish::TranslationPolisher::try_new() {
                 Some(p) => {
-                    info!("Translation polish: OpenRouter (fixes STT/MT errors)");
+                    info!(
+                        "Translation polish: {} (fixes STT/MT errors)",
+                        polish_backend_label()
+                    );
                     Some(p)
                 }
                 None => {
                     if mode == "local" {
-                        info!("Translation polish: off (no OpenRouter API key in .env)");
+                        info!(
+                            "Translation polish: off (download Qwen2.5-0.5B from Settings → Translation)"
+                        );
                     }
                     None
                 }

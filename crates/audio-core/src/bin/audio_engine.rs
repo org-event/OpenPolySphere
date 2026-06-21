@@ -7,7 +7,7 @@ use anyhow::Result;
 use audio_core::engine::{Engine, EngineConfig};
 use audio_core::protocol::{read_command, write_event, Event};
 use crossbeam_channel::bounded;
-use log::{debug, error, info};
+use log::{debug, info};
 
 fn main() -> Result<()> {
     env_logger::Builder::from_default_env()

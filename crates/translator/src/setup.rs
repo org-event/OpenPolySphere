@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 
-use crate::downloads::{self, download_default_voices, download_translation_models, download_whisper_model};
+use crate::downloads::{self, download_default_voices, download_polish_model, download_translation_models, download_whisper_model};
 use crate::paths::{base_dir, ensure_parent};
 use crate::settings::Settings;
 
@@ -21,6 +21,9 @@ pub async fn run() -> Result<()> {
 
     println!("--- Local STT (Whisper) ---");
     download_whisper_model().await?;
+
+    println!("--- Local polish (Qwen2.5-0.5B, CTranslate2) ---");
+    download_polish_model().await?;
 
     println!("\n--- Build ---");
     println!("Run: cargo build --release -p translator");

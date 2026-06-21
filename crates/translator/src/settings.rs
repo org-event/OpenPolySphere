@@ -47,8 +47,10 @@ impl Default for Settings {
         fields.insert("openrouter_api_key".into(), Value::String(String::new()));
         fields.insert("translation_backend".into(), Value::String("local".into()));
         fields.insert("translation_polish".into(), Value::Bool(true));
+        fields.insert("translation_polish_backend".into(), Value::String("local".into()));
         fields.insert("stt_backend".into(), Value::String("local".into()));
         fields.insert("whisper_model".into(), Value::String("auto".into()));
+        fields.insert("stt_device".into(), Value::String(String::new()));
         fields.insert("translation_model".into(), Value::String(String::new()));
         fields.insert("tts_outgoing_voice".into(), Value::String(String::new()));
         fields.insert("tts_incoming_voice".into(), Value::String(String::new()));
@@ -63,7 +65,7 @@ impl Default for Settings {
             Value::String("BlackHole 2ch".into()),
         );
         fields.insert("endpointing_ms".into(), Value::from(500));
-        fields.insert("my_language".into(), Value::String("en".into()));
+        fields.insert("my_language".into(), Value::String("ru".into()));
         fields.insert("their_language".into(), Value::String("en".into()));
         Self { fields }
     }
@@ -185,11 +187,29 @@ impl Settings {
         }
     }
 
+    pub fn stt_device(&self) -> String {
+        let v = self.str_field("stt_device");
+        if v.is_empty() {
+            audio_core::stt::local::default_stt_device_name()
+        } else {
+            v.to_lowercase()
+        }
+    }
+
     pub fn translation_polish(&self) -> bool {
         self.fields
             .get("translation_polish")
             .and_then(|v| v.as_bool())
             .unwrap_or(true)
+    }
+
+    pub fn translation_polish_backend(&self) -> String {
+        let v = self.str_field("translation_polish_backend");
+        if v.is_empty() {
+            "local".into()
+        } else {
+            v.to_lowercase()
+        }
     }
 
     pub fn translation_model(&self) -> String {
@@ -269,6 +289,7 @@ pub fn apply_env(settings: &Settings, models_base: &Path) {
     std::env::set_var("DEEPGRAM_API_KEY", settings.str_field("deepgram_api_key"));
     std::env::set_var("STT_BACKEND", settings.stt_backend());
     std::env::set_var("TRANSLATOR_WHISPER_MODEL", settings.whisper_model());
+    std::env::set_var("TRANSLATOR_STT_DEVICE", settings.stt_device());
     std::env::set_var("TRANSLATION_BACKEND", settings.translation_backend());
     std::env::set_var(
         "TRANSLATION_POLISH",
@@ -277,6 +298,10 @@ pub fn apply_env(settings: &Settings, models_base: &Path) {
         } else {
             "0"
         },
+    );
+    std::env::set_var(
+        "TRANSLATION_POLISH_BACKEND",
+        settings.translation_polish_backend(),
     );
     std::env::set_var("OPENROUTER_API_KEY", settings.openrouter_key());
     std::env::set_var("TRANSLATION_MODEL", settings.translation_model());
@@ -357,25 +382,53 @@ pub fn local_translation_status() -> serde_json::Value {
     let backend = Settings::load()
         .map(|s| s.translation_backend())
         .unwrap_or_else(|_| "local".into());
+    let polish_enabled = Settings::load()
+        .map(|s| s.translation_polish())
+        .unwrap_or(true);
+    let polish_backend = Settings::load()
+        .map(|s| s.translation_polish_backend())
+        .unwrap_or_else(|_| "local".into());
+    let (polish_model, polish_ready) = audio_core::translation::polish_model_status();
+    let polish_disabled = if !polish_enabled {
+        ""
+    } else if audio_core::translation::is_session_disabled() {
+        "Polish unavailable for this session"
+    } else if polish_backend == "local" && !polish_ready {
+        "Download polish model (~400 MB)"
+    } else {
+        ""
+    };
     serde_json::json!({
         "backend": backend,
         "pairs": map,
         "ready": all && backend != "openrouter",
+        "polish_enabled": polish_enabled,
+        "polish_backend": polish_backend,
+        "polish_model": polish_model,
+        "polish_ready": polish_ready,
+        "polish_active": polish_enabled
+            && polish_ready
+            && !audio_core::translation::is_session_disabled(),
+        "polish_disabled_reason": polish_disabled,
     })
 }
 
 pub fn stt_status() -> serde_json::Value {
-    let (model, ready) = audio_core::stt::local::whisper_model_status();
-    let installed = audio_core::stt::local::list_installed_whisper_variants();
     let settings = Settings::load().unwrap_or_default();
+    let device = settings.stt_device();
     let selected = settings.whisper_model();
     let backend = settings.stt_backend();
-    let selected_ready = audio_core::stt::local::is_variant_ready(&selected);
+    let (model, _) = audio_core::stt::local::whisper_model_status();
+    let installed = audio_core::stt::local::list_all_installed_whisper_variants();
+    let selected_ready = audio_core::stt::local::is_variant_ready_for(&selected, &device);
+    let device_ready = !audio_core::stt::local::list_installed_whisper_variants_for(&device).is_empty();
     serde_json::json!({
         "backend": backend,
+        "device": device,
         "model": model,
         "selected": selected,
         "installed": installed,
-        "ready": (ready && selected_ready && backend != "deepgram"),
+        "ready": (device_ready && selected_ready && backend != "deepgram"),
+        "metal_available": cfg!(target_os = "macos"),
     })
 }

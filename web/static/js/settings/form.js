@@ -30,6 +30,13 @@ export function populateForm(s) {
   if (whisperSel) {
     whisperSel.value = s.whisper_model || 'auto';
   }
+  const sttDevSel = document.getElementById('cfg-stt-device');
+  if (sttDevSel) {
+    sttDevSel.value = s.stt_device || (s._default_stt_device === 'metal' ? 'metal' : 'cpu');
+    if (!s.stt_device && !s._default_stt_device) {
+      sttDevSel.value = 'metal';
+    }
+  }
   const polishCb = document.getElementById('cfg-translation-polish');
   if (polishCb) {
     polishCb.checked = s.translation_polish !== false;
@@ -43,7 +50,7 @@ export function populateForm(s) {
   }
   updateTranslationModelMeta();
 
-  document.getElementById('cfg-my-lang').value = s.my_language || 'en';
+  document.getElementById('cfg-my-lang').value = s.my_language || 'ru';
   document.getElementById('cfg-their-lang').value = s.their_language || 'en';
   document.getElementById('cfg-endpointing').value = s.endpointing_ms || 500;
   document.getElementById('endpointing-val').textContent = (s.endpointing_ms || 500) + 'ms';
@@ -60,6 +67,7 @@ export function readForm() {
       (() => document.getElementById('cfg-openrouter').value)
     )().trim(),
     stt_backend: sttBackendValue(),
+    stt_device: document.getElementById('cfg-stt-device')?.value || '',
     whisper_model: whisperModelValue(),
     translation_backend: translationBackendValue(),
     translation_polish: document.getElementById('cfg-translation-polish')?.checked !== false,

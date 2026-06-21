@@ -23,13 +23,59 @@ pub async fn download_whisper_model() -> Result<()> {
 /// Download a whisper variant (`auto` → tiny for first-time setup).
 pub async fn download_whisper_for(variant: &str) -> Result<()> {
     let variant = variant.to_lowercase();
-    let target = if variant == "auto" { "tiny" } else { variant.as_str() };
+    let target = if variant == "auto" {
+        "base-q8_0"
+    } else {
+        variant.as_str()
+    };
     download_whisper_variant(target).await
 }
 
 pub async fn download_whisper_variant(variant: &str) -> Result<()> {
     let variant = variant.to_lowercase();
-    let (repo, openai_repo, label) = match variant.as_str() {
+    let device = Settings::load()
+        .map(|s| s.stt_device())
+        .unwrap_or_else(|_| audio_core::stt::local::default_stt_device_name());
+    if device == "cpu" || device == "ct2" {
+        download_whisper_ct2(&variant).await
+    } else {
+        download_whisper_ggml(&variant).await
+    }
+}
+
+const GGML_REPO: &str = "ggerganov/whisper.cpp";
+
+async fn download_whisper_ggml(variant: &str) -> Result<()> {
+    let v = audio_core::stt::local::WhisperVariant::parse(variant);
+    let ggml_name = v.ggml_filename();
+    let label = format!("whisper-{}", v.core);
+    let dir = models_dir().join("stt").join(&label);
+    let dest = dir.join(&ggml_name);
+    if dest.is_file() {
+        info!("{label} GGML ({ggml_name}) already present");
+        invalidate_engine_cache();
+        return Ok(());
+    }
+    tokio::fs::create_dir_all(&dir).await?;
+    let client = client()?;
+    info!(
+        "Downloading {GGML_REPO}/{ggml_name} (~{} MB, Metal/GPU)...",
+        ggml_size_hint(variant)
+    );
+    download_file(&client, GGML_REPO, &ggml_name, &dest)
+        .await
+        .with_context(|| format!("download {ggml_name}"))?;
+    if !dest.is_file() {
+        anyhow::bail!("{label} GGML download incomplete");
+    }
+    invalidate_engine_cache();
+    info!("Installed {label} (GGML {ggml_name}) at {}", dest.display());
+    Ok(())
+}
+
+async fn download_whisper_ct2(variant: &str) -> Result<()> {
+    let core = audio_core::stt::local::WhisperVariant::parse(variant).core;
+    let (repo, openai_repo, label) = match core {
         "tiny" => (
             "Systran/faster-whisper-tiny",
             "openai/whisper-tiny",
@@ -48,13 +94,10 @@ pub async fn download_whisper_variant(variant: &str) -> Result<()> {
     };
 
     let dir = models_dir().join("stt").join(label);
-    if whisper_ready(&dir) {
-        info!("{label} already present");
+    if whisper_ct2_ready(&dir) {
+        info!("{label} CT2 already present");
         invalidate_engine_cache();
         return Ok(());
-    }
-    if dir.exists() {
-        tokio::fs::remove_dir_all(&dir).await.ok();
     }
     tokio::fs::create_dir_all(&dir).await?;
 
@@ -65,7 +108,7 @@ pub async fn download_whisper_variant(variant: &str) -> Result<()> {
         "config.json",
         "vocabulary.txt",
     ];
-    info!("Downloading {repo} (~{} MB)...", size_hint(&variant));
+    info!("Downloading {repo} (~{} MB, CPU)...", size_hint(core));
     for f in files {
         download_file(&client, repo, f, &dir.join(f))
             .await
@@ -80,20 +123,72 @@ pub async fn download_whisper_variant(variant: &str) -> Result<()> {
     .await
     .context("download preprocessor_config.json")?;
 
-    if !whisper_ready(&dir) {
+    if !whisper_ct2_ready(&dir) {
         anyhow::bail!("{label} download incomplete");
     }
     invalidate_engine_cache();
-    info!("Installed {label} at {}", dir.display());
+    info!("Installed {label} (CT2) at {}", dir.display());
     Ok(())
 }
 
 fn size_hint(variant: &str) -> &'static str {
-    match variant {
+    match audio_core::stt::local::WhisperVariant::parse(variant).core {
         "tiny" => "75",
         "base" => "145",
         _ => "460",
     }
+}
+
+fn ggml_size_hint(variant: &str) -> &'static str {
+    match variant {
+        "base-q8_0" => "148",
+        "tiny-q8_0" => "78",
+        "tiny" => "75",
+        "base" => "145",
+        _ => "460",
+    }
+}
+
+const POLISH_REPO: &str = "winstxnhdw/Qwen2.5-0.5B-Instruct-ct2-int8";
+const POLISH_LABEL: &str = "qwen2.5-0.5b-instruct";
+
+pub async fn download_polish_model() -> Result<()> {
+    use audio_core::translation::invalidate_polish_cache;
+
+    let dir = models_dir().join("polish").join(POLISH_LABEL);
+    if polish_ready(&dir) {
+        info!("{POLISH_LABEL} already present");
+        invalidate_polish_cache();
+        return Ok(());
+    }
+    if dir.exists() {
+        tokio::fs::remove_dir_all(&dir).await.ok();
+    }
+    tokio::fs::create_dir_all(&dir).await?;
+
+    let client = client()?;
+    let files = [
+        "model.bin",
+        "config.json",
+        "tokenizer.json",
+        "vocabulary.json",
+    ];
+    info!("Downloading {POLISH_REPO} (~400 MB)...");
+    for f in files {
+        download_file(&client, POLISH_REPO, f, &dir.join(f))
+            .await
+            .with_context(|| format!("download polish/{f}"))?;
+    }
+    if !polish_ready(&dir) {
+        anyhow::bail!("polish model download incomplete");
+    }
+    invalidate_polish_cache();
+    info!("Installed {POLISH_LABEL} at {}", dir.display());
+    Ok(())
+}
+
+fn polish_ready(dir: &Path) -> bool {
+    dir.join("model.bin").is_file() && dir.join("tokenizer.json").is_file()
 }
 
 pub async fn download_translation_models() -> Result<()> {
@@ -136,7 +231,7 @@ pub async fn download_translation_models() -> Result<()> {
     Ok(())
 }
 
-fn whisper_ready(dir: &Path) -> bool {
+fn whisper_ct2_ready(dir: &Path) -> bool {
     dir.join("model.bin").is_file() && dir.join("preprocessor_config.json").is_file()
 }
 

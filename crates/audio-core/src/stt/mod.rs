@@ -1,4 +1,4 @@
-//! Speech-to-text: local Whisper (CTranslate2) or Deepgram cloud.
+//! Speech-to-text: local Whisper (Metal/whisper.cpp or CPU/CTranslate2) or Deepgram cloud.
 
 mod deepgram;
 pub mod local;
@@ -40,7 +40,8 @@ impl SttEngine {
                 SttBackend::Deepgram
             }
             _ => {
-                info!("STT backend: local Whisper (CTranslate2)");
+                let device = local::stt_device_name();
+                info!("STT backend: local Whisper ({device})");
                 local::shared_engine().context("Failed to load local Whisper STT")?;
                 SttBackend::Local
             }

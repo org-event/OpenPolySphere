@@ -110,6 +110,7 @@ pub fn api_routes() -> Router<Arc<AppState>> {
         .route("/api/stt-status", get(stt_status_route))
         .route("/api/download-whisper-model", post(download_whisper))
         .route("/api/download-translation-models", post(download_translate))
+        .route("/api/download-polish-model", post(download_polish))
         .route("/api/voices", get(api_voices))
         .route("/api/devices", get(api_devices))
         .route("/api/tts-preview", post(tts_preview))
@@ -202,6 +203,7 @@ async fn get_settings(State(state): State<Arc<AppState>>) -> Json<Value> {
     );
     out.insert("stt_backend".into(), json!(settings.stt_backend()));
     out.insert("_local_translation".into(), local_translation_status());
+    out.insert("_default_stt_device".into(), json!(audio_core::stt::local::default_stt_device_name()));
     out.insert("_local_stt".into(), stt_status());
     Json(Value::Object(out))
 }
@@ -331,6 +333,17 @@ async fn download_whisper(Json(body): Json<WhisperDownloadBody>) -> impl IntoRes
 
 async fn download_translate() -> impl IntoResponse {
     match downloads::download_translation_models().await {
+        Ok(()) => Json(json!({ "ok": true, "status": local_translation_status() })).into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "error": e.to_string() })),
+        )
+            .into_response(),
+    }
+}
+
+async fn download_polish() -> impl IntoResponse {
+    match downloads::download_polish_model().await {
         Ok(()) => Json(json!({ "ok": true, "status": local_translation_status() })).into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,

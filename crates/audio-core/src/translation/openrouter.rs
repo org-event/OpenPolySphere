@@ -13,13 +13,22 @@ const DEFAULT_MODEL: &str = "liquid/lfm-2.5-1.2b-instruct:free";
 const DEFAULT_POLISH_MODEL: &str = "liquid/lfm-2.5-1.2b-instruct:free";
 const DEFAULT_FALLBACK_MODELS: &[&str] = &[
     "liquid/lfm-2.5-1.2b-instruct:free",
-    "qwen/qwen3-4b:free",
     "meta-llama/llama-3.2-3b-instruct:free",
+    "google/gemma-3-12b-it:free",
 ];
 const DEFAULT_POLISH_FALLBACK_MODELS: &[&str] = DEFAULT_FALLBACK_MODELS;
+/// Live-call polish must not block the pipeline on rate-limit retries.
+const POLISH_REQUEST_TIMEOUT: Duration = Duration::from_secs(3);
 
 fn is_model_fallback_error(status: u16) -> bool {
     matches!(status, 402 | 404 | 429 | 502 | 503)
+}
+
+impl TranslateFailure {
+    fn is_quota_exhausted(&self) -> bool {
+        self.message.contains("free-models-per-day")
+            || self.message.contains("Add 5 credits to unlock")
+    }
 }
 
 pub struct OpenRouterClient {
@@ -158,28 +167,20 @@ impl OpenRouterClient {
         let mut last_err: Option<TranslateFailure> = None;
         let primary_model = models[0].clone();
         for model in models {
-            for attempt in 0..2 {
-                match self.request_once(body, &model) {
-                    Ok(text) if !text.trim().is_empty() => {
-                        if model != primary_model {
-                            info!("Polish succeeded via fallback model {model}");
-                        }
-                        return Ok(text);
+            match self.request_once(body, &model, Some(POLISH_REQUEST_TIMEOUT)) {
+                Ok(text) if !text.trim().is_empty() => {
+                    if model != primary_model {
+                        info!("Polish succeeded via fallback model {model}");
                     }
-                    Ok(_) => break,
-                    Err(e) if e.status == 429 && attempt == 0 => {
-                        let delay = e.retry_after.unwrap_or(2).min(10);
-                        warn!("Polish model {model} rate-limited, retry in {delay}s");
-                        std::thread::sleep(Duration::from_secs(delay));
-                        last_err = Some(e);
-                    }
-                    Err(e) if is_model_fallback_error(e.status) => {
-                        warn!("Polish model {} unavailable ({})", model, e);
-                        last_err = Some(e);
-                        break;
-                    }
-                    Err(e) => return Err(anyhow::anyhow!("{e}")),
+                    return Ok(text);
                 }
+                Ok(_) => {}
+                Err(e) if e.is_quota_exhausted() => return Err(anyhow::anyhow!("{e}")),
+                Err(e) if is_model_fallback_error(e.status) => {
+                    warn!("Polish model {} unavailable ({})", model, e);
+                    last_err = Some(e);
+                }
+                Err(e) => return Err(anyhow::anyhow!("{e}")),
             }
         }
         Err(anyhow::anyhow!(
@@ -205,7 +206,7 @@ impl OpenRouterClient {
 
         for model in models {
             for attempt in 0..3 {
-                match self.request_once(&body, &model) {
+                match self.request_once(&body, &model, None) {
                     Ok(translated) => {
                         if model != self.model {
                             info!("Translation succeeded via fallback model {model}");
@@ -319,19 +320,22 @@ impl OpenRouterClient {
         &self,
         body: &serde_json::Value,
         model: &str,
+        timeout: Option<Duration>,
     ) -> Result<String, TranslateFailure> {
         let mut req_body = body.clone();
         if let Some(obj) = req_body.as_object_mut() {
             obj.insert("model".into(), serde_json::Value::String(model.to_string()));
         }
 
-        let response = match ureq::post(&self.api_url)
+        let mut req = ureq::post(&self.api_url)
             .set("Authorization", &format!("Bearer {}", self.api_key))
             .set("Content-Type", "application/json")
             .set("HTTP-Referer", "http://127.0.0.1:5050")
-            .set("X-Title", "call-translator")
-            .send_json(req_body)
-        {
+            .set("X-Title", "call-translator");
+        if let Some(t) = timeout {
+            req = req.timeout(t);
+        }
+        let response = match req.send_json(req_body) {
             Ok(resp) => resp,
             Err(ureq::Error::Status(code, resp)) => {
                 let raw = resp.into_string().unwrap_or_default();
