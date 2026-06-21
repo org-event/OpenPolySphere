@@ -11,55 +11,36 @@
 ![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
+> Форк [LetovKai/call-translator](https://github.com/LetovKai/call-translator), автор оригинала — Kai Letov.
+
 > **Внимание:** только macOS (14+). Использует CoreAudio и cpal для захвата аудио. Поддержка Windows/Linux пока отсутствует — принимаем контрибуции!
 
 ---
 
 ## Быстрый старт
 
-**Установка одной командой** (macOS с Homebrew):
-
 ```bash
-git clone https://github.com/LetovKai/call-translator.git
+git clone git@github.com:org-event/call-translator.git
 cd call-translator
-./setup.sh
+cargo run --release -p translator -- setup   # первый раз: скачать модели
+cargo run --release -p translator            # запуск сервера
 ```
 
-Скрипт устанавливает все зависимости, скачивает голосовые модели для английского и русского, и собирает проект.
+Откройте **http://127.0.0.1:5050** в **Google Chrome**.
 
-Далее:
-
-```bash
-./run.sh
-```
-
-Откройте **http://127.0.0.1:5050** в **Google Chrome**. При первом запуске настройки откроются автоматически — введите API-ключи и выберите языки.
-
-> **Браузер:** Используйте **Chrome** — аудио-монитор и маршрутизация через BlackHole работают корректно. В Safari монитор не работает из-за ограничений аудио-выхода. Другие браузеры не тестировались.
-
-> Нужны два бесплатных API-ключа:
-> - [Deepgram](https://console.deepgram.com) — распознавание речи
-> - [Groq](https://console.groq.com) — перевод (LLM)
+Локальный режим (по умолчанию): Whisper STT + Opus-MT — API-ключи не нужны.
 
 ---
 
 ## Архитектура
 
-```
-┌─────────────┐     ┌──────────────┐     ┌───────────┐     ┌─────────┐
-│  Ваш микро- │────>│ Deepgram STT │────>│ Groq LLM  │────>│ Piper   │──> Звонок
-│  фон (рус.) │     │ (речь→текст) │     │ (перевод) │     │  TTS    │  (BlackHole)
-└─────────────┘     └──────────────┘     └───────────┘     └─────────┘
+Один Rust-бинарник `translator`: Axum на `:5050` + аудио-движок in-process (STT, перевод, TTS).
 
-┌─────────────┐     ┌──────────────┐     ┌───────────┐     ┌─────────┐
-│   Аудио     │────>│ Deepgram STT │────>│ Groq LLM  │────>│ Piper   │──> Динамики
-│  звонка     │     │ (речь→текст) │     │ (перевод) │     │  TTS    │
-└─────────────┘     └──────────────┘     └───────────┘     └─────────┘
+```
+Браузер (app.js) ←SSE→ Axum ←→ audio-core ←→ CoreAudio / models
 ```
 
-- **Elixir** — оркестратор, супервизия процессов, управление портами
-- **Rust** — захват/воспроизведение аудио, STT-стриминг, синтез речи, перевод
-- **Flask** — веб-интерфейс для транскрипта, настроек и управления
+- **Rust** — сервер, UI API, захват/воспроизведение аудио, STT, перевод, TTS
 
 ---
 
@@ -69,37 +50,27 @@ cd call-translator
 |---|---|---|
 | macOS 14+ | CoreAudio для аудио I/O | — |
 | [Homebrew](https://brew.sh) | Пакетный менеджер | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
-| Elixir | Рантайм приложения | `brew install elixir` |
-| Rust | Аудио-движок | `brew install rustup && rustup-init` |
-| Python 3 | Веб-сервер UI | `brew install python@3` |
+| Rust | Приложение + аудио-движок | `brew install rustup && rustup-init` |
 | espeak-ng | Фонемизация для TTS | `brew install espeak-ng` |
 | ONNX Runtime | Инференс моделей | `brew install onnxruntime` |
-| Flask | Веб-фреймворк | через venv (см. ниже) |
 | [BlackHole](https://existential.audio/blackhole/) | Виртуальная маршрутизация аудио | Скачать вручную |
-| Xcode CLT | C-компилятор для Rust | `xcode-select --install` |
+| Xcode CLT | C-компилятор | `xcode-select --install` |
 
-**API-ключи (есть бесплатные тарифы):**
-- [Deepgram](https://console.deepgram.com) — распознавание речи (модель Nova-3)
-- [Groq](https://console.groq.com) — перевод через llama-3.3-70b
+**Опционально** (облачный STT/перевод): [Deepgram](https://console.deepgram.com), [OpenRouter](https://openrouter.ai/keys)
 
 ---
 
 ## Ручная установка
 
-Если хотите установить всё пошагово вместо `setup.sh`:
+Если хотите установить всё пошагово:
 
 ### 1. Системные пакеты
 
 ```bash
 xcode-select --install
-brew install elixir rustup espeak-ng onnxruntime python@3
+brew install rustup espeak-ng onnxruntime
 rustup-init -y --default-toolchain stable
 source ~/.cargo/env
-
-# Виртуальное окружение и Flask
-python3 -m venv .venv
-source .venv/bin/activate
-pip install flask
 ```
 
 ### 2. Аудио-драйвер BlackHole
@@ -155,17 +126,11 @@ GROQ_API_KEY=ваш_ключ
 ORT_DYLIB_PATH=/opt/homebrew/lib/libonnxruntime.dylib
 ```
 
-### 5. Сборка
+### 5. Сборка и запуск
 
 ```bash
-mix deps.get
-mix compile    # Компилирует Elixir + Rust (первая сборка занимает несколько минут)
-```
-
-### 6. Запуск
-
-```bash
-./run.sh
+cargo run --release -p translator -- setup
+cargo run --release -p translator
 ```
 
 Откройте **http://127.0.0.1:5050** в Chrome.
@@ -229,9 +194,10 @@ mix compile    # Компилирует Elixir + Rust (первая сборка
 ## Решение проблем
 
 **"Engine not starting"**
-- Проверьте, что в `.env` указаны валидные API-ключи
-- Убедитесь, что `ORT_DYLIB_PATH` указывает на библиотеку onnxruntime
-- Запустите `mix compile` для проверки ошибок сборки
+- Нажмите **Start** после загрузки страницы (сервер idle до этого)
+- Локальный режим: модели в `models/` — `cargo run --release -p translator -- setup`
+- Проверьте `ORT_DYLIB_PATH` → библиотека onnxruntime
+- `cargo build -p translator` для проверки ошибок сборки
 
 **"Нет аудио из звонка"**
 - Убедитесь, что BlackHole 16ch настроен в Multi-Output Device
@@ -246,12 +212,12 @@ mix compile    # Компилирует Elixir + Rust (первая сборка
 - Используйте Chrome — Safari не поддерживает маршрутизацию аудио-выхода, необходимую для монитора
 - Проверьте, что системный аудио-выход установлен на динамики (не на BlackHole)
 
-**"Ключ Groq показывает invalid"**
-- Скорее всего ключ валиден — проверьте кнопкой "Test" в Settings
-- Ключи из `.env` работают автоматически, даже если поле в UI пустое
+**"Ключ OpenRouter показывает invalid"**
+- Нужен только при облачном переводе
+- Ключи из `.env` работают, даже если поле в UI пустое
 
 ---
 
 ## Лицензия
 
-MIT
+MIT — см. [LICENSE](LICENSE). Copyright (c) 2026 Kai Letov (автор оригинала).

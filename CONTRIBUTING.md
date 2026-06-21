@@ -26,19 +26,16 @@ Open an [issue](../../issues/new?template=feature_request.md) describing the use
 ### Development setup
 
 ```bash
-git clone https://github.com/YOUR_USER/realtime-call-translator.git
-cd realtime-call-translator
-./setup.sh          # installs all dependencies
-cp .env.example .env
-# edit .env with your Deepgram + Groq API keys
-./run.sh
+git clone git@github.com:org-event/call-translator.git
+cd call-translator
+cargo run --release -p translator -- setup
+cp .env.example .env   # optional: cloud API keys
+cargo run --release -p translator
 ```
 
 ### Code style
 
-- **Python**: follow existing patterns in `web.py`
 - **Rust**: `cargo fmt` + `cargo clippy`
-- **Elixir**: `mix format`
 
 ### What we especially welcome
 

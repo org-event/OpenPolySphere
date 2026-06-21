@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Translator</title>
+<link rel="stylesheet" href="/static/css/style.css?v=4">
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="overlay">
+  <div class="spinner" id="spinner"></div>
+  <p id="overlay-text">Connecting to server…</p>
+</div>
+
+<!-- Settings backdrop -->
+<div class="sp-backdrop" id="sp-backdrop" onclick="closeSettings()"></div>
+
+<!-- Log panel backdrop -->
+<div class="lp-backdrop" id="lp-backdrop" onclick="closeLogs()"></div>
+
+<!-- Log panel (left) -->
+<div class="lp" id="lp">
+  <div class="lp-head">
+    <h2>Logs</h2>
+    <div class="lp-head-actions">
+      <button type="button" class="lp-action" id="btn-log-clear" onclick="clearLogs()">Clear</button>
+      <button type="button" class="lp-close" onclick="closeLogs()">&times;</button>
+    </div>
+  </div>
+  <div class="lp-body" id="log-list">
+    <div class="lp-empty" id="log-empty">No errors or warnings yet</div>
+  </div>
+</div>
+
+<!-- Settings panel -->
+<div class="sp" id="sp">
+  <div class="sp-head">
+    <h2>Settings</h2>
+    <button class="sp-close" onclick="closeSettings()">&times;</button>
+  </div>
+  <div class="sp-body">
+    <form autocomplete="off" onsubmit="return false">
+
+    <!-- API Keys -->
+    <div class="sp-section" id="sec-keys">
+      <div class="sp-section-head" onclick="toggleSection('sec-keys')">
+        <span>API Keys</span>
+        <span class="chev">&#9662;</span>
+      </div>
+      <div class="sp-section-body">
+        <div class="sp-field">
+          <div class="sp-label">Speech-to-text (STT)</div>
+          <label class="sp-check sp-check-prominent">
+            <input type="checkbox" id="cfg-use-local-stt" checked>
+            <span><strong>Local model</strong> — Whisper on this Mac</span>
+          </label>
+          <div class="translation-engine-badge local" id="stt-engine-badge">Active: Local Whisper</div>
+          <div id="stt-local-panel">
+            <div class="sp-label" style="margin-top:8px">Whisper model</div>
+            <div class="sp-input-row">
+              <select class="sp-input" id="cfg-whisper-model">
+                <option value="auto">Auto — fastest installed</option>
+                <option value="tiny">Tiny — ~75 MB, lowest latency</option>
+                <option value="base">Base — ~145 MB</option>
+                <option value="small">Small — ~460 MB, best quality</option>
+              </select>
+            </div>
+            <div class="sp-hint" id="stt-local-status">Checking model...</div>
+            <div class="sp-input-row" style="margin-top:8px">
+              <button type="button" class="sp-test-btn" id="btn-download-stt" onclick="downloadWhisperModel()">Download selected</button>
+            </div>
+            <div class="sp-hint" id="stt-model-hint">Runs on CPU (Accelerate on Apple Silicon).</div>
+          </div>
+          <div id="stt-cloud-panel" style="display:none">
+            <div class="sp-label" style="margin-top:12px">Deepgram API Key</div>
+            <div class="sp-input-row">
+              <input class="sp-input sp-key" id="cfg-deepgram" type="text" placeholder="Enter Deepgram key..." autocomplete="one-time-code" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
+              <button class="sp-test-btn" id="test-deepgram" onclick="testKey('deepgram')">Test</button>
+            </div>
+            <div class="sp-hint">Get a key at <a href="https://console.deepgram.com" target="_blank" rel="noopener">console.deepgram.com</a></div>
+          </div>
+        </div>
+        <div class="sp-field">
+          <div class="sp-label">Translation</div>
+          <label class="sp-check sp-check-prominent" id="cfg-use-local-wrap">
+            <input type="checkbox" id="cfg-use-local-model" checked>
+            <span><strong>Local model</strong> — Opus-MT (ru↔en, on this Mac)</span>
+          </label>
+          <div class="translation-engine-badge local" id="translation-engine-badge">Local: Opus-MT ru↔en</div>
+          <div id="translation-local-panel">
+            <div class="sp-hint" id="translation-local-status">Checking models...</div>
+            <div class="sp-input-row" style="margin-top:8px">
+              <button type="button" class="sp-test-btn" id="btn-download-translate" onclick="downloadTranslationModels()">Download models</button>
+              <button type="button" class="sp-test-btn" id="btn-test-translate" onclick="testLocalTranslation()">Test</button>
+            </div>
+            <div class="sp-hint">Pure machine translation — no API limits, no chatbot replies.</div>
+            <label class="sp-check" style="margin-top:10px" id="cfg-translation-polish-wrap">
+              <input type="checkbox" id="cfg-translation-polish" checked>
+              <span><strong>AI polish</strong> — fix STT/MT errors via OpenRouter (uses key from .env)</span>
+            </label>
+            <div class="sp-hint" id="translation-polish-hint">Opus-MT draft → LLM corrects wording before TTS. Adds ~0.5–1.5 s latency.</div>
+          </div>
+          <div id="translation-cloud-panel" style="display:none">
+            <div class="sp-label" style="margin-top:12px">OpenRouter API Key</div>
+            <div class="sp-input-row">
+              <input class="sp-input sp-key" id="cfg-openrouter" type="text" placeholder="sk-or-v1-..." autocomplete="one-time-code" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other">
+              <button class="sp-test-btn" id="test-openrouter" onclick="testKey('openrouter')">Test</button>
+            </div>
+            <div class="sp-hint">Get a key at <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a></div>
+            <div class="sp-label" style="margin-top:12px">Translation model</div>
+            <div class="sp-input-row" id="cloud-model-row">
+              <select class="sp-input" id="cfg-translation-model"></select>
+              <button type="button" class="sp-test-btn" id="btn-refresh-models" onclick="loadTranslationModels()" title="Refresh model list">&#8635;</button>
+            </div>
+            <div class="sp-model-filters" id="cloud-model-filters">
+              <label class="sp-check"><input type="checkbox" id="cfg-models-free" checked onchange="loadTranslationModels()"> Free only</label>
+              <select class="sp-input sp-input-compact" id="cfg-models-sort" onchange="loadTranslationModels()">
+                <option value="latency-low-to-high">Fastest latency</option>
+                <option value="throughput-high-to-low">Highest throughput</option>
+                <option value="most-popular">Most popular</option>
+              </select>
+            </div>
+            <div class="sp-hint" id="translation-model-meta"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Languages -->
+    <div class="sp-section" id="sec-lang">
+      <div class="sp-section-head" onclick="toggleSection('sec-lang')">
+        <span>Languages</span>
+        <span class="chev">&#9662;</span>
+      </div>
+      <div class="sp-section-body">
+        <div class="sp-field">
+          <div class="sp-label">My Language <span class="badge">I speak</span></div>
+          <select class="sp-input" id="cfg-my-lang">
+            <option value="ru">Russian</option>
+            <option value="en">English</option>
+            <option value="ar">Arabic</option>
+            <option value="ca">Catalan</option>
+            <option value="cs">Czech</option>
+            <option value="da">Danish</option>
+            <option value="de">German</option>
+            <option value="el">Greek</option>
+            <option value="es">Spanish</option>
+            <option value="fa">Persian</option>
+            <option value="fi">Finnish</option>
+            <option value="fr">French</option>
+            <option value="hi">Hindi</option>
+            <option value="hu">Hungarian</option>
+            <option value="id">Indonesian</option>
+            <option value="it">Italian</option>
+            <option value="lv">Latvian</option>
+            <option value="nl">Dutch</option>
+            <option value="no">Norwegian</option>
+            <option value="pl">Polish</option>
+            <option value="pt">Portuguese</option>
+            <option value="ro">Romanian</option>
+            <option value="sv">Swedish</option>
+            <option value="tr">Turkish</option>
+            <option value="uk">Ukrainian</option>
+            <option value="vi">Vietnamese</option>
+            <option value="zh">Chinese</option>
+          </select>
+        </div>
+        <div class="sp-field">
+          <div class="sp-label">Their Language <span class="badge">they speak</span></div>
+          <select class="sp-input" id="cfg-their-lang">
+            <option value="en">English</option>
+            <option value="ru">Russian</option>
+            <option value="ar">Arabic</option>
+            <option value="ca">Catalan</option>
+            <option value="cs">Czech</option>
+            <option value="da">Danish</option>
+            <option value="de">German</option>
+            <option value="el">Greek</option>
+            <option value="es">Spanish</option>
+            <option value="fa">Persian</option>
+            <option value="fi">Finnish</option>
+            <option value="fr">French</option>
+            <option value="hi">Hindi</option>
+            <option value="hu">Hungarian</option>
+            <option value="id">Indonesian</option>
+            <option value="it">Italian</option>
+            <option value="lv">Latvian</option>
+            <option value="nl">Dutch</option>
+            <option value="no">Norwegian</option>
+            <option value="pl">Polish</option>
+            <option value="pt">Portuguese</option>
+            <option value="ro">Romanian</option>
+            <option value="sv">Swedish</option>
+            <option value="tr">Turkish</option>
+            <option value="uk">Ukrainian</option>
+            <option value="vi">Vietnamese</option>
+            <option value="zh">Chinese</option>
+          </select>
+          <div class="sp-hint">Select a language, then download additional voices from the Voice section below.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice -->
+    <div class="sp-section" id="sec-voice">
+      <div class="sp-section-head" onclick="toggleSection('sec-voice')">
+        <span>Voice</span>
+        <span class="chev">&#9662;</span>
+      </div>
+      <div class="sp-section-body">
+        <div class="sp-field">
+          <div class="sp-label" id="voice-label-in">My Voice (incoming TTS)</div>
+          <div class="sp-input-row">
+            <select class="sp-input" id="cfg-voice-in"></select>
+            <button class="sp-dl-btn hidden" id="dl-voice-in" onclick="downloadSelectedVoice('in')" title="Download voice"><span class="dl-icon">&#8615;</span><span class="dl-spin"></span></button>
+            <button class="sp-preview-btn" id="preview-in" onclick="previewVoice('in')" title="Preview"><span class="preview-icon">&#9654;</span><span class="preview-spin"></span></button>
+          </div>
+          <div class="sp-hint" id="voice-hint-in"></div>
+        </div>
+        <div class="sp-field">
+          <div class="sp-label" id="voice-label-out">Their Voice (outgoing TTS)</div>
+          <div class="sp-input-row">
+            <select class="sp-input" id="cfg-voice-out"></select>
+            <button class="sp-dl-btn hidden" id="dl-voice-out" onclick="downloadSelectedVoice('out')" title="Download voice"><span class="dl-icon">&#8615;</span><span class="dl-spin"></span></button>
+            <button class="sp-preview-btn" id="preview-out" onclick="previewVoice('out')" title="Preview"><span class="preview-icon">&#9654;</span><span class="preview-spin"></span></button>
+          </div>
+          <div class="sp-hint" id="voice-hint-out"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio Devices -->
+    <div class="sp-section" id="sec-audio">
+      <div class="sp-section-head" onclick="toggleSection('sec-audio')">
+        <span>Audio Devices</span>
+        <span class="chev">&#9662;</span>
+      </div>
+      <div class="sp-section-body">
+        <div class="sp-field">
+          <div class="sp-label">Microphone</div>
+          <select class="sp-input" id="cfg-mic"></select>
+          <div class="level-meter" id="meter-mic" aria-hidden="true"><div class="level-meter-fill"></div></div>
+          <div class="level-meter-hint" id="meter-mic-hint"></div>
+        </div>
+        <div class="sp-field">
+          <div class="sp-label">Speakers <span class="badge">you hear</span></div>
+          <select class="sp-input" id="cfg-speaker"></select>
+        </div>
+        <div class="sp-field">
+          <div class="sp-label">Call Input <span class="badge">Telegram → app</span></div>
+          <select class="sp-input" id="cfg-meet-in"></select>
+          <div class="level-meter" id="meter-call-in" aria-hidden="true"><div class="level-meter-fill"></div></div>
+          <div class="level-meter-hint" id="meter-call-in-hint"></div>
+        </div>
+        <div class="sp-field">
+          <div class="sp-label">Call Output <span class="badge">app → Telegram</span></div>
+          <select class="sp-input" id="cfg-meet-out"></select>
+        </div>
+        <div class="sp-hint" style="margin-top:8px">Input level bars show signal while Settings are open. Speak into the MacBook mic to test Microphone; play audio into Call Input (e.g. Telegram) to test the virtual device.</div>
+      </div>
+    </div>
+
+    <!-- Advanced -->
+    <div class="sp-section" id="sec-advanced">
+      <div class="sp-section-head" onclick="toggleSection('sec-advanced')">
+        <span>Advanced</span>
+        <span class="chev">&#9662;</span>
+      </div>
+      <div class="sp-section-body">
+        <div class="sp-field">
+          <div class="sp-label">STT Endpointing (sentence boundary sensitivity)</div>
+          <div class="sp-slider-wrap">
+            <input type="range" class="sp-slider" id="cfg-endpointing" min="100" max="1000" step="50" value="500">
+            <span class="sp-slider-val" id="endpointing-val">500ms</span>
+          </div>
+          <div class="sp-hint">Lower = faster response, may cut sentences. Higher = waits longer for complete sentences.</div>
+        </div>
+      </div>
+    </div>
+
+    </form>
+  </div>
+
+  <!-- Footer with restart button -->
+  <div class="sp-footer">
+    <button class="restart-btn" id="restart-btn" onclick="saveAndRestart()">
+      <span class="ring"></span>
+      <span class="progress-bar" id="restart-progress"></span>
+      <span class="restart-text" id="restart-text">Save &amp; Restart Engine</span>
+    </button>
+  </div>
+</div>
+
+<!-- Main UI -->
+<header>
+  <h1>Live Translator</h1>
+  <div class="header-controls">
+    <span id="timer">0:00</span>
+    <div class="engine-pill stopped" id="engine-pill">
+      <span class="engine-dot"></span>
+      <span id="engine-label">Stopped</span>
+    </div>
+    <div id="status">Connected</div>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme"></button>
+  </div>
+</header>
+
+<div class="controls">
+  <button class="btn btn-engine stopped" id="btn-engine" onclick="toggleEngine()">
+    <span class="engine-icon" id="engine-icon">&#9654;</span>
+    <span id="engine-toggle-text">Start</span>
+  </button>
+  <button class="btn btn-icon" id="btn-logs" onclick="openLogs()" title="Errors &amp; warnings">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5L1.5 13h13L8 1.5z"/><path d="M8 6v3.5M8 11.5v.5" stroke-linecap="round"/></svg>
+    Logs
+    <span class="log-badge hidden" id="log-badge">0</span>
+  </button>
+  <div class="btn-sep"></div>
+  <button class="btn active" id="btn-mic-out" onclick="toggleMute('outgoing')" title="Your microphone (outgoing). Green = on, grey = muted.">
+    <span class="dot"></span> Mic Out
+  </button>
+  <button class="btn muted" id="btn-mic-in" onclick="toggleMute('incoming')" title="Incoming call audio (their speech). Mute during solo test to avoid echo loop.">
+    <span class="dot"></span> Mic In
+  </button>
+  <div class="btn-sep"></div>
+  <button class="btn btn-icon" id="btn-tab-capture" onclick="toggleTabCapture()" title="Capture audio from a browser tab (replaces BlackHole for incoming)">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2.5A1.5 1.5 0 014.5 1h7A1.5 1.5 0 0113 2.5v11a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 013 13.5v-11zM4.5 2a.5.5 0 00-.5.5v11a.5.5 0 00.5.5h7a.5.5 0 00.5-.5v-11a.5.5 0 00-.5-.5h-7z" fill="none" stroke="currentColor" stroke-width="0.8"/><path d="M6 5h4v1H6zm0 2.5h4v1H6zm0 2.5h3v1H6z" opacity="0.5"/></svg>
+    Tab Audio
+  </button>
+  <button class="btn btn-icon" id="btn-monitor" onclick="toggleMonitor()" title="Play translations in browser">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h4l2 2h4a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V3z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 7v3l2.5-1.5L6.5 7z"/></svg>
+    Monitor
+  </button>
+  <div class="btn-sep"></div>
+  <button class="btn btn-icon" id="btn-compact" onclick="toggleCompact()" title="Compact mode">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 4h12v1.5H2zm0 3.25h8v1.5H2zm0 3.25h10v1.5H2z"/></svg>
+    Compact
+  </button>
+  <button class="btn btn-icon" id="btn-bookmarks" onclick="toggleBookmarkFilter()" title="Bookmarks">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2h8v12l-4-2.5L4 14V2z"/></svg>
+    Saved
+  </button>
+  <span class="spacer"></span>
+  <a href="/history" class="btn btn-icon" id="btn-history" title="Call history">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg>
+    History
+  </a>
+  <button class="btn btn-icon" id="btn-export" onclick="exportChat()" title="Export transcript">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M5 7l3 3 3-3M3 12h10"/></svg>
+    Export
+  </button>
+  <button class="btn btn-icon" id="btn-clear" onclick="clearAll()" title="Clear chat">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h8l-.5 8.5a1 1 0 01-1 .5H5.5a1 1 0 01-1-.5L4 5zM3 4h10M6 4V2.5h4V4"/></svg>
+    Clear
+  </button>
+  <div class="btn-sep"></div>
+  <button class="btn btn-icon btn-settings-main" id="btn-settings" onclick="openSettings()" title="Settings">
+    <svg class="gear-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3M4.1 4.1l2.1 2.1M13.8 13.8l2.1 2.1M4.1 15.9l2.1-2.1M13.8 6.2l2.1-2.1"/></svg>
+    Settings
+  </button>
+</div>
+
+<div class="chat" id="chat">
+  <div class="typing" id="typing">
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<footer>
+  <span>STT: <b id="avg-stt">-</b></span>
+  <span>Translate: <b id="avg-trl">-</b></span>
+  <span>TTS: <b id="avg-tts">-</b></span>
+  <span>Latency: <b id="avg-lat">-</b></span>
+  <span>Phrases: <b id="total">0</b></span>
+</footer>
+
+<script src="/static/js/tooltips.js"></script>
+<script type="module" src="/static/js/main.js?v=12"></script>
+</body>
+</html>

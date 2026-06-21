@@ -1,15 +1,5 @@
-# Elixir
-/_build/
-/cover/
-/deps/
-/doc/
-/tmp/
-erl_crash.dump
-*.ez
-translator-*.tar
-
 # Rust
-/native/audio_engine/target/
+/target/
 
 # Models (large, downloaded separately)
 /models/
@@ -23,14 +13,10 @@ translator-*.tar
 !.env.example
 settings.json
 
-# Python
-/.venv/
-__pycache__/
-
-# Runtime
-test-log.txt
-/tts-output/
+# Runtime / local data
 calls.db
+calls.db-*
+/tts-output/
 
 # IDE
 .idea/

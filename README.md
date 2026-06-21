@@ -10,7 +10,9 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 
 ![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![GitHub stars](https://img.shields.io/github/stars/LetovKai/call-translator)
+![GitHub stars](https://img.shields.io/github/stars/org-event/call-translator)
+
+> Fork of [LetovKai/call-translator](https://github.com/LetovKai/call-translator) by Kai Letov.
 
 > **Note:** macOS only (14+). Uses CoreAudio and cpal for audio capture. Windows/Linux support is not available yet — contributions welcome!
 
@@ -18,51 +20,26 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 
 ## Quick Start
 
-**One-command setup** (macOS with Homebrew):
-
 ```bash
-git clone https://github.com/LetovKai/call-translator.git
+git clone git@github.com:org-event/call-translator.git
 cd call-translator
-./setup.sh
+cargo run --release -p translator -- setup   # download models (first time)
+cargo run --release -p translator            # start server
 ```
 
-The script installs all dependencies, downloads voice models for English and Russian, and builds the project.
+Open **http://127.0.0.1:5050** in **Google Chrome**.
 
-Then:
-
-```bash
-./run.sh
-```
-
-Open **http://127.0.0.1:5050** in **Google Chrome**. Settings open automatically on first launch — enter your API keys and configure languages there.
-
-**[Usage Guide (USAGE.md)](USAGE.md)** — controls, voice management, audio setup, call history.
-
-> **Browser:** Use **Chrome** — audio monitor and BlackHole routing work correctly. Safari has audio output limitations that prevent monitor playback. Other browsers are untested.
-
-> You need two free API keys (free tiers available):
-> - [Deepgram](https://console.deepgram.com) — speech-to-text
-> - [Groq](https://console.groq.com) — translation (LLM)
+Local mode (default): Whisper STT + Opus-MT translation — no API keys required. Cloud STT/translation optional via Settings.
 
 ---
 
 ## Architecture
 
-```
-┌─────────────┐     ┌──────────────┐     ┌───────────┐     ┌─────────┐
-│  Your Mic   │────>│ Deepgram STT │────>│ Groq LLM  │────>│ Piper   │──> Call
-│  (your lang)│     │  (speech→text)│     │ (translate)│     │  TTS    │   (BlackHole)
-└─────────────┘     └──────────────┘     └───────────┘     └─────────┘
+Single Rust binary (`translator`): Axum web server on `:5050` + in-process audio engine (STT, translation, TTS).
 
-┌─────────────┐     ┌──────────────┐     ┌───────────┐     ┌─────────┐
-│  Call Audio  │────>│ Deepgram STT │────>│ Groq LLM  │────>│ Piper   │──> Speakers
-│ (their lang)│     │  (speech→text)│     │ (translate)│     │  TTS    │
-└─────────────┘     └──────────────┘     └───────────┘     └─────────┘
 ```
-
-- **Elixir** — orchestrator, process supervision, port management
-- **Rust** — audio capture/playback, STT streaming, TTS synthesis, translation
-- **Flask** — web UI for live transcript, settings, and controls
+Browser (app.js) ←SSE→ Axum ←→ audio-core Engine ←→ CoreAudio / models
+```
 
 ---
 
@@ -71,38 +48,28 @@ Open **http://127.0.0.1:5050** in **Google Chrome**. Settings open automatically
 | Dependency | Purpose | Install |
 |---|---|---|
 | macOS 14+ | CoreAudio for audio I/O | — |
-| [Homebrew](https://brew.sh) | Package manager | `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"` |
-| Elixir | Application runtime | `brew install elixir` |
-| Rust | Audio engine | `brew install rustup && rustup-init` |
-| Python 3 | Web UI server | `brew install python@3` |
+| [Homebrew](https://brew.sh) | Package manager | see brew.sh |
+| Rust | App + audio engine | `brew install rustup && rustup-init` |
 | espeak-ng | TTS phonemization | `brew install espeak-ng` |
 | ONNX Runtime | Model inference | `brew install onnxruntime` |
-| Flask | Web framework | via venv (see below) |
 | [BlackHole](https://existential.audio/blackhole/) | Virtual audio routing | Manual download |
-| Xcode CLT | C compiler for Rust | `xcode-select --install` |
+| Xcode CLT | C compiler | `xcode-select --install` |
 
-**API Keys (free tiers available):**
-- [Deepgram](https://console.deepgram.com) — speech-to-text (Nova-3 model)
-- [Groq](https://console.groq.com) — translation via llama-3.3-70b
+**Optional API keys** (cloud STT/translation): [Deepgram](https://console.deepgram.com), [OpenRouter](https://openrouter.ai/keys)
 
 ---
 
 ## Manual Installation
 
-If you prefer to install everything step by step instead of using `setup.sh`:
+If you prefer step-by-step setup:
 
 ### 1. System packages
 
 ```bash
 xcode-select --install
-brew install elixir rustup espeak-ng onnxruntime python@3
+brew install rustup espeak-ng onnxruntime
 rustup-init -y --default-toolchain stable
 source ~/.cargo/env
-
-# Create virtual environment and install Flask
-python3 -m venv .venv
-source .venv/bin/activate
-pip install flask
 ```
 
 ### 2. BlackHole audio driver
@@ -122,7 +89,7 @@ Setup in your call app (Google Meet, Zoom, etc.):
 
 ### 3. Download voice models
 
-TTS voices come from [Piper](https://github.com/rhasspy/piper). The setup script downloads English and Russian voices automatically. Additional voices can be downloaded from the web UI — select a language and click the download button.
+TTS voices come from [Piper](https://github.com/rhasspy/piper). Run `cargo run --release -p translator -- setup` to download default voices, Whisper, and Opus-MT models. Additional voices can be downloaded from the web UI.
 
 To download manually:
 
@@ -158,17 +125,11 @@ GROQ_API_KEY=your_key_here
 ORT_DYLIB_PATH=/opt/homebrew/lib/libonnxruntime.dylib
 ```
 
-### 5. Build
+### 5. Build and run
 
 ```bash
-mix deps.get
-mix compile    # Compiles Elixir + Rust (first build takes a few minutes)
-```
-
-### 6. Run
-
-```bash
-./run.sh
+cargo run --release -p translator -- setup   # first time: download models
+cargo run --release -p translator            # start server
 ```
 
 Open **http://127.0.0.1:5050** in Chrome.
@@ -232,9 +193,10 @@ TTS requires downloading a Piper voice model for the language (one-click from th
 ## Troubleshooting
 
 **"Engine not starting"**
-- Check that `.env` has valid API keys
+- Press **Start** after the page loads (server runs idle until then)
+- For local mode: models in `models/` — run `cargo run --release -p translator -- setup`
 - Verify `ORT_DYLIB_PATH` points to your onnxruntime library
-- Run `mix compile` to check for build errors
+- Run `cargo build -p translator` to check for build errors
 
 **"No audio from call"**
 - Ensure BlackHole 16ch is set up in a Multi-Output Device
@@ -249,12 +211,12 @@ TTS requires downloading a Piper voice model for the language (one-click from th
 - Use Chrome — Safari does not support audio output routing required for monitor
 - Check your system audio output is set to speakers (not BlackHole)
 
-**"Groq key shows invalid"**
-- The key is likely valid — test by clicking "Test" in Settings
-- Keys set via `.env` work automatically even if the UI field is empty
+**"OpenRouter key shows invalid"**
+- Only needed when cloud translation is enabled
+- Keys in `.env` work even if the Settings field is empty
 
 ---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE). Copyright (c) 2026 Kai Letov (original author).

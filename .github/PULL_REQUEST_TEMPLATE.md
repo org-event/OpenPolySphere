@@ -10,5 +10,4 @@
 
 - [ ] Tested locally with a real call
 - [ ] No API keys or secrets in the diff
-- [ ] Rust: `cargo clippy` passes
-- [ ] Python: no new warnings
+- [ ] Rust: `cargo clippy -p translator` passes

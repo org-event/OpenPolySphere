@@ -13,6 +13,7 @@ const TIPS = {
     export: 'Export transcript as text file',
     clear: 'Clear all messages',
     history: 'View call history',
+    logs: 'Errors and warnings log',
     'test-key': 'Verify that the API key is valid',
     'my-lang': 'The language you speak',
     'their-lang': 'The language the other person speaks',
@@ -40,6 +41,7 @@ const TIPS = {
     export: 'Экспортировать переписку в файл',
     clear: 'Очистить все сообщения',
     history: 'История звонков',
+    logs: 'Лог ошибок и предупреждений',
     'test-key': 'Проверить валидность API-ключа',
     'my-lang': 'Язык, на котором говорите вы',
     'their-lang': 'Язык, на котором говорит собеседник',
@@ -454,9 +456,10 @@ function applyTooltips() {
   t('btn-export', 'export');
   t('btn-clear', 'clear');
   t('btn-history', 'history');
+  t('btn-logs', 'logs');
   // Settings
   t('test-deepgram', 'test-key');
-  t('test-groq', 'test-key');
+  t('test-openrouter', 'test-key');
   t('cfg-my-lang', 'my-lang');
   t('cfg-their-lang', 'their-lang');
   t('cfg-voice-in', 'voice-in');
