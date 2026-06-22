@@ -282,6 +282,7 @@ fn find_espeak_ng() -> Result<String> {
         "/opt/homebrew/bin/espeak-ng",
         "/usr/local/bin/espeak-ng",
         "/usr/bin/espeak-ng",
+        r"C:\Program Files\eSpeak NG\espeak-ng.exe",
     ];
 
     for candidate in &candidates {

@@ -72,3 +72,77 @@ jobs:
           test -x target/release/translator
           test -d target/release/LiveTranslator.app
           ./target/release/translator --help
+
+  windows:
+    runs-on: windows-latest
+    needs: [rustfmt, js]
+    timeout-minutes: 90
+    env:
+      ORT_VERSION: "1.20.1"
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install OpenBLAS (vcpkg)
+        run: |
+          vcpkg install openblas:x64-windows-static
+          vcpkg integrate install
+          echo "CMAKE_INCLUDE_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows-static/include/openblas" >> $env:GITHUB_ENV
+          echo "CMAKE_LIBRARY_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows-static/lib" >> $env:GITHUB_ENV
+
+      - name: Install espeak-ng
+        run: choco install espeak-ng -y
+
+      - name: Install ONNX Runtime
+        shell: pwsh
+        run: |
+          $zip = "onnxruntime-win-x64-$env:ORT_VERSION.zip"
+          Invoke-WebRequest -Uri "https://github.com/microsoft/onnxruntime/releases/download/v$env:ORT_VERSION/$zip" -OutFile $zip
+          Expand-Archive $zip -DestinationPath ort
+          echo "ORT_DYLIB_PATH=$PWD/ort/onnxruntime-win-x64-$env:ORT_VERSION/lib/onnxruntime.dll" >> $env:GITHUB_ENV
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "26"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Clippy
+        run: cargo clippy -p translator -p audio-core --all-targets -- -D warnings
+
+      - name: Build release
+        run: cargo build --release -p translator
+
+      - name: Verify binary
+        run: .\target\release\translator.exe --help
+
+      - name: Package artifact
+        shell: pwsh
+        run: |
+          $dest = "dist/banyan-windows-x64"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          Copy-Item target/release/translator.exe $dest/
+          Copy-Item ort/onnxruntime-win-x64-$env:ORT_VERSION/lib/onnxruntime.dll $dest/
+          Copy-Item -Recurse web $dest/web
+          Copy-Item .env.example, README.md $dest/
+          @(
+            "Banyan Windows CI artifact (Windows 10/11 x64)",
+            "",
+            "1. Unzip to a folder",
+            "2. .\translator.exe --help",
+            "3. .\translator.exe setup   (downloads models)",
+            "4. .\translator.exe         then open http://127.0.0.1:5050",
+            "",
+            "Virtual audio for calls: VB-Audio Virtual Cable (see docs/windows.md)",
+            "espeak-ng: install via choco if TTS phonemization fails"
+          ) | Set-Content -Path $dest/WINDOWS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: banyan-windows-x64
+          path: dist/banyan-windows-x64
+          retention-days: 14
