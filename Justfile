@@ -114,7 +114,18 @@ check-swift:
       echo "[!] Swift not found. Run: xcode-select --install"
       exit 1
     fi
+    # Apple Translation APIs need the macOS 15+ SDK (Xcode 16+); TranslationSession needs macOS 26 SDK.
+    if ! xcrun --sdk macosx --show-sdk-version 2>/dev/null | awk -F. '{ exit !($1 >= 15) }'; then
+      echo "[skip] Swift Translation checks need macOS 15+ SDK (install Xcode 16+)"
+      exit 0
+    fi
     for pkg in tools/apple-speech-auth tools/apple-translate tools/apple-speech; do
       echo "==> swift build $pkg"
+      if [[ "$pkg" == "tools/apple-translate" ]]; then
+        if ! xcrun --sdk macosx --show-sdk-version 2>/dev/null | awk -F. '{ exit !($1 >= 26) }'; then
+          echo "[skip] apple-translate needs macOS 26 SDK (Xcode 26+) for TranslationSession"
+          continue
+        fi
+      fi
       swift build -c release --package-path "$pkg"
     done

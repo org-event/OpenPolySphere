@@ -12,9 +12,27 @@ permissions:
 
 jobs:
   release-macos:
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: |
+          selected=""
+          for candidate in /Applications/Xcode_26*.app /Applications/Xcode.app; do
+            [[ -d "$candidate" ]] || continue
+            sudo xcode-select -s "$candidate/Contents/Developer"
+            major=$(xcodebuild -version | awk '/Xcode/ {split($2,a,"."); print a[1]}')
+            if [[ "$major" -ge 26 ]]; then
+              selected="$candidate"
+              break
+            fi
+          done
+          if [[ -z "$selected" ]]; then
+            echo "No Xcode 26+ found on runner" >&2
+            exit 1
+          fi
+          echo "Using $selected"
+          xcodebuild -version
       - uses: dtolnay/rust-toolchain@stable
       - name: Install system dependencies
         run: brew install espeak-ng onnxruntime

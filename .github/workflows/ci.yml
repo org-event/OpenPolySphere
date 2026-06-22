@@ -24,22 +24,42 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "26"
           cache: npm
       - run: npm ci
       - run: npm run lint:js
 
   macos:
-    runs-on: macos-14
+    runs-on: macos-latest
     needs: [rustfmt, js]
     steps:
       - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: |
+          selected=""
+          for candidate in /Applications/Xcode_26*.app /Applications/Xcode.app; do
+            [[ -d "$candidate" ]] || continue
+            sudo xcode-select -s "$candidate/Contents/Developer"
+            major=$(xcodebuild -version | awk '/Xcode/ {split($2,a,"."); print a[1]}')
+            if [[ "$major" -ge 26 ]]; then
+              selected="$candidate"
+              break
+            fi
+          done
+          if [[ -z "$selected" ]]; then
+            echo "No Xcode 26+ found on runner" >&2
+            ls /Applications/Xcode*.app >&2 || true
+            exit 1
+          fi
+          echo "Using $selected"
+          xcodebuild -version
+          swift --version
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "26"
           cache: npm
       - uses: extractions/setup-just@v2
       - name: Install system dependencies
