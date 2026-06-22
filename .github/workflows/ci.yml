@@ -12,7 +12,7 @@ jobs:
   rustfmt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
@@ -21,8 +21,8 @@ jobs:
   js:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: "26"
           cache: npm
@@ -33,7 +33,7 @@ jobs:
     runs-on: macos-latest
     needs: [rustfmt, js]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Select Xcode 26
         run: |
           selected=""
@@ -57,11 +57,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "26"
           cache: npm
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@v4
       - name: Install system dependencies
         run: brew install espeak-ng onnxruntime
       - run: npm ci
