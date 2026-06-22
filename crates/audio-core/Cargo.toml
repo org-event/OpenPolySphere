@@ -24,7 +24,7 @@ ort = { version = "2.0.0-rc.12", features = ["load-dynamic"] }
 ndarray = "0.17.2"
 rubato = "0.15.0"
 ureq = { version = "2.12.1", features = ["json"] }
-tungstenite = { version = "0.21.0", features = ["native-tls"] }
+tungstenite = { version = "0.29.0", features = ["native-tls"] }
 base64 = "0.22.1"
 
 [target.'cfg(target_os = "macos")'.dependencies]
