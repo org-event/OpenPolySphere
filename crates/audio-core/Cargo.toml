@@ -18,7 +18,7 @@ log = "0.4.29"
 env_logger = "0.11.9"
 anyhow = "1.0.102"
 crossbeam-channel = "0.5.15"
-cpal = "0.15.3"
+cpal = "0.18.1"
 ringbuf = "0.4.8"
 ort = { version = "2.0.0-rc.12", features = ["load-dynamic"] }
 ndarray = "0.17.2"
