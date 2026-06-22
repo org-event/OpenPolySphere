@@ -5,7 +5,6 @@
 ///   2. IPA phonemes -> phoneme_id_map (from JSON config) -> phoneme IDs
 ///   3. phoneme IDs -> ONNX VITS model (via ort) -> raw audio at model_sample_rate
 ///   4. raw audio -> rubato resampler -> output at output_sample_rate
-
 use std::collections::HashMap;
 use std::path::Path;
 use std::process::Command;
@@ -15,7 +14,9 @@ use log::{debug, info, warn};
 use ndarray::{Array1, Array2};
 use ort::session::Session;
 use ort::value::Value;
-use rubato::{Resampler, SincFixedIn, SincInterpolationParameters, SincInterpolationType, WindowFunction};
+use rubato::{
+    Resampler, SincFixedIn, SincInterpolationParameters, SincInterpolationType, WindowFunction,
+};
 use serde::Deserialize;
 
 /// Piper model configuration parsed from the `.onnx.json` file.
@@ -247,22 +248,18 @@ impl PiperTts {
             // Multi-speaker model: provide speaker ID
             let sid = Array1::from_vec(vec![0i64]); // default speaker
             let sid_value = Value::from_array(sid)?;
-            self.session.run(
-                ort::inputs![
-                    "input" => input_value,
-                    "input_lengths" => lengths_value,
-                    "scales" => scales_value,
-                    "sid" => sid_value,
-                ],
-            )?
+            self.session.run(ort::inputs![
+                "input" => input_value,
+                "input_lengths" => lengths_value,
+                "scales" => scales_value,
+                "sid" => sid_value,
+            ])?
         } else {
-            self.session.run(
-                ort::inputs![
-                    "input" => input_value,
-                    "input_lengths" => lengths_value,
-                    "scales" => scales_value,
-                ],
-            )?
+            self.session.run(ort::inputs![
+                "input" => input_value,
+                "input_lengths" => lengths_value,
+                "scales" => scales_value,
+            ])?
         };
 
         // Output shape is typically [1, 1, num_samples]
@@ -271,7 +268,7 @@ impl PiperTts {
             .context("Failed to extract output audio tensor")?;
 
         // Flatten to 1D
-        let samples: Vec<f32> = raw_data.iter().copied().collect();
+        let samples: Vec<f32> = raw_data.to_vec();
 
         Ok(samples)
     }
@@ -296,9 +293,7 @@ fn find_espeak_ng() -> Result<String> {
         }
     }
 
-    anyhow::bail!(
-        "espeak-ng not found. Install it with: brew install espeak-ng"
-    )
+    anyhow::bail!("espeak-ng not found. Install it with: brew install espeak-ng")
 }
 
 /// Resample mono f32 audio using a high-quality sinc interpolator.

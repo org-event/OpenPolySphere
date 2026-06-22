@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# First command after git clone (like npm install).
+# Installs `just` if missing, then runs `just install`.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+if ! command -v just >/dev/null; then
+  echo "[..] just not found, installing..."
+  case "$(uname -s)" in
+    Darwin)
+      if ! command -v brew >/dev/null; then
+        echo "[!] Install Homebrew first: https://brew.sh"
+        exit 1
+      fi
+      brew install just
+      ;;
+    Linux)
+      if command -v cargo >/dev/null; then
+        cargo install just --locked
+      else
+        echo "[!] Install just: https://github.com/casey/just#installation"
+        exit 1
+      fi
+      ;;
+    *)
+      echo "[!] Install just manually: https://github.com/casey/just"
+      exit 1
+      ;;
+  esac
+fi
+
+exec just install

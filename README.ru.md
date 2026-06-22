@@ -20,8 +20,9 @@
 ## Быстрый старт
 
 ```bash
-git clone git@github.com:org-event/call-translator.git
+git clone https://github.com/org-event/call-translator.git
 cd call-translator
+./scripts/bootstrap                          # dev-зависимости + git hooks (как npm install)
 cargo run --release -p translator -- setup   # первый раз: скачать модели
 cargo run --release -p translator            # запуск сервера
 ```
@@ -29,6 +30,35 @@ cargo run --release -p translator            # запуск сервера
 Откройте **http://127.0.0.1:5050** в **Google Chrome**.
 
 Локальный режим (по умолчанию): Whisper STT + Opus-MT — API-ключи не нужны.
+
+### После клонирования (для разработчиков)
+
+`./scripts/bootstrap` — первая команда после `git clone`, аналог `npm install` в Node-проектах. Ставит `just`, если его нет, затем вызывает `just install`.
+
+**Что делает `just install`:**
+
+| Шаг | macOS | Linux / Windows |
+|-----|-------|-----------------|
+| Rust + rustfmt/clippy | да | да |
+| Homebrew: espeak-ng, onnxruntime, node, pre-commit | да | пропуск (см. ручную установку) |
+| `npm ci` (ESLint для `web/static/js`) | да | да |
+| `pre-commit install` → `just check` при коммите | да | да |
+
+Если `just` уже установлен, можно сразу `just install` вместо `./scripts/bootstrap`.
+
+**Команды** (из корня репозитория):
+
+| Команда | Назначение |
+|---------|------------|
+| `./scripts/bootstrap` | Первичная настройка после clone |
+| `just install` | То же, без установки `just` |
+| `just check` | rustfmt, clippy, ESLint, Swift (только macOS) |
+| `just build` | `cargo build --release -p translator` |
+| `just run` | Запуск сервера |
+| `just setup` | Скачать Whisper, Opus-MT и голоса Piper по умолчанию |
+| `just` | Список всех рецептов |
+
+После install: один раз `just setup`, затем `just run`. Опционально: `cp .env.example .env` для облачных API-ключей.
 
 ---
 

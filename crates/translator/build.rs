@@ -1,7 +1,7 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
-fn build_swift_tool(manifest: &PathBuf, out_dir: &PathBuf, tool_name: &str, sources_dir: &str) {
+fn build_swift_tool(manifest: &Path, out_dir: &Path, tool_name: &str, sources_dir: &str) {
     let tool_dir = manifest.join(sources_dir);
     if !tool_dir.join("Package.swift").is_file() {
         println!("cargo:warning={tool_name} sources not found; skipping");
@@ -27,9 +27,7 @@ fn build_swift_tool(manifest: &PathBuf, out_dir: &PathBuf, tool_name: &str, sour
     match swift_build {
         Ok(status) if status.success() => {}
         Ok(status) => {
-            println!(
-                "cargo:warning=swift build for {tool_name} failed (status={status})"
-            );
+            println!("cargo:warning=swift build for {tool_name} failed (status={status})");
             return;
         }
         Err(e) => {
@@ -70,7 +68,11 @@ fn build_swift_tool(manifest: &PathBuf, out_dir: &PathBuf, tool_name: &str, sour
         return;
     }
 
-    if let Some(profile_dir) = out_dir.parent().and_then(|p| p.parent()).and_then(|p| p.parent()) {
+    if let Some(profile_dir) = out_dir
+        .parent()
+        .and_then(|p| p.parent())
+        .and_then(|p| p.parent())
+    {
         let bin_dest = profile_dir.join(tool_name);
         let _ = std::fs::copy(&dest, &bin_dest);
     }
@@ -93,11 +95,16 @@ fn main() {
     let manifest = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
 
-    build_swift_tool(&manifest, &out_dir, "apple-translate", "../../tools/apple-translate");
+    build_swift_tool(
+        &manifest,
+        &out_dir,
+        "apple-translate",
+        "../../tools/apple-translate",
+    );
     build_speech_app(&manifest, &out_dir);
 }
 
-fn build_speech_app(manifest: &PathBuf, out_dir: &PathBuf) {
+fn build_speech_app(manifest: &Path, out_dir: &Path) {
     let tool_dir = manifest.join("../../tools/apple-speech-auth");
     if !tool_dir.join("Package.swift").is_file() {
         println!("cargo:warning=apple-speech-auth sources not found; skipping");
@@ -176,21 +183,31 @@ fn build_speech_app(manifest: &PathBuf, out_dir: &PathBuf) {
         return;
     }
 
-    if let Some(profile_dir) = out_dir.parent().and_then(|p| p.parent()).and_then(|p| p.parent()) {
+    if let Some(profile_dir) = out_dir
+        .parent()
+        .and_then(|p| p.parent())
+        .and_then(|p| p.parent())
+    {
         let dest = profile_dir.join("LiveTranslator.app");
         let _ = std::fs::remove_dir_all(&dest);
         let _ = copy_dir_all(&staging, &dest);
     }
 
-    println!("cargo:rerun-if-changed={}", tool_dir.join("Package.swift").display());
-    println!("cargo:rerun-if-changed={}", tool_dir.join("Info.plist").display());
+    println!(
+        "cargo:rerun-if-changed={}",
+        tool_dir.join("Package.swift").display()
+    );
+    println!(
+        "cargo:rerun-if-changed={}",
+        tool_dir.join("Info.plist").display()
+    );
     println!(
         "cargo:rerun-if-changed={}",
         tool_dir.join("Sources").display()
     );
 }
 
-fn copy_dir_all(src: &PathBuf, dst: &PathBuf) -> std::io::Result<()> {
+fn copy_dir_all(src: &Path, dst: &Path) -> std::io::Result<()> {
     std::fs::create_dir_all(dst)?;
     for entry in std::fs::read_dir(src)? {
         let entry = entry?;

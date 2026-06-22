@@ -208,7 +208,7 @@ export async function previewVoice(dir) {
     } else {
       showToast('Preview failed: ' + (data.status || 'engine not running'));
     }
-  } catch (_) {
+  } catch {
     showToast('Preview error: engine not running');
   }
   btn.classList.remove('loading');

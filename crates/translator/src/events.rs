@@ -46,9 +46,7 @@ pub fn spawn_event_loop(
 fn dispatch_event(event: &Event, sse_tx: &broadcast::Sender<String>, db: &Db, side: &SideState) {
     match event {
         Event::Transcript {
-            direction,
-            text,
-            ..
+            direction, text, ..
         } => {
             let line = format!("🎤 [{direction}] {text}");
             info!("{line}");

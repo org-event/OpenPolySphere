@@ -249,7 +249,7 @@ fn engine_loop(
                 let _ = reply.send(engine.is_running());
             }
             EngineOp::Reload(settings, reply) => {
-                let result = (|| {
+                let result = {
                     if engine.is_running() {
                         for _ in engine.handle_command(Command::Stop) {}
                     }
@@ -258,7 +258,7 @@ fn engine_loop(
                     let config = engine_config(&settings, &models);
                     engine.update_config(config);
                     Ok(())
-                })();
+                };
                 let _ = reply.send(result);
             }
             EngineOp::Shutdown => break,

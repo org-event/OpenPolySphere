@@ -102,8 +102,7 @@ pub fn read_command(reader: &mut impl Read) -> Result<Option<Command>> {
         .read_exact(&mut payload)
         .context("failed to read message payload")?;
 
-    let cmd: Command =
-        serde_json::from_slice(&payload).context("failed to deserialize command")?;
+    let cmd: Command = serde_json::from_slice(&payload).context("failed to deserialize command")?;
 
     Ok(Some(cmd))
 }

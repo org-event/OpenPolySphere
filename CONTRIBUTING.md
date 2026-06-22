@@ -26,16 +26,36 @@ Open an [issue](../../issues/new?template=feature_request.md) describing the use
 ### Development setup
 
 ```bash
-git clone git@github.com:org-event/call-translator.git
+git clone https://github.com/org-event/call-translator.git
 cd call-translator
-cargo run --release -p translator -- setup
+./scripts/bootstrap    # installs `just` if needed, then `just install`
+just check             # same checks that run before each commit
 cp .env.example .env   # optional: cloud API keys
-cargo run --release -p translator
+just setup             # download models (first time)
+just run               # start server
 ```
+
+**`./scripts/bootstrap` vs `just install`:** bootstrap is the entry point after clone (like `npm install`). It ensures `just` is on your PATH, then runs `just install`. If you already have `just`, `just install` alone is enough.
+
+**`just install` installs:** Rust rustfmt/clippy; on macOS also Homebrew packages (espeak-ng, onnxruntime, node, pre-commit); `npm ci`; git pre-commit hook.
+
+| Recipe | What it runs |
+|--------|----------------|
+| `just` / `just --list` | Show all recipes |
+| `just install` | Dev environment bootstrap |
+| `just check` | rustfmt + clippy (`-D warnings`) + ESLint + Swift release build (macOS) |
+| `just build` | Release build of `translator` |
+| `just run` | `cargo run --release -p translator` |
+| `just setup` | Download Whisper, Opus-MT, default Piper voices |
+
+On **Linux/Windows** Swift and Apple-only checks are skipped automatically; full macOS build is verified in CI.
 
 ### Code style
 
+- **All**: `just check` (rustfmt, clippy, eslint, Swift on macOS)
 - **Rust**: `cargo fmt` + `cargo clippy`
+- **JS**: `npm run lint:js`
+- Pre-commit hook runs `just check` automatically after `just install`
 
 ### What we especially welcome
 

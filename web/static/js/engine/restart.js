@@ -44,7 +44,7 @@ export async function saveAndRestart() {
       try {
         const r = await fetch('/health');
         if (r.ok) break;
-      } catch (_) {}
+      } catch {}
     }
 
     txt.textContent = 'Ready...';

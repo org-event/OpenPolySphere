@@ -21,8 +21,9 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 ## Quick Start
 
 ```bash
-git clone git@github.com:org-event/call-translator.git
+git clone https://github.com/org-event/call-translator.git
 cd call-translator
+./scripts/bootstrap                          # dev deps + git hooks (like npm install)
 cargo run --release -p translator -- setup   # download models (first time)
 cargo run --release -p translator            # start server
 ```
@@ -30,6 +31,35 @@ cargo run --release -p translator            # start server
 Open **http://127.0.0.1:5050** in **Google Chrome**.
 
 Local mode (default): Whisper STT + Opus-MT translation — no API keys required. Cloud STT/translation optional via Settings.
+
+### After clone (developers)
+
+`./scripts/bootstrap` is the first command after `git clone` — like `npm install` in a Node project. It installs the `just` task runner if needed, then runs `just install`.
+
+**What `just install` does:**
+
+| Step | macOS | Linux / Windows |
+|------|-------|-----------------|
+| Rust toolchain + rustfmt/clippy | yes | yes |
+| Homebrew: espeak-ng, onnxruntime, node, pre-commit | yes | skipped (see manual install) |
+| `npm ci` (ESLint for `web/static/js`) | yes | yes |
+| `pre-commit install` → runs `just check` on commit | yes | yes |
+
+If `just` is already installed, you can run `just install` directly instead of `./scripts/bootstrap`.
+
+**Common commands** (run from the repo root):
+
+| Command | Purpose |
+|---------|---------|
+| `./scripts/bootstrap` | First-time dev setup after clone |
+| `just install` | Same as bootstrap (without installing `just`) |
+| `just check` | rustfmt, clippy, ESLint, Swift build (macOS only) |
+| `just build` | `cargo build --release -p translator` |
+| `just run` | Start the server |
+| `just setup` | Download Whisper, Opus-MT, and default Piper voices |
+| `just` | List all recipes |
+
+After install: `just setup` once, then `just run` (or `cargo run --release -p translator`). Optional: `cp .env.example .env` for cloud API keys.
 
 ---
 

@@ -1,6 +1,4 @@
-import { dom } from '../core/dom.js';
 import { state, MAX_LOGS } from '../core/state.js';
-import { showToast } from '../core/toast.js';
 
 export function isLogLine(line) {
   return (
@@ -26,7 +24,7 @@ function formatLogTime(ts) {
       minute: '2-digit',
       second: '2-digit',
     });
-  } catch (_) {
+  } catch {
     return ts.length > 19 ? ts.slice(11, 19) : ts;
   }
 }

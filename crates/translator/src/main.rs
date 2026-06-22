@@ -119,8 +119,8 @@ async fn serve() -> Result<()> {
 
 // Minimal .env loader without extra dep — read .env from base dir if present
 mod dotenvy {
-    use std::fs;
     use crate::paths::base_dir;
+    use std::fs;
 
     pub fn optional() -> Result<(), ()> {
         let path = base_dir().join(".env");

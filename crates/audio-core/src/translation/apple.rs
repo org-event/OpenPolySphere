@@ -7,10 +7,10 @@ use super::TranslationDirection;
 #[cfg(target_os = "macos")]
 mod macos {
     use super::*;
-    use std::path::PathBuf;
-    use std::process::{Command, Stdio};
     use log::debug;
     use serde::Deserialize;
+    use std::path::PathBuf;
+    use std::process::{Command, Stdio};
 
     #[derive(Debug, Clone, Deserialize)]
     struct HelperResponse {
@@ -41,15 +41,12 @@ mod macos {
                 }
             }
         }
-        for candidate in [
+        [
             PathBuf::from("bin/apple-translate"),
             PathBuf::from("tools/apple-translate/.build/release/apple-translate"),
-        ] {
-            if candidate.is_file() {
-                return Some(candidate);
-            }
-        }
-        None
+        ]
+        .into_iter()
+        .find(|candidate| candidate.is_file())
     }
 
     fn run_helper(args: &[&str]) -> Result<HelperResponse> {
@@ -119,12 +116,7 @@ mod macos {
         }
 
         pub fn translate(&self, text: &str, direction: &TranslationDirection) -> Result<String> {
-            let resp = run_helper(&[
-                "translate",
-                &direction.from_code,
-                &direction.to_code,
-                text,
-            ])?;
+            let resp = run_helper(&["translate", &direction.from_code, &direction.to_code, text])?;
             if !resp.error.is_empty() {
                 bail!("{}", resp.error);
             }

@@ -81,9 +81,8 @@ fn build_prompt(source: &str, draft: &str, direction: &TranslationDirection) -> 
          both make mistakes. Output ONLY the corrected {to} sentence to be spoken aloud. \
          Fix obvious errors using context. Preserve meaning. No explanations or quotes."
     );
-    let user = format!(
-        "Original ({from}):\n{source}\n\nDraft ({to}):\n{draft}\n\nCorrected ({to}):"
-    );
+    let user =
+        format!("Original ({from}):\n{source}\n\nDraft ({to}):\n{draft}\n\nCorrected ({to}):");
     format!(
         "<|im_start|>system\n{system}\n{IM_END}\n<|im_start|>user\n{user}\n{IM_END}\n<|im_start|>assistant\n"
     )

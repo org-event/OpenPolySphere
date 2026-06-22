@@ -51,13 +51,11 @@ mod macos {
                 }
             }
         }
-        for candidate in [PathBuf::from("target/release/LiveTranslator.app/Contents/MacOS/LiveTranslateSpeech")]
-        {
-            if candidate.is_file() {
-                return Some(candidate);
-            }
-        }
-        None
+        [PathBuf::from(
+            "target/release/LiveTranslator.app/Contents/MacOS/LiveTranslateSpeech",
+        )]
+        .into_iter()
+        .find(|candidate| candidate.is_file())
     }
 
     fn auth_app_path() -> Option<PathBuf> {
@@ -75,21 +73,17 @@ mod macos {
                 }
             }
         }
-        for candidate in [
+        [
             PathBuf::from("target/release/LiveTranslator.app"),
             PathBuf::from("tools/apple-speech-auth/LiveTranslator.app"),
-        ] {
-            if candidate.is_dir() {
-                return Some(candidate);
-            }
-        }
-        None
+        ]
+        .into_iter()
+        .find(|candidate| candidate.is_dir())
     }
 
     pub fn request_authorization() -> Result<serde_json::Value> {
-        let app = auth_app_path().context(
-            "LiveTranslator.app not found (rebuild translator on macOS)",
-        )?;
+        let app = auth_app_path()
+            .context("LiveTranslator.app not found (rebuild translator on macOS)")?;
         let out = std::env::temp_dir().join(format!(
             "call-translator-speech-auth-{}.json",
             std::process::id()
@@ -118,7 +112,10 @@ mod macos {
         }
 
         let check = run_helper(
-            &["check", &std::env::var("TRANSLATOR_MY_LANG").unwrap_or_else(|_| "ru".into())],
+            &[
+                "check",
+                &std::env::var("TRANSLATOR_MY_LANG").unwrap_or_else(|_| "ru".into()),
+            ],
             None,
             None,
         )
@@ -132,7 +129,11 @@ mod macos {
 
     pub fn ensure_speech_authorized(lang: &str) -> Result<()> {
         let status = availability(lang);
-        if status.get("ready").and_then(|v| v.as_bool()).unwrap_or(false) {
+        if status
+            .get("ready")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
             log::info!("Apple Speech already authorized for {lang}");
             return Ok(());
         }
@@ -140,7 +141,11 @@ mod macos {
             "Speech recognition permission required for {lang} — waiting for system dialog..."
         );
         let result = request_authorization()?;
-        if result.get("ready").and_then(|v| v.as_bool()).unwrap_or(false) {
+        if result
+            .get("ready")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
             log::info!("Apple Speech authorized");
             return Ok(());
         }
@@ -162,21 +167,15 @@ mod macos {
         pcm: Option<&[f32]>,
         context: Option<&str>,
     ) -> Result<HelperResponse> {
-        let app = auth_app_path().context(
-            "LiveTranslator.app not found (rebuild translator on macOS)",
-        )?;
+        let app = auth_app_path()
+            .context("LiveTranslator.app not found (rebuild translator on macOS)")?;
         let seq = HELPER_SEQ.fetch_add(1, Ordering::Relaxed);
-        let out = std::env::temp_dir().join(format!(
-            "lt-speech-{}-{seq}.json",
-            std::process::id()
-        ));
+        let out = std::env::temp_dir().join(format!("lt-speech-{}-{seq}.json", std::process::id()));
         let _ = std::fs::remove_file(&out);
 
         let pcm_path = if let Some(samples) = pcm {
-            let path = std::env::temp_dir().join(format!(
-                "lt-pcm-{}-{seq}.raw",
-                std::process::id()
-            ));
+            let path =
+                std::env::temp_dir().join(format!("lt-pcm-{}-{seq}.raw", std::process::id()));
             {
                 use std::io::Write;
                 let mut file = std::fs::File::create(&path)
@@ -201,10 +200,7 @@ mod macos {
         open_args.push("--out".into());
         open_args.push(out.to_string_lossy().into_owned());
 
-        debug!(
-            "LiveTranslator.app: {}",
-            open_args.join(" ")
-        );
+        debug!("LiveTranslator.app: {}", open_args.join(" "));
 
         let status = Command::new("open")
             .arg("-W")
@@ -220,9 +216,7 @@ mod macos {
         }
 
         if !out.is_file() {
-            bail!(
-                "LiveTranslateSpeech returned no output (status={status})"
-            );
+            bail!("LiveTranslateSpeech returned no output (status={status})");
         }
 
         let raw = std::fs::read_to_string(&out)?;
@@ -265,13 +259,13 @@ mod macos {
             Err(e) => {
                 log::debug!("LiveTranslateSpeech check failed: {e:#}");
                 serde_json::json!({
-                "helper": true,
-                "available": true,
-                "ready": false,
-                "status": "needs_permission",
-                "authorization": "unknown",
-            })
-            },
+                    "helper": true,
+                    "available": true,
+                    "ready": false,
+                    "status": "needs_permission",
+                    "authorization": "unknown",
+                })
+            }
         }
     }
 
@@ -286,14 +280,60 @@ mod macos {
         let their = std::env::var("TRANSLATOR_THEIR_LANG").unwrap_or_else(|_| "en".into());
         let words: Vec<&str> = match (source_lang, their.as_str()) {
             ("ru", "en") | ("ru", _) => vec![
-                "ok", "okay", "hello", "hi", "thanks", "thank you", "please", "sorry", "yes", "no",
-                "email", "call", "meeting", "zoom", "google", "apple", "microsoft", "team", "slack",
-                "website", "online", "update", "bug", "fix", "test", "deploy", "server", "client",
-                "api", "app", "product", "manager", "developer", "design", "marketing", "sales",
-                "price", "deal", "contract", "deadline", "project", "status", "report", "review",
+                "ok",
+                "okay",
+                "hello",
+                "hi",
+                "thanks",
+                "thank you",
+                "please",
+                "sorry",
+                "yes",
+                "no",
+                "email",
+                "call",
+                "meeting",
+                "zoom",
+                "google",
+                "apple",
+                "microsoft",
+                "team",
+                "slack",
+                "website",
+                "online",
+                "update",
+                "bug",
+                "fix",
+                "test",
+                "deploy",
+                "server",
+                "client",
+                "api",
+                "app",
+                "product",
+                "manager",
+                "developer",
+                "design",
+                "marketing",
+                "sales",
+                "price",
+                "deal",
+                "contract",
+                "deadline",
+                "project",
+                "status",
+                "report",
+                "review",
             ],
             ("en", "ru") | ("en", _) => vec![
-                "privet", "spasibo", "da", "net", "horosho", "ladno", "pozhaluysta", "izvinite",
+                "privet",
+                "spasibo",
+                "da",
+                "net",
+                "horosho",
+                "ladno",
+                "pozhaluysta",
+                "izvinite",
             ],
             _ => return None,
         };
@@ -307,11 +347,7 @@ mod macos {
             let sample_rate = WHISPER_SAMPLE_RATE;
             let context = context_words(language);
             let resp = run_helper(
-                &[
-                    "recognize",
-                    language,
-                    &sample_rate.to_string(),
-                ],
+                &["recognize", language, &sample_rate.to_string()],
                 Some(samples),
                 context.as_deref(),
             )?;

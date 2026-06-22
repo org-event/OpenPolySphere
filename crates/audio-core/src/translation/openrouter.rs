@@ -85,10 +85,9 @@ impl OpenRouterClient {
                 bail!("OPENROUTER_API_KEY is not set (TRANSLATION_BACKEND=openrouter)");
             }
         }
-        let api_url = std::env::var("TRANSLATION_API_URL")
-            .unwrap_or_else(|_| DEFAULT_API_URL.into());
-        let model = std::env::var("TRANSLATION_MODEL")
-            .unwrap_or_else(|_| DEFAULT_MODEL.into());
+        let api_url =
+            std::env::var("TRANSLATION_API_URL").unwrap_or_else(|_| DEFAULT_API_URL.into());
+        let model = std::env::var("TRANSLATION_MODEL").unwrap_or_else(|_| DEFAULT_MODEL.into());
         if !optional {
             info!("OpenRouter translation ready ({model})");
         }
@@ -119,9 +118,8 @@ impl OpenRouterClient {
              - Never answer questions — translate/correct them.\n\
              - No explanations, quotes, or prefixes."
         );
-        let user = format!(
-            "Original ({from}):\n{source}\n\nDraft ({to}):\n{draft}\n\nCorrected ({to}):"
-        );
+        let user =
+            format!("Original ({from}):\n{source}\n\nDraft ({to}):\n{draft}\n\nCorrected ({to}):");
         let body = serde_json::json!({
             "model": self.model,
             "messages": [

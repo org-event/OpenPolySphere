@@ -30,7 +30,10 @@ impl Ct2WhisperEngine {
             .map(|s| s.to_string_lossy().into_owned())
             .unwrap_or_else(|| "whisper".into());
 
-        info!("Loading Whisper STT (CTranslate2 CPU) from {}", model_dir.display());
+        info!(
+            "Loading Whisper STT (CTranslate2 CPU) from {}",
+            model_dir.display()
+        );
         let config = Config {
             device: Device::CPU,
             num_threads_per_replica: 0,
@@ -59,11 +62,15 @@ impl WhisperBackend for Ct2WhisperEngine {
         }
 
         let lang = super::common::whisper_language(language);
-        let mut options = WhisperOptions::default();
-        options.beam_size = 1;
-        options.return_no_speech_prob = true;
+        let options = WhisperOptions {
+            beam_size: 1,
+            return_no_speech_prob: true,
+            ..WhisperOptions::default()
+        };
 
-        let results = self.whisper.generate(samples, Some(lang), false, &options)?;
+        let results = self
+            .whisper
+            .generate(samples, Some(lang), false, &options)?;
         let text = results
             .into_iter()
             .map(|s| s.trim().to_string())
@@ -77,7 +84,10 @@ impl WhisperBackend for Ct2WhisperEngine {
             (MIN_PEAK_RMS / avg_rms).clamp(0.0, 0.45)
         };
 
-        Ok(TranscribeOutcome { text, no_speech_prob })
+        Ok(TranscribeOutcome {
+            text,
+            no_speech_prob,
+        })
     }
 }
 

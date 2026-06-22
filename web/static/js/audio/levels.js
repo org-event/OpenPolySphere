@@ -58,7 +58,7 @@ export async function stopLevelMonitoring() {
   }
   try {
     await sendCmd('stop_level_monitors');
-  } catch (_) {}
+  } catch {}
   setMeter('meter-mic', 'meter-mic-hint', 0);
   setMeter('meter-call-in', 'meter-call-in-hint', 0);
 }
@@ -70,7 +70,7 @@ async function pollAudioLevels() {
     const data = await r.json();
     setMeter('meter-mic', 'meter-mic-hint', data.mic, data.mic_error, data.mic_active);
     setMeter('meter-call-in', 'meter-call-in-hint', data.call_in, data.call_in_error, data.call_in_active);
-  } catch (_) {}
+  } catch {}
 }
 
 export function bindLevelMeterDeviceChange() {

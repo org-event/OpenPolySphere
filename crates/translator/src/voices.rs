@@ -6,8 +6,8 @@ use std::fs;
 use anyhow::{Context, Result};
 use serde_json::{json, Value};
 
-use crate::settings::{PIPER_VOICES_URL, USER_AGENT, default_voices};
 use crate::paths::models_dir;
+use crate::settings::{default_voices, PIPER_VOICES_URL, USER_AGENT};
 
 pub fn scan_local_voices() -> HashMap<String, Vec<String>> {
     let mut voices = HashMap::new();
@@ -96,8 +96,12 @@ pub async fn voices_api() -> Value {
     langs.extend(catalog.keys().cloned());
     let mut result = serde_json::Map::new();
     for lang in langs {
-        let local_set: std::collections::HashSet<_> =
-            local.get(&lang).cloned().unwrap_or_default().into_iter().collect();
+        let local_set: std::collections::HashSet<_> = local
+            .get(&lang)
+            .cloned()
+            .unwrap_or_default()
+            .into_iter()
+            .collect();
         let cat_voices = catalog.get(&lang).cloned().unwrap_or_default();
         let mut voice_list = Vec::new();
         for v in &cat_voices {
@@ -105,7 +109,7 @@ pub async fn voices_api() -> Value {
             voice_list.push(json!({
                 "name": name,
                 "downloaded": local_set.contains(name),
-                "size_mb": (v["size"].as_u64().unwrap_or(0) as f64 / 1_048_576.0).round() as f64 / 1.0,
+                "size_mb": (v["size"].as_u64().unwrap_or(0) as f64 / 1_048_576.0).round() / 1.0,
                 "quality": v["quality"],
             }));
         }
@@ -147,18 +151,21 @@ pub async fn download_voice_stream(lang: &str, voice_name: &str) -> Result<Strin
     } else {
         voice_name.to_string()
     };
-    let voice = voices.iter().find(|v| v["name"].as_str() == Some(&voice_name));
+    let voice = voices
+        .iter()
+        .find(|v| v["name"].as_str() == Some(&voice_name));
     let Some(voice) = voice else {
-        return Ok(format!("data: {}\n\n", json!({ "error": "Voice not found in catalog" })));
+        return Ok(format!(
+            "data: {}\n\n",
+            json!({ "error": "Voice not found in catalog" })
+        ));
     };
     let target = models_dir().join(format!("piper-{lang}"));
     fs::create_dir_all(&target)?;
     let files = voice["files"].as_array().cloned().unwrap_or_default();
-    let all_exist = files.iter().all(|f| {
-        target
-            .join(f["path"].as_str().unwrap_or(""))
-            .exists()
-    });
+    let all_exist = files
+        .iter()
+        .all(|f| target.join(f["path"].as_str().unwrap_or("")).exists());
     if all_exist {
         return Ok(format!(
             "data: {}\n\n",

@@ -19,12 +19,7 @@ fn reclaim_unix(port: u16) {
 
     let me = std::process::id();
     let Ok(out) = Command::new("lsof")
-        .args([
-            "-nP",
-            &format!("-iTCP:{port}"),
-            "-sTCP:LISTEN",
-            "-t",
-        ])
+        .args(["-nP", &format!("-iTCP:{port}"), "-sTCP:LISTEN", "-t"])
         .output()
     else {
         return;
@@ -80,10 +75,7 @@ fn reclaim_windows(port: u16) {
     use std::process::Command;
 
     let me = std::process::id();
-    let Ok(out) = Command::new("netstat")
-        .args(["-ano"])
-        .output()
-    else {
+    let Ok(out) = Command::new("netstat").args(["-ano"]).output() else {
         return;
     };
 
@@ -93,7 +85,11 @@ fn reclaim_windows(port: u16) {
         if !line.contains("LISTENING") || !line.contains(&needle) {
             continue;
         }
-        if let Some(pid) = line.split_whitespace().last().and_then(|s| s.parse::<u32>().ok()) {
+        if let Some(pid) = line
+            .split_whitespace()
+            .last()
+            .and_then(|s| s.parse::<u32>().ok())
+        {
             if pid != me {
                 pids.push(pid);
             }

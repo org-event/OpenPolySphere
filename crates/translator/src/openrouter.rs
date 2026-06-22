@@ -22,16 +22,16 @@ pub async fn fetch_models(free_only: bool, sort: &str) -> Result<Vec<Value>> {
     if let Some(data) = resp.get("data").and_then(|d| d.as_array()) {
         for m in data {
             let pricing = m.get("pricing").cloned().unwrap_or(json!({}));
-            let prompt_price = pricing
-                .get("prompt")
-                .and_then(|p| p.as_str())
-                .unwrap_or("");
+            let prompt_price = pricing.get("prompt").and_then(|p| p.as_str()).unwrap_or("");
             let id = m.get("id").and_then(|i| i.as_str()).unwrap_or("");
             let is_free = prompt_price == "0" || prompt_price == "0.0" || id.ends_with(":free");
             if free_only && !is_free {
                 continue;
             }
-            let ctx = m.get("context_length").and_then(|c| c.as_u64()).unwrap_or(0);
+            let ctx = m
+                .get("context_length")
+                .and_then(|c| c.as_u64())
+                .unwrap_or(0);
             let ctx_label = if ctx >= 1000 {
                 format!("{}K", ctx / 1000)
             } else {
@@ -191,14 +191,7 @@ pub async fn translate_text(text: &str, from_lang: &str, to_lang: &str) -> Resul
             anyhow::bail!("OPENROUTER_API_KEY not set");
         }
         let messages = build_translation_messages(text, from_lang, to_lang);
-        chat_completion(
-            &key,
-            &settings.translation_model(),
-            messages,
-            0.0,
-            Some(80),
-        )
-        .await
+        chat_completion(&key, &settings.translation_model(), messages, 0.0, Some(80)).await
     } else {
         let direction = audio_core::translation::TranslationDirection::new(from_lang, to_lang);
         let engine = audio_core::translation::TranslationEngine::new()?;

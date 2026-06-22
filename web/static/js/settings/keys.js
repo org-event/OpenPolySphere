@@ -75,7 +75,7 @@ export async function testKey(provider) {
       btn.className = 'sp-test-btn fail';
       if (data.error) showToast(data.error);
     }
-  } catch (_) {
+  } catch {
     btn.textContent = 'Error';
     btn.className = 'sp-test-btn fail';
   }

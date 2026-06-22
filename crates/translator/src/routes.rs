@@ -2,6 +2,17 @@
 
 use std::sync::Arc;
 
+use crate::downloads;
+use crate::engine_service::recreate_engine;
+use crate::openrouter::{self, test_model};
+use crate::settings::{
+    env_deepgram_key, env_openrouter_key, local_translation_status, stt_status, Settings,
+    DEEPGRAM_API_URL, USER_AGENT,
+};
+use crate::voices;
+use crate::AppState;
+use audio_core::audio;
+use audio_core::protocol::Command;
 use axum::{
     extract::{Path, Query, State},
     http::{header, StatusCode},
@@ -12,20 +23,9 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use audio_core::audio;
-use audio_core::protocol::Command;
 use futures::stream;
 use serde::Deserialize;
 use serde_json::{json, Map, Value};
-use crate::downloads;
-use crate::engine_service::recreate_engine;
-use crate::openrouter::{self, test_model};
-use crate::settings::{
-    env_deepgram_key, env_openrouter_key, local_translation_status, stt_status, Settings,
-    DEEPGRAM_API_URL, USER_AGENT,
-};
-use crate::voices;
-use crate::AppState;
 
 #[derive(Deserialize)]
 struct CmdBody {
@@ -124,10 +124,7 @@ pub fn api_routes() -> Router<Arc<AppState>> {
         .route("/api/calls/new-session", post(new_session))
         .route("/api/calls/end", post(end_call))
         .route("/api/calls", get(list_calls))
-        .route(
-            "/api/calls/{id}",
-            get(get_call).delete(delete_call),
-        )
+        .route("/api/calls/{id}", get(get_call).delete(delete_call))
         .route("/api/calls/{id}/summary", post(call_summary))
 }
 
@@ -204,7 +201,10 @@ async fn get_settings(State(state): State<Arc<AppState>>) -> Json<Value> {
     );
     out.insert("stt_backend".into(), json!(settings.stt_backend()));
     out.insert("_local_translation".into(), local_translation_status());
-    out.insert("_default_stt_device".into(), json!(audio_core::stt::local::default_stt_device_name()));
+    out.insert(
+        "_default_stt_device".into(),
+        json!(audio_core::stt::local::default_stt_device_name()),
+    );
     out.insert("_local_stt".into(), stt_status());
     Json(Value::Object(out))
 }
@@ -395,11 +395,7 @@ async fn tts_preview(
 
 async fn download_voice(Json(body): Json<VoiceDownloadBody>) -> Response {
     match voices::download_voice_stream(&body.lang, &body.voice).await {
-        Ok(body) => (
-            [(header::CONTENT_TYPE, "text/event-stream")],
-            body,
-        )
-            .into_response(),
+        Ok(body) => ([(header::CONTENT_TYPE, "text/event-stream")], body).into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
             format!("data: {}\n\n", json!({ "error": e.to_string() })),
@@ -439,10 +435,7 @@ async fn monitor_levels(
     let settings = state.settings.read().await.clone();
     let payload = json!({ "mic": body.mic, "call_in": body.call_in });
     let engine = state.engine.read().await.clone();
-    let status = engine.handle_text(
-        &format!("monitor_levels {}", payload),
-        &settings,
-    );
+    let status = engine.handle_text(&format!("monitor_levels {}", payload), &settings);
     Json(json!({ "status": status }))
 }
 
@@ -450,7 +443,11 @@ async fn api_translate(Json(body): Json<TranslateBody>) -> Json<Value> {
     if body.text.trim().is_empty() {
         return Json(json!({ "translation": "" }));
     }
-    let from = if body.from.is_empty() { "en" } else { &body.from };
+    let from = if body.from.is_empty() {
+        "en"
+    } else {
+        &body.from
+    };
     let to = if body.to.is_empty() { "ru" } else { &body.to };
     match openrouter::translate_text(&body.text, from, to).await {
         Ok(t) => Json(json!({ "translation": t })),
@@ -482,17 +479,10 @@ async fn list_calls(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     }
 }
 
-async fn get_call(
-    State(state): State<Arc<AppState>>,
-    Path(id): Path<i64>,
-) -> impl IntoResponse {
+async fn get_call(State(state): State<Arc<AppState>>, Path(id): Path<i64>) -> impl IntoResponse {
     match state.db.get_call(id) {
         Ok(Some(v)) => Json(v).into_response(),
-        Ok(None) => (
-            StatusCode::NOT_FOUND,
-            Json(json!({ "error": "not found" })),
-        )
-            .into_response(),
+        Ok(None) => (StatusCode::NOT_FOUND, Json(json!({ "error": "not found" }))).into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(json!({ "error": e.to_string() })),
@@ -501,10 +491,7 @@ async fn get_call(
     }
 }
 
-async fn delete_call(
-    State(state): State<Arc<AppState>>,
-    Path(id): Path<i64>,
-) -> Json<Value> {
+async fn delete_call(State(state): State<Arc<AppState>>, Path(id): Path<i64>) -> Json<Value> {
     let _ = state.db.delete_call(id);
     Json(json!({ "ok": true }))
 }

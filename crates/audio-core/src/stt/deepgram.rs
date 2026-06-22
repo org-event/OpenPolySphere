@@ -142,8 +142,8 @@ impl DeepgramSession {
                                 .unwrap_or_default();
 
                             if !transcript.trim().is_empty() {
-                                let utterance_end_secs = resp.start.unwrap_or(0.0)
-                                    + resp.duration.unwrap_or(0.0);
+                                let utterance_end_secs =
+                                    resp.start.unwrap_or(0.0) + resp.duration.unwrap_or(0.0);
                                 let backlog_secs = self.audio_sent_secs - utterance_end_secs;
                                 let since_last_send_ms =
                                     self.last_send_time.elapsed().as_millis() as u64;

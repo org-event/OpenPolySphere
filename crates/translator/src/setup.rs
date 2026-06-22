@@ -2,7 +2,10 @@
 
 use anyhow::Result;
 
-use crate::downloads::{self, download_default_voices, download_polish_model, download_translation_models, download_whisper_model};
+use crate::downloads::{
+    self, download_default_voices, download_polish_model, download_translation_models,
+    download_whisper_model,
+};
 use crate::paths::{base_dir, ensure_parent};
 use crate::settings::Settings;
 
@@ -74,7 +77,9 @@ fn ensure_env_file() -> Result<()> {
     let example = base_dir().join(".env.example");
     if example.is_file() {
         std::fs::copy(&example, &env)?;
-        println!("[!] Created .env from .env.example — add API keys if using cloud STT/translation");
+        println!(
+            "[!] Created .env from .env.example — add API keys if using cloud STT/translation"
+        );
     } else {
         ensure_parent(&env)?;
         std::fs::write(

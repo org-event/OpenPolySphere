@@ -29,11 +29,9 @@ impl TranslationPolisher {
             .to_lowercase();
 
         match backend.as_str() {
-            "openrouter" | "cloud" => OpenRouterClient::try_new()
-                .ok()
-                .map(|client| Self {
-                    inner: Polisher::Cloud(client),
-                }),
+            "openrouter" | "cloud" => OpenRouterClient::try_new().ok().map(|client| Self {
+                inner: Polisher::Cloud(client),
+            }),
             _ => super::polish_model::try_shared().map(|engine| Self {
                 inner: Polisher::Local(engine),
             }),

@@ -1,6 +1,5 @@
-import { dom } from '../core/dom.js';
 import { state } from '../core/state.js';
-import { avg, latencyClass, scrollBottom } from '../core/utils.js';
+import { avg } from '../core/utils.js';
 
 export function updateStats() {
   document.getElementById('avg-stt').textContent = avg(state.stats.stt);

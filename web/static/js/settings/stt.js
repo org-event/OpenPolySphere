@@ -186,7 +186,7 @@ export async function refreshSttStatus() {
         installed +
         '</span>';
     }
-  } catch (_) {
+  } catch {
     if (localEl) localEl.textContent = 'Could not check STT model';
   }
 }

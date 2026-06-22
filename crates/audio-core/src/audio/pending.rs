@@ -9,6 +9,12 @@ pub struct PendingMicAudio {
     max_samples: usize,
 }
 
+impl Default for PendingMicAudio {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PendingMicAudio {
     pub fn new() -> Self {
         Self::with_max_seconds(DEFAULT_MAX_SECONDS)

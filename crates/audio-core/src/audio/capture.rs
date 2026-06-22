@@ -61,7 +61,9 @@ impl AudioCapture {
                             .map(|frame| frame.iter().sum::<f32>() / channels as f32)
                             .collect()
                     };
-                    let chunk = AudioChunk { samples: mono.clone() };
+                    let chunk = AudioChunk {
+                        samples: mono.clone(),
+                    };
                     update_level(&level, &mono);
                     if let Some(tx) = &sender {
                         if let Err(e) = tx.try_send(chunk) {
@@ -74,17 +76,25 @@ impl AudioCapture {
             )
             .context("Failed to build input stream")?;
 
-        Ok(Self { stream, device_name: actual_name, sample_rate })
+        Ok(Self {
+            stream,
+            device_name: actual_name,
+            sample_rate,
+        })
     }
 
     pub fn start(&self) -> Result<()> {
-        self.stream.play().context("Failed to start capture stream")?;
+        self.stream
+            .play()
+            .context("Failed to start capture stream")?;
         info!("Capture started on '{}'", self.device_name);
         Ok(())
     }
 
     pub fn stop(&self) -> Result<()> {
-        self.stream.pause().context("Failed to pause capture stream")?;
+        self.stream
+            .pause()
+            .context("Failed to pause capture stream")?;
         info!("Capture stopped on '{}'", self.device_name);
         Ok(())
     }

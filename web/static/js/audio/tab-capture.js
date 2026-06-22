@@ -32,7 +32,7 @@ export async function toggleTabCapture() {
       tabStream = null;
       return;
     }
-  } catch (_) {
+  } catch {
     showToast('Tab capture cancelled');
     return;
   }

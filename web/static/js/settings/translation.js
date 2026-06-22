@@ -109,7 +109,7 @@ export async function refreshTranslationStatus() {
     if (appleEl) {
       appleEl.innerHTML = appleStatusHtml(data.apple);
     }
-  } catch (_) {
+  } catch {
     if (el) el.textContent = 'Could not check translation models';
     if (appleEl) appleEl.textContent = 'Could not check Apple Translation';
   }
@@ -174,7 +174,7 @@ export async function testLocalTranslation() {
       btn.className = 'sp-test-btn ok';
       showToast('Translation: ' + (data.translation || '(empty)'));
     }
-  } catch (_) {
+  } catch {
     btn.textContent = 'Error';
     btn.className = 'sp-test-btn fail';
   }

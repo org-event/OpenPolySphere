@@ -34,7 +34,7 @@ export async function syncEngineStatus() {
     const running = status === 'running';
     applyEngineButton(running);
     return running;
-  } catch (_) {
+  } catch {
     applyEngineButton(false);
     return false;
   }

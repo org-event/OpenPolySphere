@@ -47,7 +47,10 @@ impl Default for Settings {
         fields.insert("openrouter_api_key".into(), Value::String(String::new()));
         fields.insert("translation_backend".into(), Value::String("local".into()));
         fields.insert("translation_polish".into(), Value::Bool(true));
-        fields.insert("translation_polish_backend".into(), Value::String("local".into()));
+        fields.insert(
+            "translation_polish_backend".into(),
+            Value::String("local".into()),
+        );
         fields.insert("stt_backend".into(), Value::String("local".into()));
         fields.insert("deepgram_model".into(), Value::String("nova-3".into()));
         fields.insert("whisper_model".into(), Value::String("auto".into()));
@@ -96,15 +99,15 @@ impl Settings {
         ensure_parent(&path)?;
         let mut to_save = self.fields.clone();
         to_save.remove("groq_api_key");
-        if env_deepgram_key().is_some() {
-            if self.str_field("deepgram_api_key") == env_deepgram_key().unwrap_or_default() {
-                to_save.insert("deepgram_api_key".into(), Value::String(String::new()));
-            }
+        if env_deepgram_key().is_some()
+            && self.str_field("deepgram_api_key") == env_deepgram_key().unwrap_or_default()
+        {
+            to_save.insert("deepgram_api_key".into(), Value::String(String::new()));
         }
-        if env_openrouter_key().is_some() {
-            if self.str_field("openrouter_api_key") == env_openrouter_key().unwrap_or_default() {
-                to_save.insert("openrouter_api_key".into(), Value::String(String::new()));
-            }
+        if env_openrouter_key().is_some()
+            && self.str_field("openrouter_api_key") == env_openrouter_key().unwrap_or_default()
+        {
+            to_save.insert("openrouter_api_key".into(), Value::String(String::new()));
         }
         fs::write(&path, serde_json::to_string_pretty(&to_save)?)?;
         Ok(())
@@ -286,8 +289,7 @@ pub fn env_openrouter_key() -> Option<String> {
 fn is_placeholder(key: &str) -> bool {
     matches!(
         key.trim(),
-        ""
-            | "your_deepgram_api_key_here"
+        "" | "your_deepgram_api_key_here"
             | "your_groq_api_key_here"
             | "your_openrouter_api_key_here"
     )
@@ -321,7 +323,10 @@ pub fn apply_env(settings: &Settings, models_base: &Path) {
         std::env::var("TRANSLATION_API_URL").unwrap_or_else(|_| TRANSLATION_API_URL.into()),
     );
     std::env::set_var("TRANSLATOR_MIC_DEVICE", settings.str_field("mic_device"));
-    std::env::set_var("TRANSLATOR_SPEAKER_DEVICE", settings.str_field("speaker_device"));
+    std::env::set_var(
+        "TRANSLATOR_SPEAKER_DEVICE",
+        settings.str_field("speaker_device"),
+    );
     std::env::set_var(
         "TRANSLATOR_MEET_INPUT",
         settings.str_field("meet_input_device"),
@@ -335,7 +340,10 @@ pub fn apply_env(settings: &Settings, models_base: &Path) {
         settings.u32_field("endpointing_ms", 500).to_string(),
     );
     std::env::set_var("TRANSLATOR_MY_LANG", settings.str_field("my_language"));
-    std::env::set_var("TRANSLATOR_THEIR_LANG", settings.str_field("their_language"));
+    std::env::set_var(
+        "TRANSLATOR_THEIR_LANG",
+        settings.str_field("their_language"),
+    );
 
     let my = settings.str_field("my_language");
     let their = settings.str_field("their_language");
@@ -361,28 +369,25 @@ pub fn apply_env(settings: &Settings, models_base: &Path) {
 }
 
 pub fn engine_config(settings: &Settings, models_base: &Path) -> audio_core::engine::EngineConfig {
-    audio_core::engine::EngineConfig::from_settings(
-        &models_base.to_string_lossy(),
-        &settings.str_field("deepgram_api_key"),
-        &settings.str_field("my_language"),
-        &settings.str_field("their_language"),
-        &settings.str_field("mic_device"),
-        &settings.str_field("speaker_device"),
-        &settings.str_field("meet_input_device"),
-        &settings.str_field("meet_output_device"),
-        settings.u32_field("endpointing_ms", 500),
-        &settings.outgoing_voice(),
-        &settings.incoming_voice(),
-    )
+    audio_core::engine::EngineConfig::from_settings(audio_core::engine::EngineSettingsParams {
+        models_base: &models_base.to_string_lossy(),
+        deepgram_api_key: &settings.str_field("deepgram_api_key"),
+        my_language: &settings.str_field("my_language"),
+        their_language: &settings.str_field("their_language"),
+        mic_device: &settings.str_field("mic_device"),
+        speaker_device: &settings.str_field("speaker_device"),
+        meet_input: &settings.str_field("meet_input_device"),
+        meet_out: &settings.str_field("meet_output_device"),
+        endpointing_ms: settings.u32_field("endpointing_ms", 500),
+        out_voice: &settings.outgoing_voice(),
+        in_voice: &settings.incoming_voice(),
+    })
 }
 
 pub fn local_translation_status() -> serde_json::Value {
     let models = crate::paths::models_dir();
     let translate = models.join("translate");
-    let pairs = [
-        ("opus-mt-ru-en", "ru", "en"),
-        ("opus-mt-en-ru", "en", "ru"),
-    ];
+    let pairs = [("opus-mt-ru-en", "ru", "en"), ("opus-mt-en-ru", "en", "ru")];
     let mut map = serde_json::Map::new();
     let mut all = true;
     for (name, _, _) in pairs {
@@ -453,7 +458,8 @@ pub fn stt_status() -> serde_json::Value {
     let (model, _) = audio_core::stt::local::whisper_model_status();
     let installed = audio_core::stt::local::list_all_installed_whisper_variants();
     let selected_ready = audio_core::stt::local::is_variant_ready_for(&selected, &device);
-    let device_ready = !audio_core::stt::local::list_installed_whisper_variants_for(&device).is_empty();
+    let device_ready =
+        !audio_core::stt::local::list_installed_whisper_variants_for(&device).is_empty();
     let ready = match backend.as_str() {
         "deepgram" | "cloud" => {
             !settings.str_field("deepgram_api_key").trim().is_empty()

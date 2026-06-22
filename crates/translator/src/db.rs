@@ -101,7 +101,11 @@ impl Db {
             Ok(id) => id,
             Err(_) => return,
         };
-        let speaker = if direction == "outgoing" { "me" } else { "them" };
+        let speaker = if direction == "outgoing" {
+            "me"
+        } else {
+            "them"
+        };
         let ts = chrono_ts();
         let conn = self.conn.lock().unwrap();
         let existing: Option<i64> = conn
@@ -144,7 +148,11 @@ impl Db {
                     params![text, id],
                 );
             } else if let Ok(call_id) = tracker.ensure_call(&conn) {
-                let speaker = if direction == "outgoing" { "me" } else { "them" };
+                let speaker = if direction == "outgoing" {
+                    "me"
+                } else {
+                    "them"
+                };
                 let _ = conn.execute(
                     "INSERT INTO utterances (call_id, ts, direction, speaker, original, translated) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
                     params![call_id, prev.ts, direction, speaker, prev.transcript, text],
@@ -175,22 +183,25 @@ impl Db {
     pub fn get_call(&self, call_id: i64) -> Result<Option<Value>> {
         let conn = self.conn.lock().unwrap();
         let call: Option<Value> = conn
-            .query_row("SELECT * FROM calls WHERE id = ?1", params![call_id], |row| {
-                Ok(json!({
-                    "id": row.get::<_, i64>(0)?,
-                    "started_at": row.get::<_, String>(1)?,
-                    "ended_at": row.get::<_, Option<String>>(2)?,
-                    "my_language": row.get::<_, Option<String>>(3)?,
-                    "their_language": row.get::<_, Option<String>>(4)?,
-                    "summary": row.get::<_, Option<String>>(5)?,
-                }))
-            })
+            .query_row(
+                "SELECT * FROM calls WHERE id = ?1",
+                params![call_id],
+                |row| {
+                    Ok(json!({
+                        "id": row.get::<_, i64>(0)?,
+                        "started_at": row.get::<_, String>(1)?,
+                        "ended_at": row.get::<_, Option<String>>(2)?,
+                        "my_language": row.get::<_, Option<String>>(3)?,
+                        "their_language": row.get::<_, Option<String>>(4)?,
+                        "summary": row.get::<_, Option<String>>(5)?,
+                    }))
+                },
+            )
             .ok();
         let Some(call) = call else {
             return Ok(None);
         };
-        let mut stmt =
-            conn.prepare("SELECT * FROM utterances WHERE call_id = ?1 ORDER BY id")?;
+        let mut stmt = conn.prepare("SELECT * FROM utterances WHERE call_id = ?1 ORDER BY id")?;
         let utterances = stmt
             .query_map(params![call_id], |row| {
                 Ok(json!({
@@ -209,7 +220,10 @@ impl Db {
 
     pub fn delete_call(&self, call_id: i64) -> Result<()> {
         let conn = self.conn.lock().unwrap();
-        conn.execute("DELETE FROM utterances WHERE call_id = ?1", params![call_id])?;
+        conn.execute(
+            "DELETE FROM utterances WHERE call_id = ?1",
+            params![call_id],
+        )?;
         conn.execute("DELETE FROM calls WHERE id = ?1", params![call_id])?;
         Ok(())
     }

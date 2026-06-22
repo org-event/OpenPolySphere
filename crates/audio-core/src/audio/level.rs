@@ -26,11 +26,7 @@ pub fn update_level(level: &AtomicU32, samples: &[f32]) {
     // Boost quiet mics; clamp to 0..1
     let instant = (rms * 25.0).min(1.0);
     let prev = read_level(level);
-    let smoothed = if instant > prev {
-        instant
-    } else {
-        prev * 0.82
-    };
+    let smoothed = if instant > prev { instant } else { prev * 0.82 };
     level.store((smoothed * 1000.0) as u32, Ordering::Relaxed);
 }
 

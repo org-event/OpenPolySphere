@@ -6,7 +6,7 @@
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use ct2rs::{Config, Device, Translator, TranslationOptions};
+use ct2rs::{Config, Device, TranslationOptions, Translator};
 use log::debug;
 
 /// Greedy decode — best latency for live calls (beam 2 adds ~30–80 ms per phrase).

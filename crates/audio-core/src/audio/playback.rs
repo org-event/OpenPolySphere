@@ -24,9 +24,7 @@ impl AudioPlayback {
     /// `receiver`: channel providing audio sample buffers to play.
     pub fn new(device_name: &str, sample_rate: u32, receiver: Receiver<Vec<f32>>) -> Result<Self> {
         let device = find_output_device(device_name)?;
-        let actual_name = device
-            .name()
-            .unwrap_or_else(|_| "unknown".into());
+        let actual_name = device.name().unwrap_or_else(|_| "unknown".into());
 
         let config = StreamConfig {
             channels: 1,

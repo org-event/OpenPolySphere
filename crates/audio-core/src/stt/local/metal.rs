@@ -71,7 +71,10 @@ impl WhisperBackend for MetalWhisperEngine {
             });
         }
 
-        let mut state = self.state.lock().expect("Whisper Metal state lock poisoned");
+        let mut state = self
+            .state
+            .lock()
+            .expect("Whisper Metal state lock poisoned");
         let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
         params.set_n_threads(4);
         params.set_translate(false);
@@ -116,7 +119,10 @@ impl WhisperBackend for MetalWhisperEngine {
             );
         }
 
-        Ok(TranscribeOutcome { text, no_speech_prob })
+        Ok(TranscribeOutcome {
+            text,
+            no_speech_prob,
+        })
     }
 }
 

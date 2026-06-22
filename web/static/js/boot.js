@@ -30,7 +30,7 @@ export async function waitForEngine() {
         overlay.className = 'hidden';
         return;
       }
-    } catch (_) {}
+    } catch {}
     await sleep(500);
   }
 }

@@ -27,6 +27,9 @@ pub const AGC_LIMIT_PEAK: f32 = 0.55;
 pub const NO_SPEECH_PROB_THRESHOLD: f32 = 0.55;
 const TRIM_SILENCE_RMS: f32 = 0.006;
 
+type WhisperJob = (Vec<f32>, f32);
+type WhisperJobSlot = Arc<Mutex<Option<WhisperJob>>>;
+
 pub struct TranscribeOutcome {
     pub text: String,
     pub no_speech_prob: f32,
@@ -42,7 +45,7 @@ pub struct LocalWhisperSession {
     in_speech: bool,
     peak_amplitude: f32,
     last_voice: Instant,
-    job_slot: Arc<Mutex<Option<(Vec<f32>, f32)>>>,
+    job_slot: WhisperJobSlot,
     job_notify: Sender<()>,
     result_rx: Receiver<SttResult>,
     _worker: JoinHandle<()>,
@@ -56,7 +59,7 @@ impl LocalWhisperSession {
     ) -> Self {
         let (job_notify, job_rx) = bounded::<()>(64);
         let (result_tx, result_rx) = bounded::<SttResult>(RESULT_QUEUE);
-        let job_slot: Arc<Mutex<Option<(Vec<f32>, f32)>>> = Arc::new(Mutex::new(None));
+        let job_slot: WhisperJobSlot = Arc::new(Mutex::new(None));
         let worker_slot = Arc::clone(&job_slot);
 
         let worker = thread::Builder::new()
@@ -217,7 +220,9 @@ pub fn is_whisper_hallucination(text: &str, expected_lang: &str) -> bool {
         return true;
     }
 
-    if t.chars().all(|c| c.is_ascii_punctuation() || c.is_whitespace()) {
+    if t.chars()
+        .all(|c| c.is_ascii_punctuation() || c.is_whitespace())
+    {
         return true;
     }
 
@@ -285,7 +290,9 @@ fn apple_stt_enabled() -> bool {
 }
 
 fn letter_count(text: &str, pred: fn(char) -> bool) -> usize {
-    text.chars().filter(|c| c.is_alphabetic() && pred(*c)).count()
+    text.chars()
+        .filter(|c| c.is_alphabetic() && pred(*c))
+        .count()
 }
 
 fn is_cyrillic(c: char) -> bool {
@@ -494,10 +501,7 @@ pub fn resolve_whisper_pref(base: &Path, pref: &str, device: &str) -> PathBuf {
 }
 
 fn apply_utterance_agc(samples: &mut [f32], peak_hint: f32) -> f32 {
-    let peak = samples
-        .iter()
-        .map(|s| s.abs())
-        .fold(peak_hint, f32::max);
+    let peak = samples.iter().map(|s| s.abs()).fold(peak_hint, f32::max);
     if peak < AGC_MIN_PEAK {
         return peak;
     }
@@ -514,8 +518,5 @@ fn apply_utterance_agc(samples: &mut [f32], peak_hint: f32) -> f32 {
     for s in samples.iter_mut() {
         *s = (*s * gain).clamp(-1.0, 1.0);
     }
-    samples
-        .iter()
-        .map(|s| s.abs())
-        .fold(0.0f32, f32::max)
+    samples.iter().map(|s| s.abs()).fold(0.0f32, f32::max)
 }

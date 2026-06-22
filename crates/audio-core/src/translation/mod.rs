@@ -11,7 +11,9 @@ mod polish_model;
 pub use apple::availability_for_settings as apple_translation_availability;
 
 pub use polish::{is_session_disabled, polish_backend_label, reset_session};
-pub use polish_model::{invalidate_engine_cache as invalidate_polish_cache, model_status as polish_model_status};
+pub use polish_model::{
+    invalidate_engine_cache as invalidate_polish_cache, model_status as polish_model_status,
+};
 
 use anyhow::Result;
 use log::info;

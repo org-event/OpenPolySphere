@@ -21,7 +21,10 @@ struct ModelPair {
 impl LocalEngine {
     pub fn new() -> Result<Self> {
         let base_dir = translate_models_dir();
-        info!("Loading local translation models from {}", base_dir.display());
+        info!(
+            "Loading local translation models from {}",
+            base_dir.display()
+        );
 
         let ru_en_path = base_dir.join("opus-mt-ru-en");
         let en_ru_path = base_dir.join("opus-mt-en-ru");
@@ -37,10 +40,10 @@ impl LocalEngine {
             );
         }
 
-        if let Some(_) = &ru_en {
+        if ru_en.is_some() {
             info!("Loaded opus-mt-ru-en");
         }
-        if let Some(_) = &en_ru {
+        if en_ru.is_some() {
             info!("Loaded opus-mt-en-ru");
         }
 

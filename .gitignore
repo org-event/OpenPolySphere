@@ -1,5 +1,6 @@
 # Rust
 /target/
+/dist/
 
 # Swift helper build
 /tools/apple-translate/.build/
@@ -27,6 +28,7 @@ calls.db-*
 # IDE
 .idea/
 .vscode/
+node_modules/
 *.swp
 *.swo
 

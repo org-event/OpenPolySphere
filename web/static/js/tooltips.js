@@ -476,3 +476,5 @@ function applyTooltips() {
   t('btn-summary', 'summary');
   t('btn-delete', 'delete-call');
 }
+
+window.applyTooltips = applyTooltips;

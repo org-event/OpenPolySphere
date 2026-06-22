@@ -43,6 +43,21 @@ pub struct EngineConfig {
     pub their_language: String,
 }
 
+/// Inputs for [`EngineConfig::from_settings`].
+pub struct EngineSettingsParams<'a> {
+    pub models_base: &'a str,
+    pub deepgram_api_key: &'a str,
+    pub my_language: &'a str,
+    pub their_language: &'a str,
+    pub mic_device: &'a str,
+    pub speaker_device: &'a str,
+    pub meet_input: &'a str,
+    pub meet_out: &'a str,
+    pub endpointing_ms: u32,
+    pub out_voice: &'a str,
+    pub in_voice: &'a str,
+}
+
 impl EngineConfig {
     pub fn from_env() -> Self {
         let base = std::env::var("TRANSLATOR_MODELS_DIR").unwrap_or_else(|_| "./models".into());
@@ -50,35 +65,34 @@ impl EngineConfig {
     }
 
     /// Build config from explicit settings (used by the `translator` binary).
-    pub fn from_settings(
-        models_base: &str,
-        deepgram_api_key: &str,
-        my_language: &str,
-        their_language: &str,
-        mic_device: &str,
-        speaker_device: &str,
-        meet_input: &str,
-        meet_out: &str,
-        endpointing_ms: u32,
-        out_voice: &str,
-        in_voice: &str,
-    ) -> Self {
-        let base = models_base.to_string();
+    pub fn from_settings(p: EngineSettingsParams<'_>) -> Self {
+        let base = p.models_base.to_string();
+        let my_language = p.my_language;
+        let their_language = p.their_language;
         Self {
-            deepgram_api_key: deepgram_api_key.to_string(),
-            tts_en_model: format!("{base}/piper-{their_language}/{out_voice}.onnx"),
-            tts_en_config: format!("{base}/piper-{their_language}/{out_voice}.onnx.json"),
-            tts_ru_model: format!("{base}/piper-{my_language}/{in_voice}.onnx"),
-            tts_ru_config: format!("{base}/piper-{my_language}/{in_voice}.onnx.json"),
-            mic_device: mic_device.to_string(),
-            speaker_device: speaker_device.to_string(),
-            meet_input_device: meet_input.to_string(),
-            meet_output_device: meet_out.to_string(),
+            deepgram_api_key: p.deepgram_api_key.to_string(),
+            tts_en_model: format!(
+                "{base}/piper-{their_language}/{out}.onnx",
+                out = p.out_voice
+            ),
+            tts_en_config: format!(
+                "{base}/piper-{their_language}/{out}.onnx.json",
+                out = p.out_voice
+            ),
+            tts_ru_model: format!("{base}/piper-{my_language}/{inp}.onnx", inp = p.in_voice),
+            tts_ru_config: format!(
+                "{base}/piper-{my_language}/{inp}.onnx.json",
+                inp = p.in_voice
+            ),
+            mic_device: p.mic_device.to_string(),
+            speaker_device: p.speaker_device.to_string(),
+            meet_input_device: p.meet_input.to_string(),
+            meet_output_device: p.meet_out.to_string(),
             sample_rate: std::env::var("TRANSLATOR_SAMPLE_RATE")
                 .ok()
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(48000),
-            endpointing_ms,
+            endpointing_ms: p.endpointing_ms,
             my_language: my_language.to_string(),
             their_language: their_language.to_string(),
         }
@@ -101,12 +115,8 @@ impl EngineConfig {
                 .unwrap_or_else(|| format!("{base}/piper-ru/ru_RU-denis-medium.onnx.json")),
             mic_device: fields.mic_device.unwrap_or_else(|| "default".into()),
             speaker_device: fields.speaker_device.unwrap_or_else(|| "default".into()),
-            meet_input_device: fields
-                .meet_input
-                .unwrap_or_else(|| "BlackHole 16ch".into()),
-            meet_output_device: fields
-                .meet_out
-                .unwrap_or_else(|| "BlackHole 2ch".into()),
+            meet_input_device: fields.meet_input.unwrap_or_else(|| "BlackHole 16ch".into()),
+            meet_output_device: fields.meet_out.unwrap_or_else(|| "BlackHole 2ch".into()),
             sample_rate: fields.sample_rate.unwrap_or(48000),
             endpointing_ms: fields.endpointing_ms.unwrap_or(500),
             my_language: fields.my_language.unwrap_or_else(|| "ru".into()),
@@ -307,8 +317,8 @@ impl Engine {
             }
 
             Command::TtsPreview { lang, voice } => {
-                let models_base = std::env::var("TRANSLATOR_MODELS_DIR")
-                    .unwrap_or_else(|_| "./models".into());
+                let models_base =
+                    std::env::var("TRANSLATOR_MODELS_DIR").unwrap_or_else(|_| "./models".into());
                 let model_path = format!("{}/piper-{}/{}.onnx", models_base, lang, voice);
                 let config_path = format!("{}/piper-{}/{}.onnx.json", models_base, lang, voice);
                 let text = match lang.as_str() {
@@ -416,9 +426,8 @@ impl Engine {
         );
 
         info!("Loading translation engine...");
-        let translator = Arc::new(
-            TranslationEngine::new().context("Failed to initialize translation engine")?,
-        );
+        let translator =
+            Arc::new(TranslationEngine::new().context("Failed to initialize translation engine")?);
 
         info!("Loading TTS models...");
         let mut tts_out = Some(
@@ -451,7 +460,10 @@ impl Engine {
                         self.config.sample_rate,
                         stt_engine.clone(),
                         translator.clone(),
-                        TranslationDirection::new(&self.config.my_language, &self.config.their_language),
+                        TranslationDirection::new(
+                            &self.config.my_language,
+                            &self.config.their_language,
+                        ),
                         &self.config.my_language,
                         tts,
                         self.event_tx.clone(),
@@ -471,7 +483,10 @@ impl Engine {
                         self.config.sample_rate,
                         stt_engine.clone(),
                         translator.clone(),
-                        TranslationDirection::new(&self.config.their_language, &self.config.my_language),
+                        TranslationDirection::new(
+                            &self.config.their_language,
+                            &self.config.my_language,
+                        ),
                         &self.config.their_language,
                         tts,
                         self.event_tx.clone(),
@@ -511,7 +526,8 @@ impl Engine {
             mic: level::read_level(&self.mic_level),
             call_in: level::read_level(&self.call_in_level),
             mic_active: self.level_monitor_mic.is_some() || self.state == EngineState::Running,
-            call_in_active: self.level_monitor_call_in.is_some() || self.state == EngineState::Running,
+            call_in_active: self.level_monitor_call_in.is_some()
+                || self.state == EngineState::Running,
             mic_error: self.mic_monitor_error.clone(),
             call_in_error: self.call_in_monitor_error.clone(),
         }
@@ -558,9 +574,8 @@ impl Engine {
             }
         } else if !call_in.is_empty() && call_in == mic {
             self.level_monitor_call_in = None;
-            self.call_in_monitor_error = Some(
-                "Same device as microphone — use a separate Call Input device".into(),
-            );
+            self.call_in_monitor_error =
+                Some("Same device as microphone — use a separate Call Input device".into());
         }
 
         self.ensure_level_ticker();
@@ -747,7 +762,10 @@ fn run_pipeline(
     let _proc_handle = std::thread::spawn(move || {
         while let Ok((text, stt_ms)) = proc_rx.recv() {
             if local::is_whisper_hallucination(&text, &proc_source_lang) {
-                info!("[{}] Hallucination dropped before translate: '{}'", proc_direction, text);
+                info!(
+                    "[{}] Hallucination dropped before translate: '{}'",
+                    proc_direction, text
+                );
                 continue;
             }
             let _audio_len = process_utterance(
@@ -766,7 +784,10 @@ fn run_pipeline(
         }
     });
 
-    info!("[{}] Capture rate: {}Hz, STT rate: {}Hz", direction, capture_rate, stt_sample_rate);
+    info!(
+        "[{}] Capture rate: {}Hz, STT rate: {}Hz",
+        direction, capture_rate, stt_sample_rate
+    );
 
     let mut pending_mic = PendingMicAudio::new();
 
@@ -806,7 +827,10 @@ fn run_pipeline(
         match session.poll_transcript() {
             Ok(Some(result)) => {
                 if let Err(e) = proc_tx.try_send((result.text, result.stt_latency_ms)) {
-                    warn!("[{}] Processor channel full, dropping transcript: {}", direction, e);
+                    warn!(
+                        "[{}] Processor channel full, dropping transcript: {}",
+                        direction, e
+                    );
                 }
             }
             Ok(None) => {}
@@ -913,7 +937,10 @@ fn process_utterance(
         });
 
         if let Err(e) = playback_tx.try_send(audio) {
-            warn!("[{}] Playback channel full or disconnected: {}", direction, e);
+            warn!(
+                "[{}] Playback channel full or disconnected: {}",
+                direction, e
+            );
         }
 
         let playback_ms = (audio_len as u64 * 1000) / sample_rate.max(1) as u64;
