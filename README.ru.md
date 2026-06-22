@@ -20,8 +20,8 @@
 ## Быстрый старт
 
 ```bash
-git clone https://github.com/org-event/call-translator.git
-cd call-translator
+git clone https://github.com/org-event/Banyan.git
+cd Banyan
 ./scripts/bootstrap                          # dev-зависимости + git hooks (как npm install)
 cargo run --release -p translator -- setup   # первый раз: скачать модели
 cargo run --release -p translator            # запуск сервера

@@ -26,8 +26,8 @@ Open an [issue](../../issues/new?template=feature_request.md) describing the use
 ### Development setup
 
 ```bash
-git clone https://github.com/org-event/call-translator.git
-cd call-translator
+git clone https://github.com/org-event/Banyan.git
+cd Banyan
 ./scripts/bootstrap    # installs `just` if needed, then `just install`
 just check             # same checks that run before each commit
 cp .env.example .env   # optional: cloud API keys

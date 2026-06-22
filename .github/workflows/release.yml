@@ -42,7 +42,7 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           ARCH="$(uname -m)"
-          NAME="call-translator-${VERSION}-macos-${ARCH}"
+          NAME="banyan-${VERSION}-macos-${ARCH}"
           STAGING="dist/${NAME}"
           mkdir -p dist
           rm -rf "$STAGING"

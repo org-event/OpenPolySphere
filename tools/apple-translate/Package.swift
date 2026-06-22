@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "apple-translate",
-    platforms: [.macOS(.v15)],
+    platforms: [.macOS(.v14)],
     products: [
         .executable(name: "apple-translate", targets: ["AppleTranslate"]),
     ],

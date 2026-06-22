@@ -10,7 +10,7 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 
 ![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![GitHub stars](https://img.shields.io/github/stars/org-event/call-translator)
+![GitHub stars](https://img.shields.io/github/stars/org-event/Banyan)
 
 > Fork of [LetovKai/call-translator](https://github.com/LetovKai/call-translator) by Kai Letov.
 
@@ -21,8 +21,8 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 ## Quick Start
 
 ```bash
-git clone https://github.com/org-event/call-translator.git
-cd call-translator
+git clone https://github.com/org-event/Banyan.git
+cd Banyan
 ./scripts/bootstrap                          # dev deps + git hooks (like npm install)
 cargo run --release -p translator -- setup   # download models (first time)
 cargo run --release -p translator            # start server
