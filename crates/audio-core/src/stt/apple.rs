@@ -10,9 +10,8 @@ mod imp {
     use std::sync::OnceLock;
 
     use crate::platform::{
-        env_var, ENV_SPEECH_AUTH_APP, ENV_SPEECH_CONTEXT, ENV_SPEECH_HELPER,
-        LEGACY_ENV_SPEECH_AUTH_APP, LEGACY_ENV_SPEECH_CONTEXT, LEGACY_ENV_SPEECH_HELPER,
-        SPEECH_AUTH_APP, SPEECH_EXECUTABLE,
+        optional_env, ENV_SPEECH_AUTH_APP, ENV_SPEECH_CONTEXT, ENV_SPEECH_HELPER, SPEECH_AUTH_APP,
+        SPEECH_EXECUTABLE,
     };
     use crate::stt::local::{TranscribeOutcome, WhisperBackend, WHISPER_SAMPLE_RATE};
 
@@ -43,7 +42,7 @@ mod imp {
     }
 
     fn helper_path() -> Option<PathBuf> {
-        if let Some(path) = env_var(ENV_SPEECH_HELPER, LEGACY_ENV_SPEECH_HELPER) {
+        if let Some(path) = optional_env(ENV_SPEECH_HELPER) {
             let p = PathBuf::from(path);
             if p.is_file() {
                 return Some(p);
@@ -65,7 +64,7 @@ mod imp {
     }
 
     fn auth_app_path() -> Option<PathBuf> {
-        if let Some(path) = env_var(ENV_SPEECH_AUTH_APP, LEGACY_ENV_SPEECH_AUTH_APP) {
+        if let Some(path) = optional_env(ENV_SPEECH_AUTH_APP) {
             let p = PathBuf::from(path);
             if p.is_dir() {
                 return Some(p);
@@ -276,7 +275,7 @@ mod imp {
     }
 
     fn context_words(source_lang: &str) -> Option<String> {
-        if let Some(extra) = env_var(ENV_SPEECH_CONTEXT, LEGACY_ENV_SPEECH_CONTEXT) {
+        if let Some(extra) = optional_env(ENV_SPEECH_CONTEXT) {
             let extra = extra.trim();
             if !extra.is_empty() {
                 return Some(extra.to_string());

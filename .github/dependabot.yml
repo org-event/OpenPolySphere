@@ -3,7 +3,7 @@
 #
 # Ecosystems in this repo:
 #   cargo           — workspace (root + crates/*)
-#   npm             — eslint toolchain (package.json / package-lock.json)
+#   bun             — eslint toolchain (package.json / bun.lock)
 #   github-actions  — .github/workflows/*.yml
 
 version: 2
@@ -40,7 +40,7 @@ updates:
     rebase-strategy: auto
 
   # --- JavaScript (dev tooling) ---
-  - package-ecosystem: npm
+  - package-ecosystem: bun
     directory: /
     schedule:
       interval: daily
@@ -49,11 +49,11 @@ updates:
     allow:
       - dependency-type: all
     groups:
-      npm-dev:
+      bun-dev:
         dependency-type: development
         patterns:
           - "*"
-      npm-security:
+      bun-security:
         applies-to: security-updates
         patterns:
           - "*"
@@ -67,7 +67,7 @@ updates:
       include: scope
     rebase-strategy: auto
 
-  # --- GitHub Actions (checkout, setup-node, rust-toolchain, etc.) ---
+  # --- GitHub Actions (checkout, setup-bun, rust-toolchain, etc.) ---
   - package-ecosystem: github-actions
     directory: /
     schedule:

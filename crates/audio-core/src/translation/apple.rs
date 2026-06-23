@@ -8,9 +8,7 @@ mod imp {
     use std::path::PathBuf;
     use std::process::{Command, Stdio};
 
-    use crate::platform::{
-        env_var, ENV_TRANSLATE_HELPER, LEGACY_ENV_TRANSLATE_HELPER, TRANSLATE_BINARY,
-    };
+    use crate::platform::{optional_env, ENV_TRANSLATE_HELPER, TRANSLATE_BINARY};
     use crate::translation::TranslationDirection;
 
     #[derive(Debug, Clone, Deserialize)]
@@ -28,7 +26,7 @@ mod imp {
     }
 
     fn helper_path() -> Option<PathBuf> {
-        if let Some(path) = env_var(ENV_TRANSLATE_HELPER, LEGACY_ENV_TRANSLATE_HELPER) {
+        if let Some(path) = optional_env(ENV_TRANSLATE_HELPER) {
             let p = PathBuf::from(path);
             if p.is_file() {
                 return Some(p);

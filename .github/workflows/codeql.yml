@@ -1,7 +1,7 @@
 name: CodeQL
 
 # Static analysis (SAST): injection, crypto misuse, unsafe data flow, workflow issues.
-# Complements Dependabot (CVE in dependencies) and cargo/npm audit in security-audit.yml.
+# Complements Dependabot (CVE in dependencies) and cargo/bun audit in security-audit.yml.
 
 on:
   push:

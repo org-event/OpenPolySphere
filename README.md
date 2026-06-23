@@ -23,7 +23,7 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 ```bash
 git clone https://github.com/org-event/Banyan.git
 cd Banyan
-./scripts/bootstrap                          # dev deps + git hooks (like npm install)
+./scripts/bootstrap                          # dev deps + git hooks (like bun install)
 cargo run --release -p translator -- setup   # download models (first time)
 cargo run --release -p translator            # start server
 ```
@@ -34,15 +34,15 @@ Local mode (default): Whisper STT + Opus-MT translation — no API keys required
 
 ### After clone (developers)
 
-`./scripts/bootstrap` is the first command after `git clone` — like `npm install` in a Node project. It installs the `just` task runner if needed, then runs `just install`.
+`./scripts/bootstrap` is the first command after `git clone` — like `bun install` in a JS project. It installs the `just` task runner if needed, then runs `just install`.
 
 **What `just install` does:**
 
 | Step | macOS | Linux / Windows |
 |------|-------|-----------------|
 | Rust toolchain + rustfmt/clippy | yes | yes |
-| Homebrew: espeak-ng, onnxruntime, node, pre-commit | yes | skipped (see manual install) |
-| `npm ci` (ESLint for `web/static/js`) | yes | yes |
+| Homebrew: espeak-ng, onnxruntime, bun, pre-commit | yes | skipped (see manual install) |
+| `bun install --frozen-lockfile` (ESLint for `web/static/js`) | yes | yes |
 | `pre-commit install` → runs `just check` on commit | yes | yes |
 
 If `just` is already installed, you can run `just install` directly instead of `./scripts/bootstrap`.

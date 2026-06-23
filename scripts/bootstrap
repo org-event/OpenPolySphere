@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# First command after git clone (like npm install).
+# First command after git clone (like bun install).
 # Installs `just` if missing, then runs `just install`.
 set -euo pipefail
 cd "$(dirname "$0")/.."

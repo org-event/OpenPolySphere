@@ -1,6 +1,6 @@
 name: Security Audit
 
-# CVE scanning in lockfiles — RustSec (cargo) + npm advisory DB.
+# CVE scanning in lockfiles — RustSec (cargo) + bun advisory DB.
 # Dependabot alerts cover the same sources over time; this fails CI on known issues.
 
 on:
@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
@@ -27,15 +28,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  npm-audit:
-    name: npm audit
+  bun-audit:
+    name: bun audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "26"
-          cache: npm
-      - run: npm ci
-      - name: Audit package-lock.json
-        run: npm audit --audit-level=moderate
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - name: Audit bun.lock
+        run: bun audit

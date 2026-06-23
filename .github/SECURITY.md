@@ -26,6 +26,6 @@ This repository is monitored with:
 
 - Dependabot (dependency CVE alerts and update PRs)
 - CodeQL static analysis (Rust, JavaScript, GitHub Actions workflows)
-- `cargo audit` / `npm audit` in CI
+- `cargo audit` / `bun audit` in CI
 - Dependency review on pull requests
 - Secret scanning and push protection (GitHub)

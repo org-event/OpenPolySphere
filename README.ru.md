@@ -22,7 +22,7 @@
 ```bash
 git clone https://github.com/org-event/Banyan.git
 cd Banyan
-./scripts/bootstrap                          # dev-зависимости + git hooks (как npm install)
+./scripts/bootstrap                          # dev-зависимости + git hooks (как bun install)
 cargo run --release -p translator -- setup   # первый раз: скачать модели
 cargo run --release -p translator            # запуск сервера
 ```
@@ -33,15 +33,15 @@ cargo run --release -p translator            # запуск сервера
 
 ### После клонирования (для разработчиков)
 
-`./scripts/bootstrap` — первая команда после `git clone`, аналог `npm install` в Node-проектах. Ставит `just`, если его нет, затем вызывает `just install`.
+`./scripts/bootstrap` — первая команда после `git clone`, аналог `bun install` в JS-проектах. Ставит `just`, если его нет, затем вызывает `just install`.
 
 **Что делает `just install`:**
 
 | Шаг | macOS | Linux / Windows |
 |-----|-------|-----------------|
 | Rust + rustfmt/clippy | да | да |
-| Homebrew: espeak-ng, onnxruntime, node, pre-commit | да | пропуск (см. ручную установку) |
-| `npm ci` (ESLint для `web/static/js`) | да | да |
+| Homebrew: espeak-ng, onnxruntime, bun, pre-commit | да | пропуск (см. ручную установку) |
+| `bun install --frozen-lockfile` (ESLint для `web/static/js`) | да | да |
 | `pre-commit install` → `just check` при коммите | да | да |
 
 Если `just` уже установлен, можно сразу `just install` вместо `./scripts/bootstrap`.

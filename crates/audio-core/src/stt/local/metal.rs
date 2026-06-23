@@ -10,9 +10,17 @@ use whisper_rs::{
 };
 
 use super::common::{
-    is_ggml_ready, models_base_dir, resolve_whisper_pref, whisper_initial_prompt,
-    TranscribeOutcome, WhisperBackend, MIN_UTTERANCE_RMS,
+    is_ggml_ready, models_base_dir, resolve_whisper_pref, TranscribeOutcome, WhisperBackend,
+    MIN_UTTERANCE_RMS,
 };
+
+fn whisper_initial_prompt(language: &str) -> Option<&'static str> {
+    match language {
+        "ru" => Some("Разговор на русском языке. Привет, здравствуйте, как дела."),
+        "en" => Some("English conversation. Hello, how are you."),
+        _ => None,
+    }
+}
 
 pub struct MetalWhisperEngine {
     state: Mutex<WhisperState>,

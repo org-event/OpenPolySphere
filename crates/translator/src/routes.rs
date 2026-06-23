@@ -109,7 +109,6 @@ pub fn api_routes() -> Router<Arc<AppState>> {
         .route("/api/translation-status", get(translation_status))
         .route("/api/stt-status", get(stt_status_route))
         .route("/api/banyan-speech-authorize", post(apple_speech_authorize))
-        .route("/api/apple-speech-authorize", post(apple_speech_authorize))
         .route("/api/download-whisper-model", post(download_whisper))
         .route("/api/download-translation-models", post(download_translate))
         .route("/api/download-polish-model", post(download_polish))

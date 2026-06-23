@@ -4,8 +4,8 @@
 default:
     @just --list
 
-# Bootstrap dev environment for this machine (like npm install).
-install: install-rust install-system install-js install-hooks
+# Bootstrap dev environment for this machine (like bun install).
+install: install-rust install-system install-js install-git install-hooks
     @echo ""
     @echo "Dev environment ready."
     @echo "  just check                              # lint before commit"
@@ -60,7 +60,7 @@ install-system:
         brew list onnxruntime &>/dev/null || brew install onnxruntime
         command -v just >/dev/null || brew install just
         command -v pre-commit >/dev/null || brew install pre-commit
-        command -v node >/dev/null || brew install node
+        command -v bun >/dev/null || brew install oven-sh/bun/bun
         xcode-select -p &>/dev/null || echo "[!] Run: xcode-select --install (for Swift)"
         echo "[ok] macOS system deps"
         ;;
@@ -80,13 +80,23 @@ install-system:
 install-js:
     #!/usr/bin/env bash
     set -euo pipefail
-    if ! command -v npm >/dev/null; then
-      echo "[!] npm not found. Install Node.js 20+ then re-run: just install"
+    if ! command -v bun >/dev/null; then
+      echo "[!] bun not found. Install from https://bun.sh then re-run: just install"
       exit 1
     fi
-    echo "[..] npm ci..."
-    npm ci
+    echo "[..] bun install --frozen-lockfile..."
+    bun install --frozen-lockfile
     echo "[ok] JS dev dependencies"
+
+install-git:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo "[..] git rebase workflow (local config for this repo)..."
+    git config pull.rebase true
+    git config rebase.autoStash true
+    git config branch.autoSetupRebase always
+    git config fetch.prune true
+    echo "[ok] pull.rebase, rebase.autoStash, branch.autoSetupRebase, fetch.prune"
 
 install-hooks:
     #!/usr/bin/env bash
@@ -115,7 +125,7 @@ check-rust:
     @just prepush-rust
 
 check-js:
-    npm run lint:js
+    bun run lint:js
 
 check-windows-static:
     #!/usr/bin/env bash

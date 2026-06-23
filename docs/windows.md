@@ -41,6 +41,6 @@ Target: **Windows 10/11 x64**. Goal for now: **CI builds on `windows-latest`**, 
 
 ## Local dev (optional)
 
-Native build needs: Rust, CMake, vcpkg OpenBLAS, ONNX Runtime, espeak-ng, Node (for ESLint). Prefer CI artifact until Phase 2 is done.
+Native build needs: Rust, CMake, vcpkg OpenBLAS, ONNX Runtime, espeak-ng, Bun (for ESLint). Prefer CI artifact until Phase 2 is done.
 
 See [issue #3](https://github.com/org-event/Banyan/issues/3).

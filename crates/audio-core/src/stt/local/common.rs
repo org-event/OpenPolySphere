@@ -347,15 +347,6 @@ pub fn whisper_language(code: &str) -> &str {
     }
 }
 
-#[cfg(target_os = "macos")]
-pub fn whisper_initial_prompt(language: &str) -> Option<&'static str> {
-    match language {
-        "ru" => Some("Разговор на русском языке. Привет, здравствуйте, как дела."),
-        "en" => Some("English conversation. Hello, how are you."),
-        _ => None,
-    }
-}
-
 pub fn models_base_dir() -> PathBuf {
     PathBuf::from(std::env::var("TRANSLATOR_MODELS_DIR").unwrap_or_else(|_| "./models".into()))
 }
