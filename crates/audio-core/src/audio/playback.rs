@@ -8,6 +8,8 @@ use ringbuf::{
     HeapRb,
 };
 
+use super::device_label;
+
 /// Plays audio received from a channel to a named output device.
 pub struct AudioPlayback {
     stream: Stream,
@@ -24,11 +26,11 @@ impl AudioPlayback {
     /// `receiver`: channel providing audio sample buffers to play.
     pub fn new(device_name: &str, sample_rate: u32, receiver: Receiver<Vec<f32>>) -> Result<Self> {
         let device = find_output_device(device_name)?;
-        let actual_name = device.name().unwrap_or_else(|_| "unknown".into());
+        let actual_name = device_label(&device);
 
         let config = StreamConfig {
             channels: 1,
-            sample_rate: cpal::SampleRate(sample_rate),
+            sample_rate,
             buffer_size: cpal::BufferSize::Fixed(960), // 20ms at 48kHz
         };
 
@@ -76,7 +78,7 @@ impl AudioPlayback {
 
         let stream = device
             .build_output_stream(
-                &config,
+                config,
                 move |data: &mut [f32], _info: &cpal::OutputCallbackInfo| {
                     let filled = consumer.pop_slice(data);
                     // Fill remaining with silence if underrun
@@ -137,7 +139,7 @@ fn find_output_device(name: &str) -> Result<Device> {
 
     let mut available = Vec::new();
     for device in devices {
-        let dev_name = device.name().unwrap_or_else(|_| "unknown".into());
+        let dev_name = device_label(&device);
         if dev_name == name {
             return Ok(device);
         }

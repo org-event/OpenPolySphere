@@ -4,6 +4,7 @@ use cpal::{Device, Stream, StreamConfig};
 use crossbeam_channel::Sender;
 use log::{debug, error, info};
 
+use super::device_label;
 use super::level::update_level;
 
 pub struct AudioChunk {
@@ -29,18 +30,18 @@ impl AudioCapture {
         level: std::sync::Arc<std::sync::atomic::AtomicU32>,
     ) -> Result<Self> {
         let device = find_input_device(device_name)?;
-        let actual_name = device.name().unwrap_or_else(|_| "unknown".into());
+        let actual_name = device_label(&device);
 
         let default_cfg = device
             .default_input_config()
             .context("Failed to get default input config")?;
 
         let channels = default_cfg.channels();
-        let sample_rate = default_cfg.sample_rate().0;
+        let sample_rate = default_cfg.sample_rate();
 
         let config = StreamConfig {
             channels,
-            sample_rate: default_cfg.sample_rate(),
+            sample_rate,
             buffer_size: cpal::BufferSize::Default,
         };
 
@@ -51,7 +52,7 @@ impl AudioCapture {
 
         let stream = device
             .build_input_stream(
-                &config,
+                config,
                 move |data: &[f32], _info: &cpal::InputCallbackInfo| {
                     // Downmix to mono by averaging channels if needed.
                     let mono: Vec<f32> = if channels == 1 {
@@ -121,7 +122,7 @@ fn find_input_device(name: &str) -> Result<Device> {
 
     let mut available = Vec::new();
     for device in devices {
-        let dev_name = device.name().unwrap_or_else(|_| "unknown".into());
+        let dev_name = device_label(&device);
         if dev_name == name {
             return Ok(device);
         }

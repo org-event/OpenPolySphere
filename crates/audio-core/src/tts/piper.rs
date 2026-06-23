@@ -15,7 +15,8 @@ use ndarray::{Array1, Array2};
 use ort::session::Session;
 use ort::value::Value;
 use rubato::{
-    Resampler, SincFixedIn, SincInterpolationParameters, SincInterpolationType, WindowFunction,
+    audioadapter_buffers::direct::SequentialSliceOfVecs, Async, FixedAsync, Resampler,
+    SincInterpolationParameters, SincInterpolationType, WindowFunction,
 };
 use serde::Deserialize;
 
@@ -289,20 +290,22 @@ fn resample(input: &[f32], from_rate: u32, to_rate: u32) -> Result<Vec<f32>> {
     };
 
     let ratio = to_rate as f64 / from_rate as f64;
+    let chunk_size = input.len().max(1);
 
-    let mut resampler = SincFixedIn::<f32>::new(
-        ratio,
-        2.0, // max_resample_ratio_relative (not used for fixed ratio)
-        params,
-        input.len(),
-        1, // mono channel
-    )
-    .context("Failed to create resampler")?;
+    let mut resampler =
+        Async::<f32>::new_sinc(ratio, 2.0, &params, chunk_size, 1, FixedAsync::Input)
+            .context("Failed to create resampler")?;
 
-    let waves_in = vec![input.to_vec()];
-    let waves_out = resampler
-        .process(&waves_in, None)
+    let input_data = vec![input.to_vec()];
+    let input_adapter = SequentialSliceOfVecs::new(&input_data, 1, input.len())
+        .context("Resample input adapter")?;
+    let output_len = resampler.process_all_needed_output_len(input.len());
+    let mut output_data = vec![vec![0.0f32; output_len]];
+    let mut output_adapter = SequentialSliceOfVecs::new_mut(&mut output_data, 1, output_len)
+        .context("Resample output adapter")?;
+    resampler
+        .process_all_into_buffer(&input_adapter, &mut output_adapter, input.len(), None)
         .context("Resampling failed")?;
 
-    Ok(waves_out.into_iter().next().unwrap_or_default())
+    Ok(output_data.into_iter().next().unwrap_or_default())
 }
