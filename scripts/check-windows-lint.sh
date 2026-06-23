@@ -5,9 +5,29 @@ cd "$(dirname "$0")/.."
 
 errors=0
 
-for f in crates/audio-core/src/stt/mod.rs crates/audio-core/src/translation/mod.rs; do
+# Orchestrators must not branch on target_os — use platform/ + imp/stub facades.
+for f in \
+  crates/audio-core/src/stt/mod.rs \
+  crates/audio-core/src/translation/mod.rs \
+  crates/audio-core/src/stt/local/mod.rs \
+  crates/translator/src/main.rs; do
   if rg -q '#\[cfg\(target_os' "$f"; then
-    echo "[fail] $f: platform cfg must not appear in orchestrators (use platform/ + apple imp)"
+    echo "[fail] $f: platform cfg must not appear in orchestrators (use platform/ + imp)"
+    errors=$((errors + 1))
+  fi
+done
+
+# Platform-specific backends must expose macOS imp + non-macOS stub.
+for f in \
+  crates/audio-core/src/stt/apple.rs \
+  crates/audio-core/src/translation/apple.rs \
+  crates/audio-core/src/stt/local/metal.rs; do
+  if ! rg -q '#\[cfg\(target_os = "macos"\)\]' "$f"; then
+    echo "[fail] $f: missing macOS imp module"
+    errors=$((errors + 1))
+  fi
+  if ! rg -q '#\[cfg\(not\(target_os = "macos"\)\)\]' "$f"; then
+    echo "[fail] $f: missing non-macOS stub imp module"
     errors=$((errors + 1))
   fi
 done

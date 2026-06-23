@@ -2,8 +2,6 @@
 
 mod common;
 mod ct2;
-
-#[cfg(target_os = "macos")]
 mod metal;
 
 use std::path::{Path, PathBuf};
@@ -11,8 +9,6 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 use log::info;
-
-use crate::platform::Capabilities;
 
 pub use common::is_whisper_hallucination;
 pub use common::TranscribeOutcome;
@@ -32,15 +28,18 @@ pub struct LocalWhisperEngine {
 impl LocalWhisperEngine {
     fn new() -> Result<Self> {
         let device = stt_device();
-        let caps = Capabilities::current();
         let backend: Arc<dyn WhisperBackend> = match device.as_str() {
-            "metal" | "gpu" if caps.whisper_metal => match metal::MetalWhisperEngine::new() {
-                Ok(engine) => {
+            "metal" | "gpu" => match metal::open_whisper_backend() {
+                Some(Ok(engine)) => {
                     info!("STT compute: Metal GPU (whisper.cpp)");
-                    Arc::new(engine)
+                    engine
                 }
-                Err(e) => {
+                Some(Err(e)) => {
                     info!("Metal Whisper unavailable ({e:#}), falling back to CPU CT2");
+                    Arc::new(ct2::Ct2WhisperEngine::new()?)
+                }
+                None => {
+                    info!("Metal GPU not available on this platform, using CPU (CTranslate2)");
                     Arc::new(ct2::Ct2WhisperEngine::new()?)
                 }
             },
@@ -48,17 +47,16 @@ impl LocalWhisperEngine {
                 info!("STT compute: CPU (CTranslate2)");
                 Arc::new(ct2::Ct2WhisperEngine::new()?)
             }
-            other if caps.whisper_metal => {
-                info!("Unknown STT device '{other}', trying Metal");
-                match metal::MetalWhisperEngine::new() {
-                    Ok(engine) => Arc::new(engine),
-                    Err(_) => Arc::new(ct2::Ct2WhisperEngine::new()?),
+            other => match metal::open_whisper_backend() {
+                Some(Ok(engine)) => {
+                    info!("Unknown STT device '{other}', using Metal GPU");
+                    engine
                 }
-            }
-            other => {
-                info!("Unknown STT device '{other}', using CPU");
-                Arc::new(ct2::Ct2WhisperEngine::new()?)
-            }
+                _ => {
+                    info!("Unknown STT device '{other}', using CPU");
+                    Arc::new(ct2::Ct2WhisperEngine::new()?)
+                }
+            },
         };
 
         Ok(Self { backend })
