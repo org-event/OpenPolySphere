@@ -1,4 +1,5 @@
 import { sendCmd } from '../core/api.js';
+import { t } from '../core/i18n.js';
 import { state } from '../core/state.js';
 import { showToast } from '../core/toast.js';
 import { sleep } from '../core/utils.js';
@@ -17,13 +18,13 @@ export function applyEngineButton(running) {
   if (running) {
     btn.className = 'btn btn-engine running';
     icon.innerHTML = '&#9724;';
-    text.textContent = 'Stop';
-    setEnginePill('running', 'Translating');
+    text.textContent = t('header.stop');
+    setEnginePill('running', t('header.translating'));
   } else {
     btn.className = 'btn btn-engine stopped';
     icon.innerHTML = '&#9654;';
-    text.textContent = 'Start';
-    setEnginePill('stopped', 'Stopped');
+    text.textContent = t('header.start');
+    setEnginePill('stopped', t('header.stopped'));
   }
 }
 
@@ -51,12 +52,12 @@ export async function toggleEngine() {
 
   try {
     if (state.engineRunning) {
-      text.textContent = 'Stopping...';
+      text.textContent = t('header.stopping');
       icon.innerHTML = '&#8987;';
-      setEnginePill('restarting', 'Stopping...');
+      setEnginePill('restarting', t('header.stopping'));
       const resp = await sendCmd('stop');
       if (!(resp.status || '').startsWith('ok')) {
-        showToast('Stop failed: ' + (resp.status || 'unknown'));
+        showToast(t('toast.stopFailed', { error: resp.status || 'unknown' }));
         await syncEngineStatus();
         return;
       }
@@ -65,7 +66,7 @@ export async function toggleEngine() {
       applyEngineButton(false);
       hideTyping();
       state.pending = { direction: null, transcript: null, translation: null };
-      showToast('Engine stopped');
+      showToast(t('toast.engineStopped'));
       fetch('/api/calls/end', { method: 'POST' }).catch(() => {});
       if (document.getElementById('sp')?.classList.contains('open')) {
         startLevelMonitoring();
@@ -74,9 +75,9 @@ export async function toggleEngine() {
     }
 
     btn.className = 'btn btn-engine stopped';
-    text.textContent = 'Starting...';
+    text.textContent = t('header.starting');
     icon.innerHTML = '&#8987;';
-    setEnginePill('restarting', 'Starting...');
+    setEnginePill('restarting', t('header.starting'));
 
     await fetch('/api/calls/new-session', { method: 'POST' });
     clearAll();
@@ -85,7 +86,7 @@ export async function toggleEngine() {
 
     const resp = await sendCmd(state.muteState.incoming ? 'start outgoing' : 'start');
     if (!(resp.status || '').startsWith('ok')) {
-      showToast('Start failed: ' + (resp.status || 'unknown'));
+      showToast(t('toast.startFailed', { error: resp.status || 'unknown' }));
       applyEngineButton(false);
       return;
     }
@@ -98,7 +99,7 @@ export async function toggleEngine() {
     }
 
     if (!running) {
-      showToast('Engine did not start — check API keys and model');
+      showToast(t('toast.didNotStart'));
       applyEngineButton(false);
       return;
     }
@@ -106,12 +107,12 @@ export async function toggleEngine() {
     state.sessionStart = Date.now();
     state.timerOffset = 0;
     state.timerPaused = false;
-    showToast('Engine started');
+    showToast(t('toast.engineStarted'));
     if (document.getElementById('sp')?.classList.contains('open')) {
       startLevelMonitoring();
     }
   } catch (e) {
-    showToast('Error: ' + (e.message || 'command failed'));
+    showToast(t('toast.authFailed', { error: e.message || 'command failed' }));
     await syncEngineStatus();
   } finally {
     state.engineBusy = false;

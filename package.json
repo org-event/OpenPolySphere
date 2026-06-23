@@ -2,7 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint:js": "eslint web/static/js"
+    "lint:js": "eslint web/static/js scripts/**/*.mjs",
+    "i18n:merge-settings": "bun scripts/merge-settings-locales.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

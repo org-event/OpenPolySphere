@@ -135,27 +135,17 @@ export function processLine(line) {
     if (state.lastMsgEl) {
       const meta = document.createElement('div');
       meta.className = 'meta';
-      meta.innerHTML =
-        '<span class="' +
-        latencyClass(stt) +
-        '">stt ' +
-        stt +
-        'ms</span>' +
-        '<span class="' +
-        latencyClass(trl) +
-        '">trl ' +
-        trl +
-        'ms</span>' +
-        '<span class="' +
-        latencyClass(tts) +
-        '">tts ' +
-        tts +
-        'ms</span>' +
-        '<span class="' +
-        latencyClass(total) +
-        '">= ' +
-        total +
-        'ms</span>';
+      for (const [ms, label] of [
+        [stt, 'stt'],
+        [trl, 'trl'],
+        [tts, 'tts'],
+        [total, '='],
+      ]) {
+        const span = document.createElement('span');
+        span.className = latencyClass(ms);
+        span.textContent = label === '=' ? `= ${ms}ms` : `${label} ${ms}ms`;
+        meta.appendChild(span);
+      }
       state.lastMsgEl.appendChild(meta);
       scrollBottom();
     }

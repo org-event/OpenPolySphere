@@ -1,4 +1,5 @@
 import { sendCmd } from '../core/api.js';
+import { t } from '../core/i18n.js';
 import { showToast } from '../core/toast.js';
 import { sleep } from '../core/utils.js';
 import { applyEngineButton, syncEngineStatus } from './control.js';
@@ -56,11 +57,11 @@ export async function saveAndRestart() {
     btn.classList.remove('restarting');
     btn.classList.add('success');
     txt.innerHTML = '&#10003; Ready!';
-    showToast('Settings saved — press Start to translate');
+    showToast(t('toast.savedPressStart'));
 
     await sleep(2500);
     btn.classList.remove('success');
-    txt.textContent = 'Save & Restart Engine';
+    txt.textContent = t('settings.saveRestart');
     bar.style.width = '0%';
   } catch (e) {
     btn.classList.remove('restarting');

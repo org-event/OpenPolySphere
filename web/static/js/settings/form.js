@@ -1,7 +1,13 @@
 import { state } from '../core/state.js';
 import { initI18n, switchLocale, t } from '../core/i18n.js';
 import { UI_LOCALES } from '../core/ui-locales.js';
-import { sttBackendValue, updateSttEngineUI, refreshSttStatus, whisperModelValue, deepgramModelValue } from './stt.js';
+import {
+  sttBackendValue,
+  updateSttEngineUI,
+  refreshSttStatus,
+  whisperModelValue,
+  deepgramModelValue,
+} from './stt.js';
 import { loadVoices } from './voices.js';
 import {
   translationBackendValue,
@@ -10,6 +16,31 @@ import {
   loadTranslationModels,
   updateTranslationModelMeta,
 } from './translation.js';
+import { loadDevices } from './devices.js';
+import { populateCallLangSelect } from '../core/call-languages.js';
+import { applyEngineButton } from '../engine/control.js';
+
+function refreshSettingsButtonLabels() {
+  for (const id of ['test-deepgram', 'test-openrouter', 'btn-test-translate', 'btn-test-translate-apple']) {
+    const btn = document.getElementById(id);
+    if (
+      btn &&
+      !btn.classList.contains('testing') &&
+      !btn.classList.contains('ok') &&
+      !btn.classList.contains('fail')
+    ) {
+      btn.textContent = t('settings.test');
+    }
+  }
+  const dlTr = document.getElementById('btn-download-translate');
+  if (dlTr && !dlTr.classList.contains('loading')) {
+    dlTr.textContent = t('settings.downloadOpusMt');
+  }
+  const dlPl = document.getElementById('btn-download-polish');
+  if (dlPl && !dlPl.classList.contains('loading')) {
+    dlPl.textContent = t('settings.downloadPolish');
+  }
+}
 
 export function populateForm(s) {
   const dg = document.getElementById('cfg-deepgram');
@@ -69,8 +100,8 @@ export function populateForm(s) {
   }
   updateTranslationModelMeta();
 
-  document.getElementById('cfg-my-lang').value = s.my_language || 'ru';
-  document.getElementById('cfg-their-lang').value = s.their_language || 'en';
+  populateCallLangSelect('cfg-my-lang', s.my_language || 'ru');
+  populateCallLangSelect('cfg-their-lang', s.their_language || 'en');
   document.getElementById('cfg-endpointing').value = s.endpointing_ms || 500;
   document.getElementById('endpointing-val').textContent = (s.endpointing_ms || 500) + 'ms';
   populateUiLocaleSelect(s.ui_locale || '', s._system_locale);
@@ -170,8 +201,13 @@ export function initUiLocaleListener() {
     const code = e.target.value;
     await switchLocale(code, state.currentSettings._system_locale);
     updateUiLocaleLabels(state.currentSettings._system_locale);
+    refreshSettingsButtonLabels();
+    applyEngineButton(state.engineRunning);
+    await loadDevices();
     await refreshSttStatus();
     await refreshTranslationStatus();
     await loadVoices();
+    updateSttEngineUI();
+    updateTranslationEngineUI();
   });
 }

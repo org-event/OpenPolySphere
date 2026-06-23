@@ -1,36 +1,11 @@
 {
-  "app": {
-    "title": "Banyan",
-    "connecting": "Ansluter till server…",
-    "connected": "Ansluten — tryck Starta för att översätta",
-    "connectedHeader": "Ansluten"
-  },
   "header": {
-    "stopped": "Stoppad",
-    "start": "Starta",
     "stop": "Stop",
     "translating": "Translating",
     "starting": "Starting...",
     "stopping": "Stopping..."
   },
-  "controls": {
-    "logs": "Loggar",
-    "micOut": "Mic ut",
-    "micIn": "Mic in",
-    "tabAudio": "Flik-ljud",
-    "monitor": "Monitor",
-    "compact": "Kompakt",
-    "saved": "Sparade",
-    "history": "Historik",
-    "export": "Exportera",
-    "clear": "Rensa",
-    "settings": "Inställningar"
-  },
   "settings": {
-    "title": "Inställningar",
-    "uiLocale": "Gränssnittsspråk",
-    "uiLocaleSystem": "Systemstandard ({locale})",
-    "saveRestart": "Spara och starta om",
     "sections": {
       "apiKeys": "API Keys",
       "languages": "Languages",
@@ -157,60 +132,6 @@
     "rateLimitedUpstream": "Model rate-limited upstream",
     "rateLimitMeta": "{prefix}{error}{wait}",
     "rateLimitWait": " — wait {seconds}s or switch model"
-  },
-  "logs": {
-    "title": "Loggar",
-    "clear": "Rensa",
-    "empty": "Inga fel eller varningar ännu"
-  },
-  "common": {
-    "connecting": "Ansluter…",
-    "downloadFailed": "Nedladdning misslyckades: {error}",
-    "downloaded": "Nedladdad!",
-    "none": "ingen"
-  },
-  "voice": {
-    "noTts": "Ingen TTS-röst för {lang}. Översättning utan ljud.",
-    "downloadDefault": "Ladda ner {lang}-röst och starta om",
-    "installed": "{lang}-röst installerad!",
-    "noVoices": "Inga röster för {lang}",
-    "downloadedGroup": "Nedladdade",
-    "availableGroup": "Tillgängliga ({count})",
-    "labelIn": "{lang}-röst (jag hör)",
-    "labelOut": "{lang}-röst (de hör)"
-  },
-  "stt": {
-    "whisperDisabledDeepgram": "Whisper inaktiverad — moln Deepgram",
-    "whisperDisabledApple": "Whisper inaktiverad — Banyan Speech",
-    "deepgramActive": "Aktiv: Deepgram {model} · streaming",
-    "deepgramNeedKey": "Ange Deepgram-nyckel nedan",
-    "localActive": "Aktiv: {model} · {device}",
-    "localMeta": "Vald: {selected} · Installerad: {installed}",
-    "localNeedModel": "Behöver whisper-{need} ({format}). Klicka Ladda ner.",
-    "localInstalled": "Installerad: {installed}",
-    "checkFailed": "Kunde inte kontrollera STT-modell",
-    "appleHelperMissing": "Banyan Speech-hjälpare inte byggd",
-    "appleUnavailable": "Taligenkänning ej tillgänglig för ditt språk",
-    "appleReady": "Klar — Banyan Speech{onDevice}",
-    "appleOnDevice": " · på enheten",
-    "appleDenied": "Tillåt Banyan Speech i Systeminställningar",
-    "appleGrant": "Banyan Speech tillgänglig — ge behörighet vid första användning"
-  },
-  "translation": {
-    "openrouterSelected": "OpenRouter vald — API-nyckel nedan",
-    "appleSelected": "Banyan Translate vald — se panel nedan",
-    "ready": "Klar — {pairs}{polish}",
-    "polishReason": " · Polering: {reason}",
-    "polishActive": " · polering: {model}",
-    "modelsMissing": "Saknade modeller: {pairs}. Ladda ner (~600 MB).",
-    "checkFailed": "Kunde inte kontrollera översättningsmodeller",
-    "appleCheckFailed": "Kunde inte kontrollera Banyan Translate",
-    "appleHelperMissing": "Banyan Translate-hjälpare inte byggd (macOS 14.4+)",
-    "applePairUnsupported": "Språkpar stöds inte av Banyan Translate",
-    "appleReady": "Klar — språkpaket installerade (offline)",
-    "appleSupported": "Stöds men inte nedladdat — installera språkpaket",
-    "appleChecking": "Kontrollerar språk…",
-    "rateLimited": "{provider}{error}{retry}"
   },
   "footer": {
     "stt": "STT:",

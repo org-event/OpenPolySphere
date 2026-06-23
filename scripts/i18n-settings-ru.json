@@ -1,36 +1,11 @@
 {
-  "app": {
-    "title": "Banyan",
-    "connecting": "Подключение к серверу…",
-    "connected": "Подключено — нажмите Старт для перевода",
-    "connectedHeader": "Подключено"
-  },
   "header": {
-    "stopped": "Остановлен",
-    "start": "Старт",
     "stop": "Стоп",
     "translating": "Перевод",
     "starting": "Запуск…",
     "stopping": "Остановка…"
   },
-  "controls": {
-    "logs": "Логи",
-    "micOut": "Микрофон",
-    "micIn": "Вход звонка",
-    "tabAudio": "Звук вкладки",
-    "monitor": "Монитор",
-    "compact": "Компакт",
-    "saved": "Закладки",
-    "history": "История",
-    "export": "Экспорт",
-    "clear": "Очистить",
-    "settings": "Настройки"
-  },
   "settings": {
-    "title": "Настройки",
-    "uiLocale": "Язык интерфейса",
-    "uiLocaleSystem": "Как в системе ({locale})",
-    "saveRestart": "Сохранить и перезапустить",
     "sections": {
       "apiKeys": "API-ключи",
       "languages": "Языки",
@@ -157,60 +132,6 @@
     "rateLimitedUpstream": "Лимит модели на стороне провайдера",
     "rateLimitMeta": "{prefix}{error}{wait}",
     "rateLimitWait": " — подождите {seconds} с или смените модель"
-  },
-  "logs": {
-    "title": "Логи",
-    "clear": "Очистить",
-    "empty": "Ошибок и предупреждений пока нет"
-  },
-  "common": {
-    "connecting": "Подключение…",
-    "downloadFailed": "Ошибка загрузки: {error}",
-    "downloaded": "Загружено!",
-    "none": "нет"
-  },
-  "voice": {
-    "noTts": "Нет голоса TTS для {lang}. Перевод будет, но без озвучки.",
-    "downloadDefault": "Скачать голос {lang} и перезапустить",
-    "installed": "Голос {lang} установлен!",
-    "noVoices": "Нет голосов для {lang}",
-    "downloadedGroup": "Загружено",
-    "availableGroup": "Доступно ({count})",
-    "labelIn": "Голос {lang} (я слышу)",
-    "labelOut": "Голос {lang} (они слышат)"
-  },
-  "stt": {
-    "whisperDisabledDeepgram": "Whisper отключён — используется Deepgram",
-    "whisperDisabledApple": "Whisper отключён — Banyan Speech",
-    "deepgramActive": "Активно: Deepgram {model} · поток",
-    "deepgramNeedKey": "Укажите ключ Deepgram ниже",
-    "localActive": "Активно: {model} · {device}",
-    "localMeta": "Выбрано: {selected} · Установлено: {installed}",
-    "localNeedModel": "Нужен whisper-{need} ({format}). Нажмите «Скачать».",
-    "localInstalled": "Установлено: {installed}",
-    "checkFailed": "Не удалось проверить модель STT",
-    "appleHelperMissing": "Помощник Banyan Speech не собран",
-    "appleUnavailable": "Распознавание речи недоступно для вашего языка",
-    "appleReady": "Готово — Banyan Speech{onDevice}",
-    "appleOnDevice": " · на устройстве",
-    "appleDenied": "Разрешите Banyan Speech: Настройки → Конфиденциальность → Распознавание речи",
-    "appleGrant": "Banyan Speech доступен — выдайте разрешение при первом запуске"
-  },
-  "translation": {
-    "openrouterSelected": "Выбран OpenRouter — укажите ключ ниже",
-    "appleSelected": "Выбран Banyan Translate — см. панель ниже",
-    "ready": "Готово — {pairs}{polish}",
-    "polishReason": " · Полировка: {reason}",
-    "polishActive": " · полировка: {model}",
-    "modelsMissing": "Нет моделей: {pairs}. Нажмите «Скачать» (~600 МБ).",
-    "checkFailed": "Не удалось проверить модели перевода",
-    "appleCheckFailed": "Не удалось проверить Banyan Translate",
-    "appleHelperMissing": "Помощник Banyan Translate не собран (нужен macOS 14.4+)",
-    "applePairUnsupported": "Эта пара языков не поддерживается Banyan Translate",
-    "appleReady": "Готово — языковые пакеты установлены (офлайн)",
-    "appleSupported": "Поддерживается, но не загружено — установите пакеты в Настройки → Язык и регион",
-    "appleChecking": "Проверка доступности языков…",
-    "rateLimited": "{provider}{error}{retry}"
   },
   "footer": {
     "stt": "STT:",

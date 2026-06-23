@@ -37,6 +37,15 @@ export function applyDocumentI18n() {
     if (el.hasAttribute('data-i18n-placeholder')) el.placeholder = val;
     else el.textContent = val;
   });
+  document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    el.title = t(el.getAttribute('data-i18n-title'));
+  });
+  document.querySelectorAll('option[data-i18n]').forEach((el) => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
 }
 
 /** @param {string} effective from settings (_effective_ui_locale) */

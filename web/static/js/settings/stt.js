@@ -2,12 +2,21 @@ import { showToast } from '../core/toast.js';
 import { t } from '../core/i18n.js';
 import { clearChildren, setStatus, setStatusLines, statusSpan } from '../core/safe-dom.js';
 
-const WHISPER_HINTS = {
-  auto: 'Auto: Metal prefers base-q8_0 → base → tiny. CPU picks smallest CT2 installed.',
-  tiny: 'Tiny — ~75 MB. Fastest STT. Good for live calls.',
-  base: 'Base — ~145 MB. Balance of speed and accuracy.',
-  'base-q8_0': 'Base Q8_0 — ~148 MB. Higher-precision GGML quant for Metal GPU (recommended).',
-  small: 'Small — ~460 MB. Best accuracy, slowest on CPU.',
+const WHISPER_HINT_KEYS = {
+  auto: 'hints.whisperAuto',
+  tiny: 'hints.whisperTiny',
+  base: 'hints.whisperBase',
+  'base-q8_0': 'hints.whisperBaseQ8',
+  small: 'hints.whisperSmall',
+};
+
+const DEEPGRAM_HINT_KEYS = {
+  'nova-3': 'hints.dgNova3',
+  'nova-2': 'hints.dgNova2',
+  nova: 'hints.dgNova',
+  enhanced: 'hints.dgEnhanced',
+  base: 'hints.dgBase',
+  'whisper-large': 'hints.dgWhisperLarge',
 };
 
 export function sttBackendValue() {
@@ -30,15 +39,6 @@ function applyAppleSttOptionVisibility(apple) {
   }
 }
 
-const DEEPGRAM_HINTS = {
-  'nova-3': 'Best accuracy for live calls. Default.',
-  'nova-2': 'Often lower latency than Nova-3; good for RU/EN.',
-  nova: 'Older Nova — may be faster, less accurate.',
-  enhanced: 'Legacy model — balanced speed/quality.',
-  base: 'Fastest Deepgram model; weaker on accents and RU.',
-  'whisper-large': 'OpenAI Whisper large hosted by Deepgram.',
-};
-
 export function deepgramModelValue() {
   return document.getElementById('cfg-deepgram-model')?.value || 'nova-3';
 }
@@ -47,7 +47,8 @@ export function updateDeepgramHint() {
   const hint = document.getElementById('stt-deepgram-hint');
   const sel = deepgramModelValue();
   if (hint) {
-    hint.textContent = DEEPGRAM_HINTS[sel] || DEEPGRAM_HINTS['nova-3'];
+    const key = DEEPGRAM_HINT_KEYS[sel] || DEEPGRAM_HINT_KEYS['nova-3'];
+    hint.textContent = t(key);
   }
 }
 
@@ -63,12 +64,10 @@ export function updateWhisperHint() {
   const hint = document.getElementById('stt-model-hint');
   const sel = whisperModelValue();
   const dev = sttDeviceValue();
-  const devNote =
-    dev === 'cpu'
-      ? 'CPU mode: CTranslate2 (no GPU).'
-      : 'Metal mode: whisper.cpp on GPU (AMD Radeon / Intel).';
+  const devNote = dev === 'cpu' ? t('hints.sttCpuMode') : t('hints.sttMetalMode');
   if (hint) {
-    hint.textContent = (WHISPER_HINTS[sel] || WHISPER_HINTS.auto) + ' ' + devNote;
+    const key = WHISPER_HINT_KEYS[sel] || WHISPER_HINT_KEYS.auto;
+    hint.textContent = t(key) + ' ' + devNote;
   }
 }
 
@@ -110,16 +109,18 @@ export function updateSttEngineUI() {
     badge.className = 'translation-engine-badge ' + (isCloud ? 'cloud' : 'local');
     if (backend === 'local') {
       const sel = whisperModelValue();
-      const dev = sttDeviceValue() === 'cpu' ? 'CPU' : 'Metal GPU';
+      const dev =
+        sttDeviceValue() === 'cpu' ? t('settings.deviceCpu') : t('settings.deviceMetal');
+      const modelLabel = sel === 'auto' ? '' : sel.replace('-q8_0', ' q8');
       badge.textContent =
         sel === 'auto'
-          ? 'Active: Whisper ' + dev + ' (auto)'
-          : 'Active: Whisper ' + sel.replace('-q8_0', ' q8') + ' · ' + dev;
+          ? t('settings.badgeActiveWhisperAuto', { device: dev })
+          : t('settings.badgeActiveWhisper', { model: modelLabel, device: dev });
     } else if (backend === 'apple') {
-      badge.textContent = 'Active: Banyan Speech (system, on-device)';
+      badge.textContent = t('settings.badgeActiveAppleStt');
     } else {
       const dgModel = deepgramModelValue();
-      badge.textContent = 'Active: Deepgram ' + dgModel;
+      badge.textContent = t('settings.badgeActiveDeepgram', { model: dgModel });
     }
   }
   updateWhisperHint();
@@ -166,7 +167,8 @@ export async function refreshSttStatus() {
     const active = data.model || '—';
     const selected = data.selected || 'auto';
     const device = data.device || sttDeviceValue();
-    const devLabel = device === 'cpu' ? 'CPU' : 'Metal GPU';
+    const devLabel =
+      device === 'cpu' ? t('settings.deviceCpu') : t('settings.deviceMetal');
     if (data.ready) {
       setStatusLines(el, [
         {
@@ -198,7 +200,7 @@ export async function downloadWhisperModel() {
   if (!btn || btn.classList.contains('loading')) return;
   const variant = whisperModelValue();
   btn.classList.add('loading');
-  btn.textContent = 'Downloading...';
+  btn.textContent = t('settings.downloading');
   try {
     const r = await fetch('/api/download-whisper-model', {
       method: 'POST',
@@ -207,20 +209,20 @@ export async function downloadWhisperModel() {
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'download failed');
-    showToast('Whisper ' + (data.status?.model || variant) + ' installed — Save & Restart');
+    showToast(t('toast.whisperInstalled', { model: data.status?.model || variant }));
     await refreshSttStatus();
   } catch (e) {
-    showToast('Download failed: ' + e.message);
+    showToast(t('toast.downloadFailed', { error: e.message }));
   }
   btn.classList.remove('loading');
-  btn.textContent = 'Download selected';
+  btn.textContent = t('settings.downloadSelected');
 }
 
 export async function requestAppleSpeechAuth() {
   const btn = document.getElementById('btn-banyan-speech-auth');
   if (!btn || btn.classList.contains('loading')) return;
   btn.classList.add('loading');
-  btn.textContent = 'Requesting...';
+  btn.textContent = t('settings.requesting');
   try {
     const r = await fetch('/api/banyan-speech-authorize', { method: 'POST' });
     const data = await r.json();
@@ -228,10 +230,10 @@ export async function requestAppleSpeechAuth() {
     showToast(data.message || 'Authorization: ' + (data.authorization || 'unknown'));
     await refreshSttStatus();
   } catch (e) {
-    showToast('Failed: ' + e.message);
+    showToast(t('toast.authFailed', { error: e.message }));
   }
   btn.classList.remove('loading');
-  btn.textContent = 'Allow Banyan Speech';
+  btn.textContent = t('settings.allowBanyanSpeech');
 }
 
 export function initSttListeners() {

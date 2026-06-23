@@ -1,4 +1,5 @@
 import { state } from '../core/state.js';
+import { t } from '../core/i18n.js';
 import { startLevelMonitoring, bindLevelMeterDeviceChange } from '../audio/levels.js';
 
 export async function loadDevices() {
@@ -13,7 +14,7 @@ export async function loadDevices() {
       sel.innerHTML = '';
       const def = document.createElement('option');
       def.value = 'default';
-      def.textContent = 'Default';
+      def.textContent = t('settings.deviceDefault');
       sel.appendChild(def);
       devices.forEach((d) => {
         const opt = document.createElement('option');
@@ -25,7 +26,7 @@ export async function loadDevices() {
         if (!devices.includes(current)) {
           const opt = document.createElement('option');
           opt.value = current;
-          opt.textContent = current + ' (saved)';
+          opt.textContent = t('settings.deviceSaved', { name: current });
           sel.appendChild(opt);
         }
         sel.value = current;

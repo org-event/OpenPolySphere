@@ -1,5 +1,6 @@
 import { state } from '../core/state.js';
 import { showToast } from '../core/toast.js';
+import { t } from '../core/i18n.js';
 import { setStatus } from '../core/safe-dom.js';
 
 export function initKeyMasking() {
@@ -34,12 +35,12 @@ export async function testKey(provider) {
   const btn = document.getElementById(btnId);
 
   if (!key) {
-    btn.textContent = 'Empty';
+    btn.textContent = t('settings.keyTest.empty');
     btn.className = 'sp-test-btn fail';
     return;
   }
 
-  btn.textContent = '...';
+  btn.textContent = t('settings.keyTest.testing');
   btn.className = 'sp-test-btn testing';
 
   try {
@@ -55,34 +56,38 @@ export async function testKey(provider) {
     });
     const data = await r.json();
     if (data.valid) {
-      btn.textContent = '\u2713 Valid';
+      btn.textContent = t('settings.keyTest.valid');
       btn.className = 'sp-test-btn ok';
     } else if (data.rate_limited) {
-      btn.textContent = '429 Limit';
+      btn.textContent = t('settings.keyTest.rateLimited');
       btn.className = 'sp-test-btn fail';
-      const hint = data.retry_after ? 'Retry in ~' + data.retry_after + 's. ' : '';
-      showToast(hint + (data.error || 'Model rate-limited upstream'));
+      const hint = data.retry_after
+        ? t('settings.rateLimitRetry', { seconds: data.retry_after })
+        : '';
+      showToast(hint + (data.error || t('settings.rateLimitedUpstream')));
       const meta = document.getElementById('translation-model-meta');
       if (meta) {
-        const msg = [
-          data.provider ? data.provider + ': ' : '',
-          data.error || 'Rate limited',
-          data.retry_after ? ' — wait ' + data.retry_after + 's or switch model' : '',
-        ].join('');
+        const msg = t('settings.rateLimitMeta', {
+          prefix: data.provider ? data.provider + ': ' : '',
+          error: data.error || t('settings.rateLimitedUpstream'),
+          wait: data.retry_after
+            ? t('settings.rateLimitWait', { seconds: data.retry_after })
+            : '',
+        });
         setStatus(meta, 'var(--yellow)', msg);
       }
     } else {
-      btn.textContent = '\u2717 Invalid';
+      btn.textContent = t('settings.keyTest.invalid');
       btn.className = 'sp-test-btn fail';
       if (data.error) showToast(data.error);
     }
   } catch {
-    btn.textContent = 'Error';
+    btn.textContent = t('settings.keyTest.error');
     btn.className = 'sp-test-btn fail';
   }
 
   setTimeout(() => {
-    btn.textContent = 'Test';
+    btn.textContent = t('settings.test');
     btn.className = 'sp-test-btn';
   }, 4000);
 }

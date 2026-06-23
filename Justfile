@@ -137,6 +137,10 @@ check-rust:
 check-js:
     bun run lint:js
 
+# Merge scripts/i18n-settings-*.json patches into web/static/locales/
+i18n-merge-settings:
+    bun run i18n:merge-settings
+
 check-windows-static:
     #!/usr/bin/env bash
     set -euo pipefail
