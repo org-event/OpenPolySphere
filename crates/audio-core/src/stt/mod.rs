@@ -4,7 +4,9 @@ pub mod apple;
 mod deepgram;
 pub mod local;
 
-use anyhow::{bail, Context, Result};
+use anyhow::{bail, Result};
+#[cfg(target_os = "macos")]
+use anyhow::Context;
 use log::info;
 
 pub use deepgram::{deepgram_model_from_env, DeepgramSession, DeepgramStt};
@@ -17,6 +19,7 @@ pub struct SttResult {
 
 enum SttBackend {
     Local,
+    #[cfg(target_os = "macos")]
     Apple,
     Deepgram,
 }
@@ -83,8 +86,11 @@ impl SttEngine {
                     self.endpointing_ms,
                     model,
                 );
-                Ok(SttSession::Deepgram(stt.create_session(sample_rate)?))
+                Ok(SttSession::Deepgram(Box::new(
+                    stt.create_session(sample_rate)?,
+                )))
             }
+            #[cfg(target_os = "macos")]
             SttBackend::Apple => {
                 #[cfg(target_os = "macos")]
                 {
@@ -113,7 +119,7 @@ impl SttEngine {
 }
 
 pub enum SttSession {
-    Deepgram(DeepgramSession),
+    Deepgram(Box<DeepgramSession>),
     Local(local::LocalWhisperSession),
 }
 

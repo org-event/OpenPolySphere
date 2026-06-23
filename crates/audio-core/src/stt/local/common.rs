@@ -347,6 +347,7 @@ pub fn whisper_language(code: &str) -> &str {
     }
 }
 
+#[cfg(target_os = "macos")]
 pub fn whisper_initial_prompt(language: &str) -> Option<&'static str> {
     match language {
         "ru" => Some("Разговор на русском языке. Привет, здравствуйте, как дела."),

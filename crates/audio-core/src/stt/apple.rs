@@ -1,6 +1,8 @@
 //! macOS Apple Speech framework via `LiveTranslator.app` / `LiveTranslateSpeech` helper.
 
-use anyhow::{bail, Context, Result};
+use anyhow::{bail, Result};
+#[cfg(target_os = "macos")]
+use anyhow::Context;
 
 #[cfg(target_os = "macos")]
 mod macos {
