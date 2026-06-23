@@ -3,14 +3,54 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Which platform jobs to run
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - macos
+          - windows
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      js: ${{ steps.filter.outputs.js }}
+      workflows: ${{ steps.filter.outputs.workflows }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rust:
+              - 'crates/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - '.cargo/**'
+            js:
+              - 'web/**'
+              - 'package.json'
+              - 'bun.lock'
+              - 'eslint.config.js'
+            workflows:
+              - '.github/workflows/**'
+              - 'Justfile'
+              - 'scripts/**'
+
   rustfmt:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.rust == 'true' || needs.changes.outputs.workflows == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
@@ -20,6 +60,13 @@ jobs:
 
   js:
     runs-on: ubuntu-latest
+    needs: changes
+    # macOS `just check` includes ESLint — run when Rust or web changes.
+    if: |
+      needs.changes.outputs.js == 'true' ||
+      needs.changes.outputs.rust == 'true' ||
+      needs.changes.outputs.workflows == 'true' ||
+      github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
@@ -28,7 +75,15 @@ jobs:
 
   macos:
     runs-on: macos-latest
-    needs: [rustfmt, js]
+    needs: [changes, rustfmt, js]
+    if: |
+      always() &&
+      (needs.rustfmt.result == 'success' || needs.rustfmt.result == 'skipped') &&
+      (needs.js.result == 'success' || needs.js.result == 'skipped') &&
+      (needs.changes.outputs.rust == 'true' || needs.changes.outputs.workflows == 'true' || github.event_name == 'workflow_dispatch') &&
+      (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'macos') ||
+       github.event_name == 'push' ||
+       (github.event_name == 'pull_request' && !contains(join(github.event.pull_request.labels.*.name, ','), 'ci/windows-only')))
     steps:
       - uses: actions/checkout@v7
       - name: Select Xcode 26
@@ -54,6 +109,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+      - uses: swatinem/rust-cache@v2
+        with:
+          shared-key: macos
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - uses: oven-sh/setup-bun@v2
       - uses: extractions/setup-just@v4
       - name: Install system dependencies
@@ -69,12 +128,30 @@ jobs:
 
   windows:
     runs-on: windows-latest
-    needs: [rustfmt, js]
+    needs: [changes, rustfmt, js]
+    if: |
+      always() &&
+      (needs.rustfmt.result == 'success' || needs.rustfmt.result == 'skipped') &&
+      (needs.js.result == 'success' || needs.js.result == 'skipped') &&
+      (needs.changes.outputs.rust == 'true' || needs.changes.outputs.workflows == 'true' || github.event_name == 'workflow_dispatch') &&
+      (github.event_name == 'workflow_dispatch' && (inputs.platform == 'all' || inputs.platform == 'windows') ||
+       github.event_name == 'push' ||
+       github.event_name == 'pull_request')
     timeout-minutes: 90
     env:
       ORT_VERSION: "1.20.1"
     steps:
       - uses: actions/checkout@v7
+
+      - name: Cache vcpkg (OpenBLAS)
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\vcpkg\installed\x64-windows-static
+            C:\vcpkg\b\d
+          key: vcpkg-openblas-static-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: |
+            vcpkg-openblas-static-
 
       - name: Install OpenBLAS (vcpkg)
         run: |
@@ -90,17 +167,19 @@ jobs:
         shell: pwsh
         run: |
           $zip = "onnxruntime-win-x64-$env:ORT_VERSION.zip"
-          Invoke-WebRequest -Uri "https://github.com/microsoft/onnxruntime/releases/download/v$env:ORT_VERSION/$zip" -OutFile $zip
-          Expand-Archive $zip -DestinationPath ort
-          echo "ORT_DYLIB_PATH=$PWD/ort/onnxruntime-win-x64-$env:ORT_VERSION/lib/onnxruntime.dll" >> $env:GITHUB_ENV
+          if (-not (Test-Path "ort/onnxruntime-win-x64-$env:ORT_VERSION/lib/onnxruntime.dll")) {
+            Invoke-WebRequest -Uri "https://github.com/microsoft/onnxruntime/releases/download/v$env:ORT_VERSION/$zip" -OutFile $zip
+            Expand-Archive $zip -DestinationPath ort -Force
+          }
 
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
 
-      - uses: oven-sh/setup-bun@v2
-
-      - run: bun install --frozen-lockfile
+      - uses: swatinem/rust-cache@v2
+        with:
+          shared-key: windows-msvc
+          save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Clippy
         run: cargo clippy -p translator -p audio-core --all-targets -- -D warnings

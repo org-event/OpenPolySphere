@@ -47,10 +47,10 @@ Native build needs: Rust, CMake, vcpkg OpenBLAS (`x64-windows-static`, matches c
 
 | Command | Where | What |
 |---------|-------|------|
-| `just check-windows-static` | **all hosts** (macOS, Linux, Windows) | In `just prepush`. Fast cfg/import guards — everyone editing cross-platform code. |
-| `just check-windows-clippy` | **native Windows only** | Same as CI `cargo clippy -p translator -p audio-core`. Skips on macOS/Linux. |
-| CI `windows` job | GitHub | Full clippy + release build on `windows-latest`. |
+| `just check-windows-static` | **all hosts** | In `just prepush`. Fast cfg/import guards. |
+| `just check-windows-clippy` | **native Windows only** | Full clippy parity with CI. |
+| CI `windows` job | GitHub | Skipped on docs-only PRs; cached vcpkg + rust on `main`. PR label `ci/windows-only` skips macOS. |
 
-**macOS-only dev extras** (`just install`): **zig** (brew, dev-only cross toolchain, not a Cargo dep). Windows and Linux developers do not install zig or the `x86_64-pc-windows-msvc` rustup target.
+See [ADR 0002](../adr/0002-ci-platform-tiers.md) for why CI is tiered.
 
 See [issue #3](https://github.com/org-event/Banyan/issues/3).
