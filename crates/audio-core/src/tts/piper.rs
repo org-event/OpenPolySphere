@@ -94,7 +94,7 @@ impl PiperTts {
         info!("Piper ONNX model loaded: {}", model_path);
 
         // Find espeak-ng binary
-        let espeak_binary = find_espeak_ng()?;
+        let espeak_binary = crate::platform::find_espeak_ng()?;
         info!("Using espeak-ng: {}", espeak_binary);
 
         Ok(Self {
@@ -272,29 +272,6 @@ impl PiperTts {
 
         Ok(samples)
     }
-}
-
-/// Find the espeak-ng binary, checking common paths.
-fn find_espeak_ng() -> Result<String> {
-    // Check PATH first
-    let candidates = [
-        "espeak-ng",
-        "/opt/homebrew/bin/espeak-ng",
-        "/usr/local/bin/espeak-ng",
-        "/usr/bin/espeak-ng",
-        r"C:\Program Files\eSpeak NG\espeak-ng.exe",
-    ];
-
-    for candidate in &candidates {
-        let result = Command::new(candidate).arg("--version").output();
-        if let Ok(output) = result {
-            if output.status.success() {
-                return Ok(candidate.to_string());
-            }
-        }
-    }
-
-    anyhow::bail!("espeak-ng not found. Install it with: brew install espeak-ng")
 }
 
 /// Resample mono f32 audio using a high-quality sinc interpolator.

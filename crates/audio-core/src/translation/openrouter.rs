@@ -367,6 +367,12 @@ impl OpenRouterClient {
     }
 }
 
+impl crate::translation::backend::TranslateBackend for OpenRouterClient {
+    fn translate(&self, text: &str, direction: &TranslationDirection) -> Result<String> {
+        OpenRouterClient::translate(self, text, direction)
+    }
+}
+
 fn parse_error_response(status: u16, model: &str, body: &str) -> TranslateFailure {
     let mut message = if body.is_empty() {
         format!("HTTP {status}")

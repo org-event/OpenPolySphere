@@ -1,18 +1,13 @@
 //! macOS Apple Speech framework via `LiveTranslator.app` / `LiveTranslateSpeech` helper.
 
 #[cfg(target_os = "macos")]
-use anyhow::Context;
-use anyhow::{bail, Result};
-
-#[cfg(target_os = "macos")]
-mod macos {
-    use super::*;
+mod imp {
+    use anyhow::{bail, Context, Result};
+    use log::debug;
+    use serde::Deserialize;
     use std::path::PathBuf;
     use std::process::Command;
     use std::sync::OnceLock;
-
-    use log::debug;
-    use serde::Deserialize;
 
     use crate::stt::local::{TranscribeOutcome, WhisperBackend, WHISPER_SAMPLE_RATE};
 
@@ -373,51 +368,50 @@ mod macos {
             .get_or_init(|| std::sync::Arc::new(AppleSpeechBackend))
             .clone())
     }
-}
 
-#[cfg(target_os = "macos")]
-pub fn apple_speech_ensure_authorized() -> Result<()> {
-    let lang = std::env::var("TRANSLATOR_MY_LANG").unwrap_or_else(|_| "ru".into());
-    macos::ensure_speech_authorized(&lang)
-}
+    pub fn apple_speech_ensure_authorized() -> Result<()> {
+        let lang = std::env::var("TRANSLATOR_MY_LANG").unwrap_or_else(|_| "ru".into());
+        ensure_speech_authorized(&lang)
+    }
 
-#[cfg(not(target_os = "macos"))]
-pub fn apple_speech_ensure_authorized() -> Result<()> {
-    Ok(())
-}
+    pub fn apple_speech_request_authorization() -> Result<serde_json::Value> {
+        request_authorization()
+    }
 
-#[cfg(target_os = "macos")]
-pub fn apple_speech_request_authorization() -> Result<serde_json::Value> {
-    macos::request_authorization()
-}
+    pub fn apple_speech_availability(lang: &str) -> serde_json::Value {
+        availability(lang)
+    }
 
-#[cfg(not(target_os = "macos"))]
-pub fn apple_speech_request_authorization() -> Result<serde_json::Value> {
-    bail!("Apple Speech is only available on macOS")
-}
-
-#[cfg(target_os = "macos")]
-pub fn apple_speech_availability(lang: &str) -> serde_json::Value {
-    macos::availability(lang)
-}
-
-#[cfg(target_os = "macos")]
-pub fn apple_speech_backend() -> Result<std::sync::Arc<dyn crate::stt::local::WhisperBackend>> {
-    let backend: std::sync::Arc<dyn crate::stt::local::WhisperBackend> = macos::shared_backend()?;
-    Ok(backend)
+    pub fn apple_speech_backend() -> Result<std::sync::Arc<dyn crate::stt::local::WhisperBackend>> {
+        let backend: std::sync::Arc<dyn crate::stt::local::WhisperBackend> = shared_backend()?;
+        Ok(backend)
+    }
 }
 
 #[cfg(not(target_os = "macos"))]
-pub fn apple_speech_availability(_lang: &str) -> serde_json::Value {
-    serde_json::json!({
-        "helper": false,
-        "available": false,
-        "ready": false,
-        "status": "unsupported",
-    })
+mod imp {
+    use anyhow::{bail, Result};
+
+    pub fn apple_speech_ensure_authorized() -> Result<()> {
+        Ok(())
+    }
+
+    pub fn apple_speech_request_authorization() -> Result<serde_json::Value> {
+        bail!("Apple Speech is only available on macOS")
+    }
+
+    pub fn apple_speech_availability(_lang: &str) -> serde_json::Value {
+        serde_json::json!({
+            "helper": false,
+            "available": false,
+            "ready": false,
+            "status": "unsupported",
+        })
+    }
+
+    pub fn apple_speech_backend() -> Result<std::sync::Arc<dyn crate::stt::local::WhisperBackend>> {
+        bail!("Apple Speech is only available on macOS")
+    }
 }
 
-#[cfg(not(target_os = "macos"))]
-pub fn apple_speech_backend() -> Result<std::sync::Arc<dyn crate::stt::local::WhisperBackend>> {
-    bail!("Apple Speech is only available on macOS")
-}
+pub use imp::*;

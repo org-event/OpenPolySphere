@@ -1,4 +1,4 @@
-//! Local speech-to-text: whisper.cpp + Metal (default on macOS) or CTranslate2 CPU.
+//! Local speech-to-text: whisper.cpp + Metal (macOS) or CTranslate2 CPU.
 
 mod common;
 mod ct2;
@@ -11,6 +11,8 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 use log::info;
+
+use crate::platform::Capabilities;
 
 pub use common::is_whisper_hallucination;
 pub use common::TranscribeOutcome;
@@ -30,9 +32,9 @@ pub struct LocalWhisperEngine {
 impl LocalWhisperEngine {
     fn new() -> Result<Self> {
         let device = stt_device();
+        let caps = Capabilities::current();
         let backend: Arc<dyn WhisperBackend> = match device.as_str() {
-            #[cfg(target_os = "macos")]
-            "metal" | "gpu" => match metal::MetalWhisperEngine::new() {
+            "metal" | "gpu" if caps.whisper_metal => match metal::MetalWhisperEngine::new() {
                 Ok(engine) => {
                     info!("STT compute: Metal GPU (whisper.cpp)");
                     Arc::new(engine)
@@ -46,15 +48,13 @@ impl LocalWhisperEngine {
                 info!("STT compute: CPU (CTranslate2)");
                 Arc::new(ct2::Ct2WhisperEngine::new()?)
             }
-            #[cfg(target_os = "macos")]
-            other => {
+            other if caps.whisper_metal => {
                 info!("Unknown STT device '{other}', trying Metal");
                 match metal::MetalWhisperEngine::new() {
                     Ok(engine) => Arc::new(engine),
                     Err(_) => Arc::new(ct2::Ct2WhisperEngine::new()?),
                 }
             }
-            #[cfg(not(target_os = "macos"))]
             other => {
                 info!("Unknown STT device '{other}', using CPU");
                 Arc::new(ct2::Ct2WhisperEngine::new()?)

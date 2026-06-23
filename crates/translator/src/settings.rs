@@ -485,7 +485,7 @@ pub fn stt_status() -> serde_json::Value {
         "selected": selected,
         "installed": installed,
         "ready": ready,
-        "metal_available": cfg!(target_os = "macos"),
+        "metal_available": audio_core::platform::Capabilities::current().whisper_metal,
         "apple": apple,
     })
 }

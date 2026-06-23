@@ -1,6 +1,7 @@
-//! Translation backends: local CTranslate2 (default) or OpenRouter cloud.
+//! Translation backends: local CTranslate2 (default), Apple (macOS), or OpenRouter cloud.
 
 mod apple;
+mod backend;
 mod local;
 mod model;
 mod normalize;
@@ -18,7 +19,11 @@ pub use polish_model::{
 use anyhow::Result;
 use log::info;
 
+use crate::platform::Capabilities;
+
 pub use openrouter::OpenRouterClient;
+
+use backend::TranslateBackend;
 
 /// Translation direction with source/target language names.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -91,16 +96,10 @@ fn lang_name(code: &str) -> &str {
     }
 }
 
-enum Backend {
-    Local(local::LocalEngine),
-    Apple(apple::AppleTranslateEngine),
-    OpenRouter(openrouter::OpenRouterClient),
-}
-
 pub struct TranslationEngine {
-    backend: Backend,
+    backend: Box<dyn TranslateBackend>,
     polisher: Option<polish::TranslationPolisher>,
-    polish_enabled: bool,
+    apply_polish: bool,
 }
 
 impl TranslationEngine {
@@ -135,25 +134,26 @@ impl TranslationEngine {
             None
         };
 
-        let backend = match mode.as_str() {
+        let (backend, apply_polish): (Box<dyn TranslateBackend>, bool) = match mode.as_str() {
             "openrouter" | "cloud" | "llm" => {
                 info!("Translation backend: OpenRouter (cloud)");
-                Backend::OpenRouter(OpenRouterClient::new()?)
+                (Box::new(OpenRouterClient::new()?), false)
             }
             "apple" | "system" | "macos" => {
                 info!("Translation backend: Apple Translation (system, on-device)");
-                Backend::Apple(apple::AppleTranslateEngine::new()?)
+                Capabilities::current().require_apple_translation()?;
+                (Box::new(apple::AppleTranslateEngine::new()?), false)
             }
             _ => {
                 info!("Translation backend: local Opus-MT + optional polish");
-                Backend::Local(local::LocalEngine::new()?)
+                (Box::new(local::LocalEngine::new()?), polish_for_backend)
             }
         };
 
         Ok(Self {
             backend,
             polisher,
-            polish_enabled: polish_for_backend,
+            apply_polish,
         })
     }
 
@@ -163,23 +163,18 @@ impl TranslationEngine {
         }
 
         let source = normalize::normalize_stt_text(text, direction);
+        let draft = self.backend.translate(&source, direction)?;
 
-        match &self.backend {
-            Backend::Local(engine) => {
-                let draft = engine.translate(&source, direction)?;
-                Ok(polish::maybe_polish(
-                    self.polish_enabled,
-                    &self.polisher,
-                    &source,
-                    &draft,
-                    direction,
-                ))
-            }
-            Backend::Apple(engine) => engine.translate(&source, direction),
-            Backend::OpenRouter(client) => {
-                // Cloud path already uses LLM; optional extra polish rarely needed.
-                client.translate(&source, direction)
-            }
+        if self.apply_polish {
+            Ok(polish::maybe_polish(
+                true,
+                &self.polisher,
+                &source,
+                &draft,
+                direction,
+            ))
+        } else {
+            Ok(draft)
         }
     }
 }

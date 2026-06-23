@@ -101,3 +101,9 @@ pub fn translate_models_dir() -> PathBuf {
     let base = std::env::var("TRANSLATOR_MODELS_DIR").unwrap_or_else(|_| "./models".into());
     PathBuf::from(base).join("translate")
 }
+
+impl crate::translation::backend::TranslateBackend for LocalEngine {
+    fn translate(&self, text: &str, direction: &TranslationDirection) -> Result<String> {
+        LocalEngine::translate(self, text, direction)
+    }
+}

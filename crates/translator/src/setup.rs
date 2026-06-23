@@ -54,33 +54,12 @@ fn check_toolchain() {
 }
 
 fn check_ort_hint() {
-    let dylib = std::env::var("ORT_DYLIB_PATH").unwrap_or_else(|_| default_ort_hint_path());
-    if std::path::Path::new(&dylib).is_file() {
+    let dylib = std::env::var("ORT_DYLIB_PATH")
+        .unwrap_or_else(|_| audio_core::platform::default_ort_dylib().to_string());
+    if audio_core::platform::ort_dylib_exists(&dylib) {
         println!("[OK] ONNX Runtime ({dylib})");
     } else {
-        #[cfg(target_os = "windows")]
-        println!("[!] ONNX Runtime not at {dylib} — place onnxruntime.dll next to translator.exe or set ORT_DYLIB_PATH");
-        #[cfg(not(target_os = "windows"))]
-        println!("[!] ONNX Runtime not at {dylib} — brew install onnxruntime");
-    }
-}
-
-fn default_ort_hint_path() -> String {
-    #[cfg(target_os = "macos")]
-    {
-        if cfg!(target_arch = "x86_64") {
-            "/usr/local/lib/libonnxruntime.dylib".into()
-        } else {
-            "/opt/homebrew/lib/libonnxruntime.dylib".into()
-        }
-    }
-    #[cfg(target_os = "windows")]
-    {
-        "onnxruntime.dll".into()
-    }
-    #[cfg(all(not(target_os = "macos"), not(target_os = "windows")))]
-    {
-        "libonnxruntime.so".into()
+        println!("{}", audio_core::platform::ort_missing_hint(&dylib));
     }
 }
 

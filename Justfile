@@ -10,6 +10,7 @@ install: install-rust install-system install-js install-hooks
     @echo "Dev environment ready."
     @echo "  just check                              # lint before commit"
     @echo "  just prepush                            # lint before git push"
+    @echo "  just check-windows-static               # cross-platform cfg guard (no MSVC)"
     @echo "  cargo run --release -p translator -- setup   # download models (first run)"
     @echo "  cargo run --release -p translator            # start server"
 
@@ -18,7 +19,7 @@ check: check-rust check-js check-swift
 
 # Fast gate before git push — same for everyone (git hook via pre-commit).
 # fmt + JS lint; catches the mistakes that broke CI in seconds.
-prepush: prepush-fmt check-js
+prepush: prepush-fmt check-js check-windows-static
 
 build:
     cargo build --release -p translator
@@ -115,6 +116,12 @@ check-rust:
 
 check-js:
     npm run lint:js
+
+check-windows-static:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    chmod +x scripts/check-windows-lint.sh
+    ./scripts/check-windows-lint.sh
 
 check-swift:
     #!/usr/bin/env bash

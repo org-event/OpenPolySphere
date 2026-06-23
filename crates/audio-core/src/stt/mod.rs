@@ -7,6 +7,8 @@ pub mod local;
 use anyhow::{bail, Context, Result};
 use log::info;
 
+use crate::platform::Capabilities;
+
 pub use deepgram::{deepgram_model_from_env, DeepgramSession, DeepgramStt};
 
 /// Transcript with STT latency info.
@@ -15,15 +17,14 @@ pub struct SttResult {
     pub stt_latency_ms: u64,
 }
 
-enum SttBackend {
-    Local,
-    #[cfg(target_os = "macos")]
-    Apple,
+/// How audio is transcribed for a session.
+enum SttPipeline {
     Deepgram,
+    Local { apple_speech: bool },
 }
 
 pub struct SttEngine {
-    backend: SttBackend,
+    pipeline: SttPipeline,
     deepgram_api_key: String,
     endpointing_ms: u32,
 }
@@ -34,7 +35,7 @@ impl SttEngine {
             .unwrap_or_else(|_| "local".into())
             .to_lowercase();
 
-        let backend = match mode.as_str() {
+        let pipeline = match mode.as_str() {
             "deepgram" | "cloud" => {
                 if deepgram_api_key.trim().is_empty() {
                     bail!("STT_BACKEND=deepgram but DEEPGRAM_API_KEY is not set");
@@ -43,40 +44,35 @@ impl SttEngine {
                     "STT backend: Deepgram (cloud, model={})",
                     deepgram_model_from_env()
                 );
-                SttBackend::Deepgram
+                SttPipeline::Deepgram
             }
             "apple" | "system" | "macos" => {
                 info!("STT backend: Apple Speech (system, on-device)");
-                #[cfg(target_os = "macos")]
-                {
-                    apple::apple_speech_ensure_authorized()
-                        .context("Apple Speech authorization")?;
-                    apple::apple_speech_backend().context("Failed to load Apple Speech STT")?;
-                    SttBackend::Apple
-                }
-                #[cfg(not(target_os = "macos"))]
-                {
-                    bail!("STT_BACKEND=apple but Apple Speech is only available on macOS");
-                }
+                Capabilities::current().require_apple_stt()?;
+                apple::apple_speech_ensure_authorized().context("Apple Speech authorization")?;
+                apple::apple_speech_backend().context("Failed to load Apple Speech STT")?;
+                SttPipeline::Local { apple_speech: true }
             }
             _ => {
                 let device = local::stt_device_name();
                 info!("STT backend: local Whisper ({device})");
                 local::shared_engine().context("Failed to load local Whisper STT")?;
-                SttBackend::Local
+                SttPipeline::Local {
+                    apple_speech: false,
+                }
             }
         };
 
         Ok(Self {
-            backend,
+            pipeline,
             deepgram_api_key,
             endpointing_ms,
         })
     }
 
     pub fn create_session(&self, sample_rate: u32, language: &str) -> Result<SttSession> {
-        match self.backend {
-            SttBackend::Deepgram => {
+        match &self.pipeline {
+            SttPipeline::Deepgram => {
                 let model = deepgram_model_from_env();
                 let stt = DeepgramStt::new(
                     self.deepgram_api_key.clone(),
@@ -88,23 +84,17 @@ impl SttEngine {
                     stt.create_session(sample_rate)?,
                 )))
             }
-            #[cfg(target_os = "macos")]
-            SttBackend::Apple => {
-                #[cfg(target_os = "macos")]
-                {
-                    let backend = apple::apple_speech_backend()?;
-                    Ok(SttSession::Local(local::LocalWhisperSession::from_backend(
-                        backend,
-                        language.to_string(),
-                        self.endpointing_ms,
-                    )))
-                }
-                #[cfg(not(target_os = "macos"))]
-                {
-                    bail!("Apple Speech STT is only available on macOS")
-                }
+            SttPipeline::Local { apple_speech: true } => {
+                let backend = apple::apple_speech_backend()?;
+                Ok(SttSession::Local(local::LocalWhisperSession::from_backend(
+                    backend,
+                    language.to_string(),
+                    self.endpointing_ms,
+                )))
             }
-            SttBackend::Local => {
+            SttPipeline::Local {
+                apple_speech: false,
+            } => {
                 let engine = local::shared_engine()?;
                 Ok(SttSession::Local(local::LocalWhisperSession::new(
                     engine,

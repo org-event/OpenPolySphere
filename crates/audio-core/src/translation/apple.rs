@@ -1,16 +1,14 @@
 //! macOS Apple Translation framework via `apple-translate` helper binary.
 
-use anyhow::{bail, Context, Result};
-
-use super::TranslationDirection;
-
 #[cfg(target_os = "macos")]
-mod macos {
-    use super::*;
+mod imp {
+    use anyhow::{bail, Context, Result};
     use log::debug;
     use serde::Deserialize;
     use std::path::PathBuf;
     use std::process::{Command, Stdio};
+
+    use crate::translation::TranslationDirection;
 
     #[derive(Debug, Clone, Deserialize)]
     struct HelperResponse {
@@ -179,29 +177,42 @@ mod macos {
     }
 }
 
-#[cfg(target_os = "macos")]
-pub use macos::{availability_for_settings, AppleTranslateEngine};
-
 #[cfg(not(target_os = "macos"))]
-pub fn availability_for_settings(_my_lang: &str, _their_lang: &str) -> serde_json::Value {
-    serde_json::json!({
-        "helper": false,
-        "available": false,
-        "ready": false,
-        "status": "unsupported",
-    })
-}
+mod imp {
+    use anyhow::{bail, Result};
 
-#[cfg(not(target_os = "macos"))]
-pub struct AppleTranslateEngine;
+    use crate::translation::TranslationDirection;
 
-#[cfg(not(target_os = "macos"))]
-impl AppleTranslateEngine {
-    pub fn new() -> Result<Self> {
-        bail!("Apple Translation is only available on macOS")
+    pub fn availability_for_settings(_my_lang: &str, _their_lang: &str) -> serde_json::Value {
+        serde_json::json!({
+            "helper": false,
+            "available": false,
+            "ready": false,
+            "status": "unsupported",
+        })
     }
 
-    pub fn translate(&self, _text: &str, _direction: &TranslationDirection) -> Result<String> {
-        bail!("Apple Translation is only available on macOS")
+    pub struct AppleTranslateEngine;
+
+    impl AppleTranslateEngine {
+        pub fn new() -> Result<Self> {
+            bail!("Apple Translation is only available on macOS")
+        }
+
+        pub fn translate(&self, _text: &str, _direction: &TranslationDirection) -> Result<String> {
+            bail!("Apple Translation is only available on macOS")
+        }
+    }
+}
+
+pub use imp::*;
+
+impl crate::translation::backend::TranslateBackend for AppleTranslateEngine {
+    fn translate(
+        &self,
+        text: &str,
+        direction: &crate::translation::TranslationDirection,
+    ) -> anyhow::Result<String> {
+        AppleTranslateEngine::translate(self, text, direction)
     }
 }
