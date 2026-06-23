@@ -41,7 +41,7 @@ Target: **Windows 10/11 x64**. Goal for now: **CI builds on `windows-latest`**, 
 
 ## Local dev (optional)
 
-Native build needs: Rust, CMake, vcpkg OpenBLAS, ONNX Runtime, espeak-ng, Bun (for ESLint). Prefer CI artifact until Phase 2 is done.
+Native build needs: Rust, CMake, vcpkg OpenBLAS (`x64-windows-static`, matches ct2rs `/MT`), ONNX Runtime, espeak-ng, Bun (for ESLint). `.cargo/config.toml` sets `+crt-static` on `x86_64-pc-windows-msvc` — required by ct2rs.
 
 **Local Windows CI parity:**
 

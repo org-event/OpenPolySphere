@@ -78,10 +78,10 @@ jobs:
 
       - name: Install OpenBLAS (vcpkg)
         run: |
-          vcpkg install openblas:x64-windows-static-md
+          vcpkg install openblas:x64-windows-static
           vcpkg integrate install
-          echo "CMAKE_INCLUDE_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows-static-md/include/openblas" >> $env:GITHUB_ENV
-          echo "CMAKE_LIBRARY_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows-static-md/lib" >> $env:GITHUB_ENV
+          echo "CMAKE_INCLUDE_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows-static/include/openblas" >> $env:GITHUB_ENV
+          echo "CMAKE_LIBRARY_PATH=$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows-static/lib" >> $env:GITHUB_ENV
 
       - name: Install espeak-ng
         run: choco install espeak-ng -y
