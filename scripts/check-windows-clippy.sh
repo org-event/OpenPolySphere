@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 case "$(uname -s)" in
   MINGW* | MSYS* | CYGWIN*)
     echo "[..] cargo clippy (native Windows, CI parity)..."
-    cargo clippy -p translator -p audio-core --all-targets -- -D warnings
+    cargo clippy -p translator -p audio-core@0.1.0 --all-targets -- -D warnings
     echo "[ok] Windows clippy passed"
     ;;
   *)

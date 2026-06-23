@@ -7,6 +7,14 @@ use anyhow::{Context, Result};
 use cpal::traits::{DeviceTrait, HostTrait};
 use log::info;
 
+/// Human-readable device name (cpal 0.18+: `description().name()`).
+fn device_label(device: &cpal::Device) -> String {
+    device
+        .description()
+        .map(|d| d.name().to_string())
+        .unwrap_or_else(|_| "unknown".into())
+}
+
 /// List all available audio devices (useful for debugging).
 /// Returns (input_names, output_names).
 pub fn list_devices() -> Result<(Vec<String>, Vec<String>)> {
@@ -16,12 +24,12 @@ pub fn list_devices() -> Result<(Vec<String>, Vec<String>)> {
     let mut output_names = Vec::new();
 
     if let Some(dev) = host.default_input_device() {
-        let name = dev.name().unwrap_or_else(|_| "unknown".into());
+        let name = device_label(&dev);
         info!("Default input device: {}", name);
     }
 
     if let Some(dev) = host.default_output_device() {
-        let name = dev.name().unwrap_or_else(|_| "unknown".into());
+        let name = device_label(&dev);
         info!("Default output device: {}", name);
     }
 
@@ -31,7 +39,7 @@ pub fn list_devices() -> Result<(Vec<String>, Vec<String>)> {
 
     info!("Available input devices:");
     for device in inputs {
-        let name = device.name().unwrap_or_else(|_| "unknown".into());
+        let name = device_label(&device);
         info!("  - {}", name);
         input_names.push(name);
     }
@@ -42,7 +50,7 @@ pub fn list_devices() -> Result<(Vec<String>, Vec<String>)> {
 
     info!("Available output devices:");
     for device in outputs {
-        let name = device.name().unwrap_or_else(|_| "unknown".into());
+        let name = device_label(&device);
         info!("  - {}", name);
         output_names.push(name);
     }

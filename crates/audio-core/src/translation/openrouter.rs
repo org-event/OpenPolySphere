@@ -325,20 +325,19 @@ impl OpenRouterClient {
             obj.insert("model".into(), serde_json::Value::String(model.to_string()));
         }
 
-        let mut req = ureq::post(&self.api_url)
-            .set("Authorization", &format!("Bearer {}", self.api_key))
-            .set("Content-Type", "application/json")
-            .set("HTTP-Referer", "http://127.0.0.1:5050")
-            .set("X-Title", "call-translator");
+        let mut config = ureq::post(&self.api_url)
+            .header("Authorization", &format!("Bearer {}", self.api_key))
+            .header("Content-Type", "application/json")
+            .header("HTTP-Referer", "http://127.0.0.1:5050")
+            .header("X-Title", "call-translator")
+            .config()
+            .http_status_as_error(false);
         if let Some(t) = timeout {
-            req = req.timeout(t);
+            config = config.timeout_global(Some(t));
         }
-        let response = match req.send_json(req_body) {
+
+        let mut response = match config.build().send_json(req_body) {
             Ok(resp) => resp,
-            Err(ureq::Error::Status(code, resp)) => {
-                let raw = resp.into_string().unwrap_or_default();
-                return Err(parse_error_response(code, model, &raw));
-            }
             Err(e) => {
                 return Err(TranslateFailure {
                     status: 0,
@@ -350,13 +349,23 @@ impl OpenRouterClient {
             }
         };
 
-        let parsed: LlmResponse = response.into_json().map_err(|e| TranslateFailure {
-            status: 500,
-            message: format!("Failed to parse response: {e:#}"),
-            retry_after: None,
-            provider: None,
-            model: model.to_string(),
-        })?;
+        let status = response.status().as_u16();
+        if status >= 400 {
+            let raw = response.body_mut().read_to_string().unwrap_or_default();
+            return Err(parse_error_response(status, model, &raw));
+        }
+
+        let parsed: LlmResponse =
+            response
+                .body_mut()
+                .read_json()
+                .map_err(|e| TranslateFailure {
+                    status: 500,
+                    message: format!("Failed to parse response: {e:#}"),
+                    retry_after: None,
+                    provider: None,
+                    model: model.to_string(),
+                })?;
 
         Ok(parsed
             .choices

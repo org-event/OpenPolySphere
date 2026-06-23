@@ -129,7 +129,7 @@ prepush-fmt:
 
 prepush-rust:
     @just prepush-fmt
-    cargo clippy -p translator -p audio-core --all-targets -- -D warnings
+    cargo clippy -p translator -p audio-core@0.1.0 --all-targets -- -D warnings
 
 check-rust:
     @just prepush-rust

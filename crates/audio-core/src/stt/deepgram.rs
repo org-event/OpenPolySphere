@@ -117,7 +117,7 @@ impl DeepgramSession {
             })
             .collect();
 
-        match self.ws.send(Message::Binary(bytes)) {
+        match self.ws.send(Message::Binary(bytes.into())) {
             Ok(()) => {
                 self.audio_sent_secs += samples.len() as f64 / self.sample_rate as f64;
                 self.last_send_time = Instant::now();
@@ -174,7 +174,7 @@ impl DeepgramSession {
     }
 
     pub fn close(&mut self) {
-        let _ = self.ws.send(Message::Binary(vec![]));
+        let _ = self.ws.send(Message::Binary(vec![].into()));
         let _ = self.ws.close(None);
     }
 }

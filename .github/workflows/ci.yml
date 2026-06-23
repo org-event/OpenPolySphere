@@ -19,6 +19,9 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   # JS-based Actions runtime (not project Node — we use Bun). Node 26 is not on GHA yet; 24 is the current target.
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -32,7 +35,7 @@ jobs:
       workflows: ${{ steps.filter.outputs.workflows }}
     steps:
       - uses: actions/checkout@v7
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -186,7 +189,7 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Clippy
-        run: cargo clippy -p translator -p audio-core --all-targets -- -D warnings
+        run: cargo clippy -p translator -p audio-core@0.1.0 --all-targets -- -D warnings
 
       - name: Build release
         run: cargo build --release -p translator
