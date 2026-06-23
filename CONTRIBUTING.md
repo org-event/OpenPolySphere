@@ -49,6 +49,20 @@ Do **not** use `git merge origin/main` or `git pull` without rebase.
 
 **Merge PRs on GitHub:** use **Rebase and merge** (or Squash and merge for a single commit). **Create a merge commit** is disabled.
 
+**Direct push to `main` is disallowed** — open a PR. Apply once per repo: `./scripts/apply-main-branch-protection.sh`
+
+### CI on pull requests
+
+Heavy jobs (macOS / Windows build) run only when Rust, workflows, or related scripts change — not on docs-only PRs. Security audits (RustSec, CodeQL) still run separately.
+
+| Label | Effect |
+|-------|--------|
+| `ci/windows-only` | Skip macOS job on this PR (Windows CI still runs). Remove before merging to `main`. |
+
+Manual full platform run: **Actions → CI → Run workflow** (`workflow_dispatch`).
+
+See [ADR 0002](docs/adr/0002-ci-platform-tiers.md).
+
 
 ```bash
 git clone https://github.com/org-event/Banyan.git
