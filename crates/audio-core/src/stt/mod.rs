@@ -4,9 +4,7 @@ pub mod apple;
 mod deepgram;
 pub mod local;
 
-#[cfg(target_os = "macos")]
-use anyhow::Context;
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use log::info;
 
 pub use deepgram::{deepgram_model_from_env, DeepgramSession, DeepgramStt};
