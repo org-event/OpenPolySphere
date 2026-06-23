@@ -20,7 +20,8 @@ The All-Rust stack runs as a single `translator` binary (Axum on `127.0.0.1:5050
 ## Not in scope yet
 
 - Code signing / notarization
-- Auto-update channel
 - GPU Whisper / whisper-tiny optimizations
+
+Auto-update is tracked in the backlog (**U1–U5**): versioning and GitHub Releases check first on the Axum stack; full signed self-update with `tauri-plugin-updater` in phase 7. See [Banyan.ru.md — Обновления приложения](backlog/Banyan.ru.md#обновления-приложения-auto-update) / [Banyan.md — Application updates](backlog/Banyan.md#application-updates-auto-update).
 
 When starting Phase 5, add a `crates/translator-tauri/` workspace member or a top-level `src-tauri/` that depends on the existing static assets and sidecar build.
