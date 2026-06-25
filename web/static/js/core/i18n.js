@@ -38,7 +38,7 @@ export function applyDocumentI18n() {
     else el.textContent = val;
   });
   document.querySelectorAll('[data-i18n-html]').forEach((el) => {
-    el.innerHTML = t(el.getAttribute('data-i18n-html'));
+    el.textContent = t(el.getAttribute('data-i18n-html'));
   });
   document.querySelectorAll('[data-i18n-title]').forEach((el) => {
     el.title = t(el.getAttribute('data-i18n-title'));
