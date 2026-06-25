@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Require pull requests before merging into main (no direct pushes).
-# Linear history is already enabled on org-event/Banyan.
+# Linear history is already enabled on org-event/OpenPolySphere.
 #
 # Optional: set REQUIRED_CHECKS to a comma-separated list of GitHub check contexts
 # (e.g. "macos,windows,rustfmt,js,cargo audit (RustSec),bun audit").
@@ -10,7 +10,7 @@
 #   ./scripts/apply-main-branch-protection.sh --dry-run
 set -euo pipefail
 
-REPO="${GITHUB_REPO:-org-event/Banyan}"
+REPO="${GITHUB_REPO:-org-event/OpenPolySphere}"
 DRY=false
 [[ "${1:-}" == "--dry-run" ]] && DRY=true
 

@@ -1,4 +1,4 @@
-//! macOS system speech via `BanyanSpeech.app` helper (Speech framework).
+//! macOS system speech via `PolySphereSpeech.app` helper (Speech framework).
 
 #[cfg(target_os = "macos")]
 mod imp {
@@ -80,7 +80,7 @@ mod imp {
         }
         [
             PathBuf::from(format!("target/release/{SPEECH_AUTH_APP}")),
-            PathBuf::from(format!("tools/banyan-speech-auth/{SPEECH_AUTH_APP}")),
+            PathBuf::from(format!("tools/polysphere-speech-auth/{SPEECH_AUTH_APP}")),
         ]
         .into_iter()
         .find(|candidate| candidate.is_dir())
@@ -88,14 +88,14 @@ mod imp {
 
     pub fn request_authorization() -> Result<serde_json::Value> {
         let app =
-            auth_app_path().context("BanyanSpeech.app not found (rebuild translator on macOS)")?;
+            auth_app_path().context("PolySphereSpeech.app not found (rebuild translator on macOS)")?;
         let out = std::env::temp_dir().join(format!(
             "call-translator-speech-auth-{}.json",
             std::process::id()
         ));
         let _ = std::fs::remove_file(&out);
 
-        log::info!("Opening speech recognition permission dialog (BanyanSpeech.app)...");
+        log::info!("Opening speech recognition permission dialog (PolySphereSpeech.app)...");
         let status = Command::new("open")
             .arg("-W")
             .arg("-a")
@@ -113,7 +113,7 @@ mod imp {
         }
 
         if !status.success() {
-            bail!("BanyanSpeech.app exited without granting speech recognition");
+            bail!("PolySphereSpeech.app exited without granting speech recognition");
         }
 
         let check = run_helper(
@@ -128,7 +128,7 @@ mod imp {
         Ok(serde_json::json!({
             "authorization": check.as_ref().map(|r| r.authorization.as_str()).unwrap_or("unknown"),
             "ready": check.as_ref().map(|r| r.ready).unwrap_or(false),
-            "message": "Open System Settings → Privacy & Security → Speech Recognition and allow Banyan Speech.",
+            "message": "Open System Settings → Privacy & Security → Speech Recognition and allow PolySphere Speech.",
         }))
     }
 
@@ -139,7 +139,7 @@ mod imp {
             .and_then(|v| v.as_bool())
             .unwrap_or(false)
         {
-            log::info!("Banyan Speech already authorized for {lang}");
+            log::info!("PolySphere Speech already authorized for {lang}");
             return Ok(());
         }
         log::info!(
@@ -151,7 +151,7 @@ mod imp {
             .and_then(|v| v.as_bool())
             .unwrap_or(false)
         {
-            log::info!("Banyan Speech authorized");
+            log::info!("PolySphere Speech authorized");
             return Ok(());
         }
         let auth = result
@@ -159,7 +159,7 @@ mod imp {
             .and_then(|v| v.as_str())
             .unwrap_or("unknown");
         bail!(
-            "Speech recognition not authorized ({auth}). Enable Banyan Speech in System Settings → Privacy & Security → Speech Recognition."
+            "Speech recognition not authorized ({auth}). Enable PolySphere Speech in System Settings → Privacy & Security → Speech Recognition."
         );
     }
 
@@ -173,7 +173,7 @@ mod imp {
         context: Option<&str>,
     ) -> Result<HelperResponse> {
         let app =
-            auth_app_path().context("BanyanSpeech.app not found (rebuild translator on macOS)")?;
+            auth_app_path().context("PolySphereSpeech.app not found (rebuild translator on macOS)")?;
         let seq = HELPER_SEQ.fetch_add(1, Ordering::Relaxed);
         let out = std::env::temp_dir().join(format!("lt-speech-{}-{seq}.json", std::process::id()));
         let _ = std::fs::remove_file(&out);
@@ -205,7 +205,7 @@ mod imp {
         open_args.push("--out".into());
         open_args.push(out.to_string_lossy().into_owned());
 
-        debug!("BanyanSpeech.app: {}", open_args.join(" "));
+        debug!("PolySphereSpeech.app: {}", open_args.join(" "));
 
         let status = Command::new("open")
             .arg("-W")
@@ -221,20 +221,20 @@ mod imp {
         }
 
         if !out.is_file() {
-            bail!("BanyanSpeech returned no output (status={status})");
+            bail!("PolySphereSpeech returned no output (status={status})");
         }
 
         let raw = std::fs::read_to_string(&out)?;
         let _ = std::fs::remove_file(&out);
         let line = raw.lines().next().unwrap_or("").trim();
         if line.is_empty() {
-            bail!("BanyanSpeech returned empty JSON (status={status})");
+            bail!("PolySphereSpeech returned empty JSON (status={status})");
         }
 
         let resp: HelperResponse =
-            serde_json::from_str(line).context("parse BanyanSpeech JSON response")?;
+            serde_json::from_str(line).context("parse PolySphereSpeech JSON response")?;
         if !status.success() && resp.error.is_empty() {
-            bail!("BanyanSpeech failed (status={status})");
+            bail!("PolySphereSpeech failed (status={status})");
         }
         Ok(resp)
     }
@@ -262,7 +262,7 @@ mod imp {
                 "authorization": resp.authorization,
             }),
             Err(e) => {
-                log::debug!("BanyanSpeech check failed: {e:#}");
+                log::debug!("PolySphereSpeech check failed: {e:#}");
                 serde_json::json!({
                     "helper": true,
                     "available": true,
@@ -370,7 +370,7 @@ mod imp {
 
     pub fn shared_backend() -> Result<std::sync::Arc<AppleSpeechBackend>> {
         if helper_path().is_none() {
-            bail!("Banyan Speech helper binary is not available on this system");
+            bail!("PolySphere Speech helper binary is not available on this system");
         }
         Ok(ENGINE
             .get_or_init(|| std::sync::Arc::new(AppleSpeechBackend))
@@ -405,7 +405,7 @@ mod imp {
     }
 
     pub fn apple_speech_request_authorization() -> Result<serde_json::Value> {
-        bail!("Banyan Speech is only available on macOS")
+        bail!("PolySphere Speech is only available on macOS")
     }
 
     pub fn apple_speech_availability(_lang: &str) -> serde_json::Value {
@@ -418,7 +418,7 @@ mod imp {
     }
 
     pub fn apple_speech_backend() -> Result<std::sync::Arc<dyn crate::stt::local::WhisperBackend>> {
-        bail!("Banyan Speech is only available on macOS")
+        bail!("PolySphere Speech is only available on macOS")
     }
 }
 

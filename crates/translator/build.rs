@@ -98,21 +98,21 @@ fn main() {
     build_swift_tool(
         &manifest,
         &out_dir,
-        "banyan-translate",
-        "../../tools/banyan-translate",
+        "polysphere-translate",
+        "../../tools/polysphere-translate",
     );
     build_speech_app(&manifest, &out_dir);
 }
 
 fn build_speech_app(manifest: &Path, out_dir: &Path) {
-    let tool_dir = manifest.join("../../tools/banyan-speech-auth");
+    let tool_dir = manifest.join("../../tools/polysphere-speech-auth");
     if !tool_dir.join("Package.swift").is_file() {
-        println!("cargo:warning=banyan-speech-auth sources not found; skipping");
+        println!("cargo:warning=polysphere-speech-auth sources not found; skipping");
         return;
     }
 
-    let scratch = out_dir.join("swift-build-BanyanSpeech");
-    let product = "BanyanSpeech";
+    let scratch = out_dir.join("swift-build-PolySphereSpeech");
+    let product = "PolySphereSpeech";
 
     let swift_build = Command::new("swift")
         .args([
@@ -166,20 +166,20 @@ fn build_speech_app(manifest: &Path, out_dir: &Path) {
         return;
     }
 
-    let staging = out_dir.join("BanyanSpeech.app");
+    let staging = out_dir.join("PolySphereSpeech.app");
     let contents = staging.join("Contents");
     let macos = contents.join("MacOS");
     let _ = std::fs::remove_dir_all(&staging);
     if std::fs::create_dir_all(&macos).is_err() {
-        println!("cargo:warning=failed to create BanyanSpeech.app layout");
+        println!("cargo:warning=failed to create PolySphereSpeech.app layout");
         return;
     }
     if std::fs::copy(tool_dir.join("Info.plist"), contents.join("Info.plist")).is_err() {
-        println!("cargo:warning=failed to copy BanyanSpeechAuth Info.plist");
+        println!("cargo:warning=failed to copy PolySphereSpeechAuth Info.plist");
         return;
     }
     if std::fs::copy(&built, macos.join(product)).is_err() {
-        println!("cargo:warning=failed to copy BanyanSpeech binary into .app");
+        println!("cargo:warning=failed to copy PolySphereSpeech binary into .app");
         return;
     }
 
@@ -188,7 +188,7 @@ fn build_speech_app(manifest: &Path, out_dir: &Path) {
         .and_then(|p| p.parent())
         .and_then(|p| p.parent())
     {
-        let dest = profile_dir.join("BanyanSpeech.app");
+        let dest = profile_dir.join("PolySphereSpeech.app");
         let _ = std::fs::remove_dir_all(&dest);
         let _ = copy_dir_all(&staging, &dest);
     }

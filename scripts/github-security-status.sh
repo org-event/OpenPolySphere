@@ -2,7 +2,7 @@
 # Print GitHub Security & Quality posture for this repo (read-only).
 set -euo pipefail
 
-REPO="${GITHUB_REPO:-org-event/Banyan}"
+REPO="${GITHUB_REPO:-org-event/OpenPolySphere}"
 
 echo "=== $REPO — Security & Quality ==="
 echo

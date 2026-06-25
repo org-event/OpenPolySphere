@@ -5,7 +5,7 @@
 | Version | Supported |
 | --- | --- |
 | `main` branch | Yes |
-| Latest [release](https://github.com/org-event/Banyan/releases/latest) | Yes |
+| Latest [release](https://github.com/org-event/OpenPolySphere/releases/latest) | Yes |
 | Other branches / older releases | Best effort |
 
 ## Reporting a Vulnerability
@@ -14,9 +14,9 @@
 
 Use GitHub **private vulnerability reporting** (preferred):
 
-https://github.com/org-event/Banyan/security/advisories/new
+https://github.com/org-event/OpenPolySphere/security/advisories/new
 
-Maintainers can also publish coordinated disclosures via [Security Advisories](https://github.com/org-event/Banyan/security/advisories).
+Maintainers can also publish coordinated disclosures via [Security Advisories](https://github.com/org-event/OpenPolySphere/security/advisories).
 
 We aim to acknowledge valid reports within **7 days** and share a remediation timeline once confirmed.
 

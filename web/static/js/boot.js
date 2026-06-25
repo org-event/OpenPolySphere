@@ -13,6 +13,7 @@ import { initKeyMasking } from './settings/keys.js';
 import { initSttListeners } from './settings/stt.js';
 import { initTranslationListeners } from './settings/translation.js';
 import { initSettingsPanel } from './settings/panel.js';
+import { initBrandLogo, showOverlayLogo } from './ui/brand-logo.js';
 
 export async function waitForEngine() {
   const overlay = document.getElementById('overlay');
@@ -22,12 +23,13 @@ export async function waitForEngine() {
     try {
       const r = await fetch('/health');
       if (r.ok) {
+        spinner.style.display = 'none';
+        await showOverlayLogo();
         text.className = 'ready';
         text.textContent = t('app.connected');
-        spinner.style.display = 'none';
         state.sessionStart = Date.now();
         await syncEngineStatus();
-        await sleep(600);
+        await sleep(900);
         overlay.className = 'hidden';
         return;
       }
@@ -37,6 +39,7 @@ export async function waitForEngine() {
 }
 
 export async function boot() {
+  initBrandLogo();
   initTheme();
   initKeyMasking();
   initSttListeners();

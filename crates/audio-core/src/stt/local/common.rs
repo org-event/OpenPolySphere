@@ -268,7 +268,7 @@ fn passes_language_check(text: &str, expected_lang: &str) -> bool {
         return false;
     }
     if apple_stt_enabled() {
-        // Banyan Speech on a fixed locale — allow Russian/English code-switching.
+        // PolySphere Speech on a fixed locale — allow Russian/English code-switching.
         return total >= 2;
     }
     match expected_lang {

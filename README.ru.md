@@ -1,3 +1,9 @@
+<div align="center">
+
+[![OpenPolySphere](docs/readme-logo.png)](https://github.com/org-event/OpenPolySphere)
+
+</div>
+
 # Realtime Call Translator
 
 [![English version](https://img.shields.io/badge/lang-english-blue)](README.md)
@@ -18,8 +24,8 @@
 ## Быстрый старт
 
 ```bash
-git clone https://github.com/org-event/Banyan.git
-cd Banyan
+git clone https://github.com/org-event/OpenPolySphere.git
+cd OpenPolySphere
 ./scripts/bootstrap                          # dev-зависимости + git hooks (как bun install)
 cargo run --release -p translator -- setup   # первый раз: скачать модели
 cargo run --release -p translator            # запуск сервера

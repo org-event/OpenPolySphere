@@ -219,12 +219,12 @@ export async function downloadWhisperModel() {
 }
 
 export async function requestAppleSpeechAuth() {
-  const btn = document.getElementById('btn-banyan-speech-auth');
+  const btn = document.getElementById('btn-polysphere-speech-auth');
   if (!btn || btn.classList.contains('loading')) return;
   btn.classList.add('loading');
   btn.textContent = t('settings.requesting');
   try {
-    const r = await fetch('/api/banyan-speech-authorize', { method: 'POST' });
+    const r = await fetch('/api/polysphere-speech-authorize', { method: 'POST' });
     const data = await r.json();
     if (data.error) throw new Error(data.error);
     showToast(data.message || 'Authorization: ' + (data.authorization || 'unknown'));
@@ -233,7 +233,7 @@ export async function requestAppleSpeechAuth() {
     showToast(t('toast.authFailed', { error: e.message }));
   }
   btn.classList.remove('loading');
-  btn.textContent = t('settings.allowBanyanSpeech');
+  btn.textContent = t('settings.allowPolySphereSpeech');
 }
 
 export function initSttListeners() {

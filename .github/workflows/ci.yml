@@ -132,7 +132,7 @@ jobs:
       - name: Verify build
         run: |
           test -x target/release/translator
-          test -d target/release/BanyanSpeech.app
+          test -d target/release/PolySphereSpeech.app
           ./target/release/translator --help
 
   windows:
@@ -203,14 +203,14 @@ jobs:
       - name: Package artifact
         shell: pwsh
         run: |
-          $dest = "dist/banyan-windows-x64"
+          $dest = "dist/openpolysphere-windows-x64"
           New-Item -ItemType Directory -Force -Path $dest | Out-Null
           Copy-Item target/release/translator.exe $dest/
           Copy-Item ort/onnxruntime-win-x64-$env:ORT_VERSION/lib/onnxruntime.dll $dest/
           Copy-Item -Recurse web $dest/web
           Copy-Item .env.example, README.md $dest/
           @(
-            "Banyan Windows CI artifact (Windows 10/11 x64)",
+            "OpenPolySphere Windows CI artifact (Windows 10/11 x64)",
             "",
             "1. Unzip to a folder",
             "2. .\translator.exe --help",
@@ -223,6 +223,6 @@ jobs:
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: banyan-windows-x64
-          path: dist/banyan-windows-x64
+          name: openpolysphere-windows-x64
+          path: dist/openpolysphere-windows-x64
           retention-days: 14

@@ -1,4 +1,4 @@
-//! Translation backends: local CTranslate2 (default), Banyan Translate (macOS), or OpenRouter cloud.
+//! Translation backends: local CTranslate2 (default), PolySphere Translate (macOS), or OpenRouter cloud.
 
 mod apple;
 mod backend;
@@ -140,7 +140,7 @@ impl TranslationEngine {
                 (Box::new(OpenRouterClient::new()?), false)
             }
             "apple" | "system" | "macos" => {
-                info!("Translation backend: Banyan Translate (system, on-device)");
+                info!("Translation backend: PolySphere Translate (system, on-device)");
                 Capabilities::current().require_apple_translation()?;
                 (Box::new(apple::AppleTranslateEngine::new()?), false)
             }

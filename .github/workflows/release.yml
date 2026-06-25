@@ -49,7 +49,7 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           ARCH="$(uname -m)"
-          NAME="banyan-${VERSION}-macos-${ARCH}"
+          NAME="openpolysphere-${VERSION}-macos-${ARCH}"
           STAGING="dist/${NAME}"
           mkdir -p dist
           rm -rf "$STAGING"
@@ -60,8 +60,8 @@ jobs:
           cp -R web "$STAGING/"
           cp .env.example README.md "$STAGING/"
           [[ -f README.ru.md ]] && cp README.ru.md "$STAGING/"
-          cp -R target/release/BanyanSpeech.app "$STAGING/"
-          [[ -f target/release/banyan-translate ]] && cp target/release/banyan-translate "$STAGING/"
+          cp -R target/release/PolySphereSpeech.app "$STAGING/"
+          [[ -f target/release/polysphere-translate ]] && cp target/release/polysphere-translate "$STAGING/"
 
           printf '%s\n' \
             '#!/usr/bin/env bash' \
@@ -137,7 +137,7 @@ jobs:
         shell: pwsh
         run: |
           $VERSION = "${{ github.ref_name }}".Substring(1)
-          $NAME = "banyan-${VERSION}-windows-x64"
+          $NAME = "openpolysphere-${VERSION}-windows-x64"
           $STAGING = "dist/$NAME"
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           if (Test-Path $STAGING) { Remove-Item -Recurse -Force $STAGING }
@@ -148,7 +148,7 @@ jobs:
           Copy-Item .env.example, README.md $STAGING/
           if (Test-Path README.ru.md) { Copy-Item README.ru.md $STAGING/ }
           @(
-            "Banyan Windows release (Windows 10/11 x64)",
+            "OpenPolySphere Windows release (Windows 10/11 x64)",
             "",
             "1. Unzip to a folder",
             "2. .\translator.exe setup   (downloads models)",

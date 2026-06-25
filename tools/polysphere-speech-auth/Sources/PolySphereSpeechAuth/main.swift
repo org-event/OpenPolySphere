@@ -185,7 +185,7 @@ func recognizeOnMain(
     let auth = SFSpeechRecognizer.authorizationStatus()
     guard auth == .authorized else {
         emit([
-            "error": "Speech recognition not authorized (\(authorizationStatusString(auth))). Click “Allow Banyan Speech” in Settings.",
+            "error": "Speech recognition not authorized (\(authorizationStatusString(auth))). Click “Allow PolySphere Speech” in Settings.",
             "authorization": authorizationStatusString(auth),
         ], outPath: outPath)
         return
@@ -343,7 +343,7 @@ enum LiveTranslateSpeechMain {
             )
             exit(0)
         default:
-            // `open -W BanyanSpeech.app --args /tmp/auth.json` passes the output path.
+            // `open -W PolySphereSpeech.app --args /tmp/auth.json` passes the output path.
             authorizeApp(outPath: first)
         }
     }
