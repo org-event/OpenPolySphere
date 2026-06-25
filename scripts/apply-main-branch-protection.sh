@@ -30,7 +30,7 @@ payload=$(jq -n \
     required_pull_request_reviews: {
       dismiss_stale_reviews: false,
       require_code_owner_reviews: false,
-      required_approving_review_count: 0
+      required_approving_review_count: 1
     },
     restrictions: null,
     required_linear_history: true,
@@ -52,7 +52,7 @@ gh api \
   "/repos/$REPO/branches/main/protection" \
   --input - <<<"$payload"
 
-echo "[ok] main: pull request required before merge (0 approvals minimum)"
+echo "[ok] main: pull request required before merge (1 approval minimum)"
 if [[ "$status_checks_json" == "null" ]]; then
   echo "[i] No required status checks (set REQUIRED_CHECKS to enable)."
 else

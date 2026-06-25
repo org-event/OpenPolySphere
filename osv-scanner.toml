@@ -1,0 +1,8 @@
+# OSV-Scanner ignores for OpenSSF Scorecard (mirrors .cargo/audit.toml).
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0436"
+reason = "Transitive via ct2rs/tokenizers; proc-macro only"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0173"
+reason = "Transitive via optional defmt integration"

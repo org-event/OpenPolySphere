@@ -1,7 +1,7 @@
 pub mod audio;
 pub mod engine;
 pub mod platform;
-pub mod protocol;
+pub use audio_protocol as protocol;
 pub mod stt;
 pub mod translation;
 pub mod tts;

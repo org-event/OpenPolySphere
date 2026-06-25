@@ -12,6 +12,7 @@ name = "audio_engine"
 path = "src/bin/audio_engine.rs"
 
 [dependencies]
+audio-protocol = { path = "../audio-protocol" }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 log = "0.4.29"

@@ -39,3 +39,4 @@ article.md
 LAUNCH_PLAN.md
 HANDOFF.md
 docs/backlog/
+docs/*.local.md

@@ -160,6 +160,7 @@ name = "audio-core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "audio-protocol",
  "base64 0.22.1",
  "cpal",
  "crossbeam-channel",
@@ -182,6 +183,15 @@ name = "audio-core"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f93ebbf82d06013f4c41fe71303feb980cddd78496d904d06be627972de51a24"
+
+[[package]]
+name = "audio-protocol"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "audioadapter"
