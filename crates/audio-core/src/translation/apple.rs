@@ -1,4 +1,4 @@
-//! macOS system translation via `banyan-translate` helper binary.
+//! macOS system translation via `polysphere-translate` helper binary.
 
 #[cfg(target_os = "macos")]
 mod imp {
@@ -43,7 +43,7 @@ mod imp {
         [
             PathBuf::from(format!("bin/{TRANSLATE_BINARY}")),
             PathBuf::from(format!(
-                "tools/banyan-translate/.build/release/{TRANSLATE_BINARY}"
+                "tools/polysphere-translate/.build/release/{TRANSLATE_BINARY}"
             )),
         ]
         .into_iter()
@@ -52,9 +52,9 @@ mod imp {
 
     fn run_helper(args: &[&str]) -> Result<HelperResponse> {
         let bin = helper_path().context(
-            "banyan-translate helper not found (rebuild on macOS 15+ or set BANYAN_TRANSLATE_HELPER)",
+            "polysphere-translate helper not found (rebuild on macOS 15+ or set POLYSPHERE_TRANSLATE_HELPER)",
         )?;
-        debug!("banyan-translate: {} {}", bin.display(), args.join(" "));
+        debug!("polysphere-translate: {} {}", bin.display(), args.join(" "));
 
         let output = Command::new(&bin)
             .args(args)
@@ -68,16 +68,16 @@ mod imp {
         if line.is_empty() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             bail!(
-                "banyan-translate returned no output (status={}): {}",
+                "polysphere-translate returned no output (status={}): {}",
                 output.status,
                 stderr.trim()
             );
         }
 
         let resp: HelperResponse =
-            serde_json::from_str(line).context("parse banyan-translate JSON response")?;
+            serde_json::from_str(line).context("parse polysphere-translate JSON response")?;
         if !output.status.success() && resp.error.is_empty() {
-            bail!("banyan-translate failed (status={})", output.status);
+            bail!("polysphere-translate failed (status={})", output.status);
         }
         Ok(resp)
     }
@@ -111,7 +111,7 @@ mod imp {
     impl AppleTranslateEngine {
         pub fn new() -> Result<Self> {
             if helper_path().is_none() {
-                bail!("Banyan Translate helper binary is not available on this system");
+                bail!("PolySphere Translate helper binary is not available on this system");
             }
             Ok(Self)
         }
@@ -199,11 +199,11 @@ mod imp {
 
     impl AppleTranslateEngine {
         pub fn new() -> Result<Self> {
-            bail!("Banyan Translate is only available on macOS")
+            bail!("PolySphere Translate is only available on macOS")
         }
 
         pub fn translate(&self, _text: &str, _direction: &TranslationDirection) -> Result<String> {
-            bail!("Banyan Translate is only available on macOS")
+            bail!("PolySphere Translate is only available on macOS")
         }
     }
 }

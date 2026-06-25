@@ -58,7 +58,7 @@ final class AuthorizeDelegate: NSObject, NSApplicationDelegate {
                 "ready": status == .authorized,
                 "message": status == .authorized
                     ? "Speech recognition authorized"
-                    : "Open System Settings → Privacy & Security → Speech Recognition and allow Banyan Speech.",
+                    : "Open System Settings → Privacy & Security → Speech Recognition and allow PolySphere Speech.",
             ]
             emit(payload)
             NSApplication.shared.terminate(status == .authorized ? 0 : 1)
@@ -140,7 +140,7 @@ func recognizeOnMain(lang: String, sampleRate: Int, samples: [Float]) async {
     let auth = SFSpeechRecognizer.authorizationStatus()
     guard auth == .authorized else {
         emit([
-            "error": "Speech recognition not authorized (\(authorizationStatusString(auth))). Click “Allow Banyan Speech” in Settings.",
+            "error": "Speech recognition not authorized (\(authorizationStatusString(auth))). Click “Allow PolySphere Speech” in Settings.",
             "authorization": authorizationStatusString(auth),
         ])
         return
@@ -220,16 +220,16 @@ enum AppleSpeechMain {
     static func main() {
         let args = Array(CommandLine.arguments.dropFirst())
         guard let command = args.first else {
-            fputs("usage: banyan-speech check <lang>\n", stderr)
-            fputs("       banyan-speech authorize\n", stderr)
-            fputs("       banyan-speech recognize <lang> <sample_rate> [pcm_file]\n", stderr)
+            fputs("usage: polysphere-speech check <lang>\n", stderr)
+            fputs("       polysphere-speech authorize\n", stderr)
+            fputs("       polysphere-speech recognize <lang> <sample_rate> [pcm_file]\n", stderr)
             exit(2)
         }
 
         switch command {
         case "check":
             guard args.count == 2 else {
-                fputs("usage: banyan-speech check <lang>\n", stderr)
+                fputs("usage: polysphere-speech check <lang>\n", stderr)
                 exit(2)
             }
             check(lang: args[1])
@@ -237,7 +237,7 @@ enum AppleSpeechMain {
             authorizeSync()
         case "recognize":
             guard args.count >= 3 else {
-                fputs("usage: banyan-speech recognize <lang> <sample_rate> [pcm_file]\n", stderr)
+                fputs("usage: polysphere-speech recognize <lang> <sample_rate> [pcm_file]\n", stderr)
                 exit(2)
             }
             let lang = args[1]

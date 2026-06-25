@@ -74,7 +74,7 @@ install-system:
       Linux)
         echo "[i] Linux: optional runtime libs for local build:"
         echo "    Debian/Ubuntu: sudo apt install espeak-ng libonnxruntime-dev pkg-config"
-        echo "    Banyan Speech / Swift checks are skipped on Linux (CI runs them on macOS)."
+        echo "    PolySphere Speech / Swift checks are skipped on Linux (CI runs them on macOS)."
         echo "    just prepush includes check-windows-static (fast cfg guards for all hosts)."
         ;;
       MINGW*|MSYS*|CYGWIN*)
@@ -164,16 +164,16 @@ check-swift:
       echo "[!] Swift not found. Run: xcode-select --install"
       exit 1
     fi
-    # Banyan Translate APIs need the macOS 15+ SDK (Xcode 16+); TranslationSession needs macOS 26 SDK.
+    # PolySphere Translate APIs need the macOS 15+ SDK (Xcode 16+); TranslationSession needs macOS 26 SDK.
     if ! xcrun --sdk macosx --show-sdk-version 2>/dev/null | awk -F. '{ exit !($1 >= 15) }'; then
       echo "[skip] Swift Translation checks need macOS 15+ SDK (install Xcode 16+)"
       exit 0
     fi
-    for pkg in tools/banyan-speech-auth tools/banyan-translate tools/banyan-speech; do
+    for pkg in tools/polysphere-speech-auth tools/polysphere-translate tools/polysphere-speech; do
       echo "==> swift build $pkg"
-      if [[ "$pkg" == "tools/banyan-translate" ]]; then
+      if [[ "$pkg" == "tools/polysphere-translate" ]]; then
         if ! xcrun --sdk macosx --show-sdk-version 2>/dev/null | awk -F. '{ exit !($1 >= 26) }'; then
-          echo "[skip] banyan-translate needs macOS 26 SDK (Xcode 26+) for TranslationSession"
+          echo "[skip] polysphere-translate needs macOS 26 SDK (Xcode 26+) for TranslationSession"
           continue
         fi
       fi

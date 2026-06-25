@@ -6,7 +6,7 @@
 
 ## Контекст
 
-Banyan изначально macOS-first (Banyan Speech, Metal Whisper, Banyan Translate). Параллельно идёт порт на Windows: CI на `windows-latest` с `cargo clippy -D warnings`.
+OpenPolySphere изначально macOS-first (PolySphere Speech, Metal Whisper, PolySphere Translate). Параллельно идёт порт на Windows: CI на `windows-latest` с `cargo clippy -D warnings`.
 
 Разработка в основном на macOS. На Mac host-clippy зелёный, на Windows — падает на типичных ошибках:
 
@@ -35,7 +35,7 @@ Banyan изначально macOS-first (Banyan Speech, Metal Whisper, Banyan Tr
 
 - **Cargo features `macos` / `windows`** — не отменяют разный target при кросс-компиляции; всё равно нужны stub'ы. Плюс размножение feature-матриц в `Cargo.toml` для маленькой команды.
 
-- **Отдельные крейты `banyan-macos` / `banyan-win`** — честная граница, но overhead: версии, CI, публикация. Рано для текущего размера проекта.
+- **Отдельные крейты `polysphere-macos` / `polysphere-win`** — честная граница, но overhead: версии, CI, публикация. Рано для текущего размера проекта.
 
 - **Runtime plugin loading (dylib)** — против **rust-first**: усложняет деплой, подпись, Windows artifact; не нужен для двух-трёх ОС.
 

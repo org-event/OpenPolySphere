@@ -1,0 +1,8 @@
+[advisories]
+# Transitive unmaintained crates; no direct dependency and no runtime impact.
+# paste: ct2rs → tokenizers → macro_rules_attribute (proc-macro only)
+# proc-macro-error2: jiff → defmt → defmt-macros (optional integration)
+ignore = [
+    "RUSTSEC-2024-0436",
+    "RUSTSEC-2026-0173",
+]

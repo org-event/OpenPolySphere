@@ -1,3 +1,9 @@
+<div align="center">
+
+[![OpenPolySphere](docs/readme-logo.png)](https://github.com/org-event/OpenPolySphere)
+
+</div>
+
 # Realtime Call Translator
 
 [![README на русском](https://img.shields.io/badge/README-Russian-blue)](README.ru.md)
@@ -10,7 +16,7 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 
 ![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![GitHub stars](https://img.shields.io/github/stars/org-event/Banyan)
+![GitHub stars](https://img.shields.io/github/stars/org-event/OpenPolySphere)
 
 > **Note:** macOS production today (14+). Windows port in active development (see `windows` branch). Linux contributions welcome.
 
@@ -19,8 +25,8 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 ## Quick Start
 
 ```bash
-git clone https://github.com/org-event/Banyan.git
-cd Banyan
+git clone https://github.com/org-event/OpenPolySphere.git
+cd OpenPolySphere
 ./scripts/bootstrap                          # dev deps + git hooks (like bun install)
 cargo run --release -p translator -- setup   # download models (first time)
 cargo run --release -p translator            # start server

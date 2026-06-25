@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Create CI-related GitHub labels (idempotent).
 set -euo pipefail
-REPO="${GITHUB_REPO:-org-event/Banyan}"
+REPO="${GITHUB_REPO:-org-event/OpenPolySphere}"
 
 create() {
   local name="$1" color="$2" desc="$3"

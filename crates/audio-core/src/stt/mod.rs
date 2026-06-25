@@ -1,4 +1,4 @@
-//! Speech-to-text: local Whisper, Banyan Speech (macOS), or Deepgram cloud.
+//! Speech-to-text: local Whisper, PolySphere Speech (macOS), or Deepgram cloud.
 
 pub mod apple;
 mod deepgram;
@@ -47,10 +47,10 @@ impl SttEngine {
                 SttPipeline::Deepgram
             }
             "apple" | "system" | "macos" => {
-                info!("STT backend: Banyan Speech (system, on-device)");
+                info!("STT backend: PolySphere Speech (system, on-device)");
                 Capabilities::current().require_apple_stt()?;
-                apple::apple_speech_ensure_authorized().context("Banyan Speech authorization")?;
-                apple::apple_speech_backend().context("Failed to load Banyan Speech STT")?;
+                apple::apple_speech_ensure_authorized().context("PolySphere Speech authorization")?;
+                apple::apple_speech_backend().context("Failed to load PolySphere Speech STT")?;
                 SttPipeline::Local { apple_speech: true }
             }
             _ => {

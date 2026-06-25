@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Banyan</title>
-<link rel="icon" href="/static/img/banyan.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/static/css/style.css?v=5">
+<title>OpenPolySphere</title>
+<link rel="icon" href="/static/img/openpolysphere-tree-icon.svg?v=6" type="image/svg+xml">
+<link rel="stylesheet" href="/static/css/style.css?v=11">
 </head>
 <body>
 
 <!-- Loading overlay -->
 <div id="overlay">
+  <div class="overlay-logo" id="overlay-logo" aria-hidden="true"></div>
   <div class="spinner" id="spinner"></div>
   <p id="overlay-text" data-i18n="app.connecting">Connecting to server…</p>
 </div>
@@ -87,11 +88,11 @@
             <div class="sp-hint" id="stt-model-hint" data-i18n="settings.sttModelHint">Metal uses AMD/Intel GPU via whisper.cpp. CPU uses CTranslate2.</div>
           </div>
           <div id="stt-apple-panel" style="display:none">
-            <div class="sp-hint" id="stt-apple-status" data-i18n="settings.checkingSpeech">Checking Banyan Speech...</div>
+            <div class="sp-hint" id="stt-apple-status" data-i18n="settings.checkingSpeech">Checking PolySphere Speech...</div>
             <div class="sp-input-row" style="margin-top:8px">
-              <button type="button" class="sp-test-btn" id="btn-banyan-speech-auth" onclick="requestAppleSpeechAuth()" data-i18n="settings.allowBanyanSpeech">Allow Banyan Speech</button>
+              <button type="button" class="sp-test-btn" id="btn-polysphere-speech-auth" onclick="requestAppleSpeechAuth()" data-i18n="settings.allowPolySphereSpeech">Allow PolySphere Speech</button>
             </div>
-            <div class="sp-hint" data-i18n-html="settings.sttAppleHint">Uses macOS Speech framework via <strong>Banyan Speech</strong>. Click the button to trigger the permission dialog, then allow <strong>Banyan Speech</strong> in System Settings → Privacy & Security → Speech Recognition.</div>
+            <div class="sp-hint" data-i18n-html="settings.sttAppleHint">Uses macOS Speech framework via <strong>PolySphere Speech</strong>. Click the button to trigger the permission dialog, then allow <strong>PolySphere Speech</strong> in System Settings → Privacy & Security → Speech Recognition.</div>
           </div>
           <div id="stt-cloud-panel" style="display:none">
             <div class="sp-label" style="margin-top:8px" data-i18n="settings.deepgramModel">Deepgram model</div>
@@ -141,7 +142,7 @@
             <div class="sp-hint" id="translation-polish-hint" data-i18n="settings.polishHint">Same stack as Whisper/Opus-MT (CTranslate2). Adds ~1–3 s per phrase on CPU.</div>
           </div>
           <div id="translation-apple-panel" style="display:none">
-            <div class="sp-hint" id="translation-apple-status" data-i18n="settings.checkingTranslate">Checking Banyan Translate...</div>
+            <div class="sp-hint" id="translation-apple-status" data-i18n="settings.checkingTranslate">Checking PolySphere Translate...</div>
             <div class="sp-input-row" style="margin-top:8px">
               <button type="button" class="sp-test-btn" id="btn-test-translate-apple" onclick="testLocalTranslation()" data-i18n="settings.test">Test</button>
             </div>
@@ -289,8 +290,12 @@
 <!-- Main UI -->
 <header>
   <div class="brand">
-    <img class="brand-logo" src="/static/img/banyan.svg" width="28" height="28" alt="">
-    <h1 data-i18n="app.title">Banyan</h1>
+    <span class="brand-logo" role="img" aria-label="OpenPolySphere"></span>
+    <span class="brand-divider" aria-hidden="true"></span>
+    <h1 class="brand-wordmark" aria-label="OpenPolySphere">
+      <span class="brand-open">Open</span>
+      <span class="brand-polysphere">PolySphere</span>
+    </h1>
   </div>
   <div class="header-controls">
     <span id="timer">0:00</span>

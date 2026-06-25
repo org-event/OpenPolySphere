@@ -32,7 +32,7 @@ Target: **Windows 10/11 x64**. Goal for now: **CI builds on `windows-latest`**, 
 
 ## Manual smoke test (after downloading CI artifact)
 
-1. Unzip artifact to a folder, e.g. `C:\banyan\`
+1. Unzip artifact to a folder, e.g. `C:\OpenPolySphere\`
 2. Open **PowerShell** in that folder
 3. `.\translator.exe --help` — should print usage
 4. `.\translator.exe setup` — downloads models (needs network, disk ~1GB+)
@@ -53,4 +53,4 @@ Native build needs: Rust, CMake, vcpkg OpenBLAS (`x64-windows-static`, matches c
 
 See [ADR 0002](../adr/0002-ci-platform-tiers.md) for why CI is tiered.
 
-See [issue #3](https://github.com/org-event/Banyan/issues/3).
+See [issue #3](https://github.com/org-event/OpenPolySphere/issues/3).

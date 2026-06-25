@@ -72,9 +72,9 @@ async fn serve() -> Result<()> {
     let stt = settings.stt_backend();
     if matches!(stt.as_str(), "apple" | "system" | "macos") {
         apply_env(&settings, &models_dir());
-        info!("Banyan Speech STT configured — requesting speech recognition permission if needed");
+        info!("PolySphere Speech STT configured — requesting speech recognition permission if needed");
         if let Err(e) = audio_core::stt::apple::apple_speech_ensure_authorized() {
-            log::warn!("Banyan Speech authorization: {e:#}");
+            log::warn!("PolySphere Speech authorization: {e:#}");
         }
     }
 

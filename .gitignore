@@ -3,10 +3,10 @@
 /dist/
 
 # Swift helper build
-/tools/banyan-translate/.build/
-/tools/banyan-speech/.build/
-/tools/banyan-speech-auth/.build/
-/tools/banyan-speech-auth/BanyanSpeech.app/
+/tools/polysphere-translate/.build/
+/tools/polysphere-speech/.build/
+/tools/polysphere-speech-auth/.build/
+/tools/polysphere-speech-auth/PolySphereSpeech.app/
 
 # Models (large, downloaded separately)
 /models/
@@ -29,6 +29,8 @@ calls.db-*
 .idea/
 .vscode/
 node_modules/
+scripts/.venv-trace/
+scripts/__pycache__/
 *.swp
 *.swo
 

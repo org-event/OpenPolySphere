@@ -65,8 +65,8 @@ See [ADR 0002](docs/adr/0002-ci-platform-tiers.md).
 
 
 ```bash
-git clone https://github.com/org-event/Banyan.git
-cd Banyan
+git clone https://github.com/org-event/OpenPolySphere.git
+cd OpenPolySphere
 ./scripts/bootstrap    # installs `just` if needed, then `just install`
 just check             # same checks that run before each commit
 cp .env.example .env   # optional: cloud API keys

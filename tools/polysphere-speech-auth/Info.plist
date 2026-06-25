@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleExecutable</key>
-	<string>BanyanSpeech</string>
+	<string>PolySphereSpeech</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.event.banyan.speech</string>
+	<string>org.event.openpolysphere.speech</string>
 	<key>CFBundleName</key>
-	<string>Banyan Speech</string>
+	<string>PolySphere Speech</string>
 	<key>CFBundleDisplayName</key>
-	<string>Banyan Speech</string>
+	<string>PolySphere Speech</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -19,6 +19,6 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Banyan Speech needs speech recognition to transcribe your voice during calls.</string>
+	<string>PolySphere Speech needs speech recognition to transcribe your voice during calls.</string>
 </dict>
 </plist>

@@ -1,6 +1,6 @@
 //! Platform capabilities — single place for `cfg(target_os = …)` checks.
 
-/// What this build of Banyan can use on the host OS.
+/// What this build of OpenPolySphere can use on the host OS.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Capabilities {
     pub apple_stt: bool,
@@ -24,7 +24,7 @@ impl Capabilities {
         if self.apple_stt {
             Ok(())
         } else {
-            anyhow::bail!("Banyan Speech STT is only available on macOS")
+            anyhow::bail!("PolySphere Speech STT is only available on macOS")
         }
     }
 
@@ -32,7 +32,7 @@ impl Capabilities {
         if self.apple_translation {
             Ok(())
         } else {
-            anyhow::bail!("Banyan Translate is only available on macOS")
+            anyhow::bail!("PolySphere Translate is only available on macOS")
         }
     }
 }

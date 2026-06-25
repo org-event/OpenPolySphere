@@ -47,7 +47,7 @@ enum StatusPayload {
         guard status == .installed else {
             let hint = status == .supported
                 ? "Language pack not downloaded. Open System Settings → General → Language & Region, or the Translate app, and add \(from) and \(to)."
-                : "This language pair is not supported by Banyan Translate."
+                : "This language pair is not supported by PolySphere Translate."
             return try encode(["error": hint, "status": statusString(status)])
         }
 
@@ -59,7 +59,7 @@ enum StatusPayload {
             }
         } else {
             return try encode([
-                "error": "Headless Banyan Translate requires macOS 26.0 or later. Use Opus-MT or OpenRouter on this Mac.",
+                "error": "Headless PolySphere Translate requires macOS 26.0 or later. Use Opus-MT or OpenRouter on this Mac.",
                 "status": statusString(status),
             ])
         }
@@ -73,8 +73,8 @@ enum StatusPayload {
 func run() async {
     let args = CommandLine.arguments.dropFirst()
     guard let command = args.first else {
-        fputs("usage: banyan-translate check <from> <to>\n", stderr)
-        fputs("       banyan-translate translate <from> <to> <text>\n", stderr)
+        fputs("usage: polysphere-translate check <from> <to>\n", stderr)
+        fputs("       polysphere-translate translate <from> <to> <text>\n", stderr)
         exit(2)
     }
 
@@ -83,7 +83,7 @@ func run() async {
         case "check":
             let rest = Array(args.dropFirst())
             guard rest.count == 2 else {
-                fputs("usage: banyan-translate check <from> <to>\n", stderr)
+                fputs("usage: polysphere-translate check <from> <to>\n", stderr)
                 exit(2)
             }
             let data = try await StatusPayload.check(from: rest[0], to: rest[1])
@@ -92,7 +92,7 @@ func run() async {
         case "translate":
             let rest = Array(args.dropFirst())
             guard rest.count >= 3 else {
-                fputs("usage: banyan-translate translate <from> <to> <text>\n", stderr)
+                fputs("usage: polysphere-translate translate <from> <to> <text>\n", stderr)
                 exit(2)
             }
             let from = rest[0]
