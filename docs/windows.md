@@ -1,56 +1,63 @@
 # Windows support (draft)
 
-Target: **Windows 10/11 x64**. Goal for now: **CI builds on `windows-latest`**, you download the artifact and smoke-test without a dev machine.
+Target: **Windows 10/11 x64**. Goal: **CI builds on `windows-latest`**, download the artifact or develop locally with the same `just` recipes as macOS/Linux.
+
+## Local dev (same flow as other platforms)
+
+After clone, use the same entry point everywhere:
+
+```powershell
+git clone https://github.com/org-event/OpenPolySphere.git
+cd OpenPolySphere
+./scripts/bootstrap          # Git Bash: installs just if needed, then just install
+just fetch-ort               # one-time: ONNX Runtime under ort/
+just check-windows-clippy    # full clippy parity with CI (native Windows)
+just build
+just setup                   # download models
+just run                     # http://127.0.0.1:5050
+```
+
+On every OS before push: `just prepush` (fmt + JS + static cfg guards).
+
+| Recipe | Where | What |
+|--------|-------|------|
+| `just install` | **all hosts** | Rust, bun, hooks; prints OS-specific one-time deps |
+| `just fetch-ort` | **all hosts** | Download or print ONNX Runtime path |
+| `just check` | **macOS** | rustfmt + clippy + ESLint + Swift |
+| `just prepush` | **all hosts** | fmt + JS + `check-windows-static` |
+| `just check-windows-clippy` | **native Windows** | Full clippy parity with CI `windows` job |
+| `just check-windows-static` | **all hosts** | Fast cfg/import guards (in `prepush`) |
+| CI `windows` job | GitHub | vcpkg OpenBLAS, ORT zip, espeak-ng. Label `ci/windows-only` skips macOS. |
+
+**One-time native Windows deps:** Rust, CMake, [vcpkg](https://vcpkg.io) OpenBLAS (`x64-windows-static`), espeak-ng (`choco install espeak-ng`), Bun. `.cargo/config.toml` sets `+crt-static` on MSVC — required by ct2rs.
 
 ## Phase 1 — CI build (current)
 
-- [x] `windows` branch
-- [ ] GitHub Actions job: compile `translator.exe`, upload artifact
-- [ ] Download artifact → run `translator.exe --help`
+- [x] GitHub Actions `windows` job: clippy + release build + artifact
+- [ ] Manual: download artifact → `translator.exe --help`
 
-**CI installs (runner only):** OpenBLAS (vcpkg), ONNX Runtime zip, espeak-ng (Chocolatey).
+**Artifact:** `translator.exe`, `onnxruntime.dll`, `web/`, `.env.example`, `WINDOWS.txt`
 
-**Artifact contains:** `translator.exe`, `onnxruntime.dll`, `web/`, `.env.example`, `WINDOWS.txt` (quick start).
+## Phase 2 — Audio routing
 
-## Phase 2 — Make the binary runnable
+- [ ] Platform defaults for virtual cable (VB-Audio / VoiceMeeter)
+- [ ] Document call routing in README
 
-- [ ] Default `ORT_DYLIB_PATH` / load `onnxruntime.dll` next to exe
-- [ ] Find `espeak-ng` on Windows (Chocolatey path)
-- [ ] Platform defaults instead of BlackHole (`cfg(windows)` in settings/engine)
-- [ ] Document virtual audio: VB-Audio Cable or VoiceMeeter
+Install [VB-Audio Virtual Cable](https://vb-audio.com/Cable/) for call ↔ translator routing.
 
-## Phase 3 — Full call translation
+## CI artifact smoke test
 
-- [ ] `translator setup` on Windows (model download)
-- [ ] Mic + virtual cable routing documented and tested
-- [ ] Optional: `just install` hints for native Windows
+```powershell
+.\translator.exe --help
+.\translator.exe setup
+.\translator.exe
+```
 
-## Phase 4 — Polish
+Open http://127.0.0.1:5050 in Chrome.
 
-- [ ] README Windows section
-- [ ] MSI installer (out of scope until MVP works)
+## Out of scope (for now)
 
-## Manual smoke test (after downloading CI artifact)
+- MSI installer / code signing
+- Apple Speech / Translation
 
-1. Unzip artifact to a folder, e.g. `C:\OpenPolySphere\`
-2. Open **PowerShell** in that folder
-3. `.\translator.exe --help` — should print usage
-4. `.\translator.exe setup` — downloads models (needs network, disk ~1GB+)
-5. `.\translator.exe` — open http://127.0.0.1:5050 in Chrome
-6. Install [VB-Audio Virtual Cable](https://vb-audio.com/Cable/) for call routing (Phase 2+)
-
-## Local dev (optional)
-
-Native build needs: Rust, CMake, vcpkg OpenBLAS (`x64-windows-static`, matches ct2rs `/MT`), ONNX Runtime, espeak-ng, Bun (for ESLint). `.cargo/config.toml` sets `+crt-static` on `x86_64-pc-windows-msvc` — required by ct2rs.
-
-**Local Windows CI parity:**
-
-| Command | Where | What |
-|---------|-------|------|
-| `just check-windows-static` | **all hosts** | In `just prepush`. Fast cfg/import guards. |
-| `just check-windows-clippy` | **native Windows only** | Full clippy parity with CI. |
-| CI `windows` job | GitHub | Skipped on docs-only PRs; cached vcpkg + rust on `main`. PR label `ci/windows-only` skips macOS. |
-
-See [ADR 0002](../adr/0002-ci-platform-tiers.md) for why CI is tiered.
-
-See [issue #3](https://github.com/org-event/OpenPolySphere/issues/3).
+See [ADR 0002](../adr/0002-ci-platform-tiers.md), [issue #3](https://github.com/org-event/OpenPolySphere/issues/3).

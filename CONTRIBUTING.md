@@ -53,13 +53,16 @@ Do **not** use `git merge origin/main` or `git pull` without rebase.
 
 ### CI on pull requests
 
-Heavy jobs (macOS / Windows build) run only when Rust, workflows, or related scripts change — not on docs-only PRs. Security audits (RustSec, CodeQL) still run separately.
+Heavy jobs (macOS / Windows / Linux build) run only when Rust, workflows, or related scripts change — not on docs-only PRs. Security audits (RustSec, CodeQL) still run separately.
 
 | Label | Effect |
 |-------|--------|
-| `ci/windows-only` | Skip macOS job on this PR (Windows CI still runs). Remove before merging to `main`. |
+| `ci/windows-only` | Skip macOS job on this PR (Windows + Linux still run). Remove before merging to `main`. |
+| `ci/linux-only` | Skip macOS and Windows on this PR (Linux still runs). Remove before merging to `main`. |
 
-Manual full platform run: **Actions → CI → Run workflow** (`workflow_dispatch`).
+Manual full platform run: **Actions → CI → Run workflow** (`workflow_dispatch`: `all` / `macos` / `windows` / `linux`).
+
+Platform port notes: [docs/windows.md](docs/windows.md), [docs/linux.md](docs/linux.md).
 
 See [ADR 0002](docs/adr/0002-ci-platform-tiers.md).
 
@@ -68,26 +71,32 @@ See [ADR 0002](docs/adr/0002-ci-platform-tiers.md).
 git clone https://github.com/org-event/OpenPolySphere.git
 cd OpenPolySphere
 ./scripts/bootstrap    # installs `just` if needed, then `just install`
-just check             # same checks that run before each commit
+just check             # lint before commit (Swift only on macOS)
 cp .env.example .env   # optional: cloud API keys
 just setup             # download models (first time)
 just run               # start server
 ```
 
+**Linux / Windows one-time deps** (after `just install`): see [docs/linux.md](docs/linux.md) or [docs/windows.md](docs/windows.md) — `just install-linux-deps`, `just fetch-ort`, then `just check-linux-clippy` or `just check-windows-clippy` on native hosts.
+
 **`./scripts/bootstrap` vs `just install`:** bootstrap is the entry point after clone (like `bun install`). It ensures `just` is on your PATH, then runs `just install`. If you already have `just`, `just install` alone is enough.
 
-**`just install` installs:** Rust rustfmt/clippy; on macOS also Homebrew packages (espeak-ng, onnxruntime, bun, pre-commit); `bun install --frozen-lockfile`; git pre-commit hook.
+**`just install` installs:** Rust rustfmt/clippy; on macOS also Homebrew packages (espeak-ng, onnxruntime, bun, pre-commit); `bun install --frozen-lockfile`; git pre-commit hook. On Linux/Windows it prints one-time system dependency steps.
 
 | Recipe | What it runs |
 |--------|----------------|
 | `just` / `just --list` | Show all recipes |
 | `just install` | Dev environment bootstrap |
-| `just check` | rustfmt + clippy (`-D warnings`) + ESLint + Swift release build (macOS) |
+| `just check` | rustfmt + clippy + ESLint + Swift (macOS only) |
+| `just prepush` | fmt + JS + Windows static cfg guards (all OS) |
+| `just check-linux-clippy` | Full Linux clippy (native Linux, CI parity) |
+| `just check-windows-clippy` | Full Windows clippy (native Windows, CI parity) |
+| `just fetch-ort` | ONNX Runtime download / path hints |
 | `just build` | Release build of `translator` |
-| `just run` | `cargo run --release -p translator` |
+| `just run` | Start server |
 | `just setup` | Download Whisper, Opus-MT, default Piper voices |
 
-On **Linux/Windows** Swift and Apple-only checks are skipped automatically; full macOS build is verified in CI.
+On **Linux/Windows** Swift and Apple-only checks are skipped automatically; platform builds are verified in CI.
 
 ### Code style
 

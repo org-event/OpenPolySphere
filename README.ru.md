@@ -56,7 +56,12 @@ cargo run --release -p translator            # запуск сервера
 |---------|------------|
 | `./scripts/bootstrap` | Первичная настройка после clone |
 | `just install` | То же, без установки `just` |
+| `just install-linux-deps` | Одноразово: apt-пакеты (только Linux) |
+| `just fetch-ort` | Скачать ONNX Runtime / подсказка по пути |
 | `just check` | rustfmt, clippy, ESLint, Swift (только macOS) |
+| `just check-linux-clippy` | Полный Linux clippy (нативный Linux, как в CI) |
+| `just check-windows-clippy` | Полный Windows clippy (нативный Windows, как в CI) |
+| `just prepush` | fmt + JS + static cfg guards (все ОС, pre-push hook) |
 | `just build` | `cargo build --release -p translator` |
 | `just run` | Запуск сервера |
 | `just setup` | Скачать Whisper, Opus-MT и голоса Piper по умолчанию |

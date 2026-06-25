@@ -248,7 +248,7 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake pkg-config libopenblas-dev espeak-ng
+          sudo apt-get install -y cmake pkg-config libopenblas-dev libasound2-dev espeak-ng
 
       - name: Install ONNX Runtime
         run: |
