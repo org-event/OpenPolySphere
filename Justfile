@@ -8,11 +8,13 @@ default:
 install: install-rust install-system install-js install-git install-hooks
     @echo ""
     @echo "Dev environment ready."
-    @echo "  just check                              # lint before commit"
-    @echo "  just prepush                            # lint before git push (incl. Windows static)"
-    @echo "  just check-windows-clippy                 # full win clippy (native Windows only)"
-    @echo "  cargo run --release -p translator -- setup   # download models (first run)"
-    @echo "  cargo run --release -p translator            # start server"
+    @echo "  just check                    # lint before commit (platform-aware)"
+    @echo "  just prepush                  # fmt + JS + static cfg guards (all OS)"
+    @echo "  just check-linux-clippy       # full Linux clippy (native Linux only)"
+    @echo "  just check-windows-clippy     # full Windows clippy (native Windows only)"
+    @echo "  just fetch-ort                # ONNX Runtime path hints / download"
+    @echo "  just setup                    # download models (first run)"
+    @echo "  just run                      # start server"
 
 # All pre-commit checks in one command.
 check: check-rust check-js check-swift
@@ -84,16 +86,18 @@ install-system:
         echo "[ok] macOS system deps"
         ;;
       Linux)
-        echo "[i] Linux: install runtime libs for local build:"
-        echo "    Debian/Ubuntu: sudo apt install cmake pkg-config libopenblas-dev espeak-ng"
-        echo "    ONNX Runtime: set ORT_DYLIB_PATH to libonnxruntime.so (see docs/linux.md)"
+        echo "[i] Linux one-time system packages:"
+        echo "    ./scripts/install-linux-deps.sh"
+        echo "    (or: sudo apt install cmake pkg-config libopenblas-dev libasound2-dev espeak-ng)"
+        echo "    just fetch-ort              # ONNX Runtime for local build"
+        echo "    just check-linux-clippy       # same as CI linux job"
         echo "    PolySphere Speech / Swift checks are skipped on Linux (CI runs them on macOS)."
-        echo "    just prepush includes check-windows-static (fast cfg guards for all hosts)."
         ;;
       MINGW*|MSYS*|CYGWIN*)
-        echo "[ok] Windows native — no zig/cross-target needed."
-        echo "    just check-windows-clippy  # full clippy, same as CI windows job"
-        echo "    just prepush               # fmt + JS + static cfg guards"
+        echo "[i] Windows one-time: OpenBLAS (vcpkg), ONNX Runtime, espeak-ng (choco) — see docs/windows.md"
+        echo "    just fetch-ort                # download ONNX Runtime zip"
+        echo "    just check-windows-clippy     # same as CI windows job"
+        echo "    just prepush                  # fmt + JS + static cfg guards"
         ;;
       *)
         echo "[i] Unknown OS — install espeak-ng and onnxruntime manually if you build locally."
@@ -165,6 +169,24 @@ check-windows-clippy:
     set -euo pipefail
     chmod +x scripts/check-windows-clippy.sh
     ./scripts/check-windows-clippy.sh
+
+check-linux-clippy:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    chmod +x scripts/check-linux-clippy.sh
+    ./scripts/check-linux-clippy.sh
+
+fetch-ort:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    chmod +x scripts/fetch-onnxruntime.sh
+    ./scripts/fetch-onnxruntime.sh
+
+install-linux-deps:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    chmod +x scripts/install-linux-deps.sh
+    ./scripts/install-linux-deps.sh
 
 check-swift:
     #!/usr/bin/env bash

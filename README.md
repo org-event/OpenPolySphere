@@ -57,7 +57,12 @@ If `just` is already installed, you can run `just install` directly instead of `
 |---------|---------|
 | `./scripts/bootstrap` | First-time dev setup after clone |
 | `just install` | Same as bootstrap (without installing `just`) |
+| `just install-linux-deps` | One-time apt packages (Linux only) |
+| `just fetch-ort` | ONNX Runtime download / path hints |
 | `just check` | rustfmt, clippy, ESLint, Swift build (macOS only) |
+| `just check-linux-clippy` | Full Linux clippy (native Linux, CI parity) |
+| `just check-windows-clippy` | Full Windows clippy (native Windows, CI parity) |
+| `just prepush` | fmt + JS + static cfg guards (all OS, pre-push hook) |
 | `just build` | `cargo build --release -p translator` |
 | `just run` | Start the server |
 | `just setup` | Download Whisper, Opus-MT, and default Piper voices |
