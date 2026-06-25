@@ -94,6 +94,8 @@
     "callOutput": "Выход звонка",
     "badgeTelegramOut": "приложение → Telegram",
     "audioLevelHint": "Полоски уровня показывают сигнал, пока открыты Настройки. Говорите в микрофон MacBook для теста; воспроизведите звук во Вход звонка (например Telegram) для теста виртуального устройства.",
+    "audioLevelHintLinux": "Полоски уровня показывают сигнал, пока открыты Настройки. Говорите в микрофон для теста; воспроизведите звук во Вход звонка для теста виртуального sink.",
+    "linuxVirtualAudioHint": "Маршрутизация звонка на Linux — <strong>null sink</strong> в PulseAudio/PipeWire. В терминале:<br><code>pactl load-module module-null-sink sink_name=OpenPolySphere-Meet-Out</code><br><code>pactl load-module module-null-sink sink_name=OpenPolySphere-Meet-In</code><br>Затем выберите <strong>OpenPolySphere-Meet-In.monitor</strong> во Вход звонка и <strong>OpenPolySphere-Meet-Out</strong> в Выход звонка. Для входящего звука можно использовать <strong>Захват вкладки</strong> на панели. Подробнее: <code>docs/linux.md</code> в репозитории.",
     "endpointing": "STT Endpointing (чувствительность границ фраз)",
     "endpointingHint": "Ниже = быстрее ответ, может обрезать фразы. Выше = дольше ждёт полные предложения.",
     "badgeActiveLocal": "Активно: локальный Opus-MT ru↔en",

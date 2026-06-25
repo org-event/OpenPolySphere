@@ -156,7 +156,9 @@
     "rateLimitRetry": "Повтор через ~{seconds} с. ",
     "rateLimitedUpstream": "Лимит модели на стороне провайдера",
     "rateLimitMeta": "{prefix}{error}{wait}",
-    "rateLimitWait": " — подождите {seconds} с или смените модель"
+    "rateLimitWait": " — подождите {seconds} с или смените модель",
+    "audioLevelHintLinux": "Полоски уровня показывают сигнал, пока открыты Настройки. Говорите в микрофон для теста; воспроизведите звук во Вход звонка для теста виртуального sink.",
+    "linuxVirtualAudioHint": "Маршрутизация звонка на Linux — <strong>null sink</strong> в PulseAudio/PipeWire. В терминале:<br><code>pactl load-module module-null-sink sink_name=OpenPolySphere-Meet-Out</code><br><code>pactl load-module module-null-sink sink_name=OpenPolySphere-Meet-In</code><br>Затем выберите <strong>OpenPolySphere-Meet-In.monitor</strong> во Вход звонка и <strong>OpenPolySphere-Meet-Out</strong> в Выход звонка. Для входящего звука можно использовать <strong>Захват вкладки</strong> на панели. Подробнее: <code>docs/linux.md</code> в репозитории."
   },
   "logs": {
     "title": "Логи",

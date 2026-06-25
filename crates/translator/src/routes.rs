@@ -214,6 +214,7 @@ async fn get_settings(State(state): State<Arc<AppState>>) -> Json<Value> {
         "_effective_ui_locale".into(),
         json!(settings.effective_ui_locale()),
     );
+    out.insert("_host_os".into(), json!(std::env::consts::OS));
     Json(Value::Object(out))
 }
 

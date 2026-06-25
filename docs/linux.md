@@ -17,7 +17,8 @@ Target: **Ubuntu 22.04+ / Debian 12+ / Fedora 39+**. Goal for now: **CI builds o
 - [x] Default `ORT_DYLIB_PATH` / `libonnxruntime.so` bundled in CI artifact
 - [x] Find `espeak-ng` on Linux via `platform::find_espeak_ng` (PATH + `/usr/bin`)
 - [x] Platform defaults instead of BlackHole (`OpenPolySphere-Meet-In.monitor` / `OpenPolySphere-Meet-Out`)
-- [ ] Document virtual audio: PipeWire / PulseAudio null sinks (below)
+- [x] Document virtual audio: PipeWire / PulseAudio null sinks (below)
+- [x] Short UI hint for virtual sink setup on Linux (Settings → Audio Devices)
 
 ### Virtual audio (PipeWire / PulseAudio)
 

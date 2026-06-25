@@ -2,6 +2,20 @@ import { state } from '../core/state.js';
 import { t } from '../core/i18n.js';
 import { startLevelMonitoring, bindLevelMeterDeviceChange } from '../audio/levels.js';
 
+/** Show Linux virtual-sink setup hint; generic level-meter text off macOS. */
+export function applyPlatformAudioHints(settings = state.currentSettings) {
+  const hostOs = settings?._host_os || '';
+  const linuxHint = document.getElementById('linux-virtual-audio-hint');
+  if (linuxHint) {
+    linuxHint.hidden = hostOs !== 'linux';
+  }
+  const levelHint = document.getElementById('audio-level-hint');
+  if (levelHint) {
+    const key = hostOs === 'linux' ? 'settings.audioLevelHintLinux' : 'settings.audioLevelHint';
+    levelHint.textContent = t(key);
+  }
+}
+
 export async function loadDevices() {
   try {
     const r = await fetch('/api/devices');
@@ -35,8 +49,8 @@ export async function loadDevices() {
 
     fillSelect('cfg-mic', inputDevs, state.currentSettings.mic_device);
     fillSelect('cfg-speaker', outputDevs, state.currentSettings.speaker_device);
-    fillSelect('cfg-meet-in', inputDevs, state.currentSettings.meet_input_device || 'TranslateTelega');
-    fillSelect('cfg-meet-out', outputDevs, state.currentSettings.meet_output_device || 'TranslateTelega');
+    fillSelect('cfg-meet-in', inputDevs, state.currentSettings.meet_input_device || 'default');
+    fillSelect('cfg-meet-out', outputDevs, state.currentSettings.meet_output_device || 'default');
     bindLevelMeterDeviceChange();
     if (document.getElementById('sp')?.classList.contains('open')) {
       startLevelMonitoring();

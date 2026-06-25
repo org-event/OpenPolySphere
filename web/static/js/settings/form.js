@@ -16,7 +16,7 @@ import {
   loadTranslationModels,
   updateTranslationModelMeta,
 } from './translation.js';
-import { loadDevices } from './devices.js';
+import { loadDevices, applyPlatformAudioHints } from './devices.js';
 import { populateCallLangSelect } from '../core/call-languages.js';
 import { applyEngineButton } from '../engine/control.js';
 
@@ -105,6 +105,7 @@ export function populateForm(s) {
   document.getElementById('cfg-endpointing').value = s.endpointing_ms || 500;
   document.getElementById('endpointing-val').textContent = (s.endpointing_ms || 500) + 'ms';
   populateUiLocaleSelect(s.ui_locale || '', s._system_locale);
+  applyPlatformAudioHints(s);
 }
 
 function populateUiLocaleSelect(selected, systemLocale) {
@@ -158,11 +159,11 @@ export function readForm() {
     meet_input_device:
       (document.getElementById('cfg-meet-in') || {}).value ||
       state.currentSettings.meet_input_device ||
-      'TranslateTelega',
+      'default',
     meet_output_device:
       (document.getElementById('cfg-meet-out') || {}).value ||
       state.currentSettings.meet_output_device ||
-      'TranslateTelega',
+      'default',
     endpointing_ms: parseInt(document.getElementById('cfg-endpointing').value),
     ui_locale: document.getElementById('cfg-ui-locale')?.value || '',
   };
@@ -202,6 +203,7 @@ export function initUiLocaleListener() {
     await switchLocale(code, state.currentSettings._system_locale);
     updateUiLocaleLabels(state.currentSettings._system_locale);
     refreshSettingsButtonLabels();
+    applyPlatformAudioHints();
     applyEngineButton(state.engineRunning);
     await loadDevices();
     await refreshSttStatus();

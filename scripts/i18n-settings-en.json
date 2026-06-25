@@ -94,6 +94,8 @@
     "callOutput": "Call Output",
     "badgeTelegramOut": "app → Telegram",
     "audioLevelHint": "Input level bars show signal while Settings are open. Speak into the MacBook mic to test Microphone; play audio into Call Input (e.g. Telegram) to test the virtual device.",
+    "audioLevelHintLinux": "Input level bars show signal while Settings are open. Speak into your microphone to test Microphone; play audio into Call Input to test the virtual sink.",
+    "linuxVirtualAudioHint": "Call routing on Linux uses PulseAudio/PipeWire <strong>null sinks</strong>. In a terminal:<br><code>pactl load-module module-null-sink sink_name=OpenPolySphere-Meet-Out</code><br><code>pactl load-module module-null-sink sink_name=OpenPolySphere-Meet-In</code><br>Then pick <strong>OpenPolySphere-Meet-In.monitor</strong> for Call Input and <strong>OpenPolySphere-Meet-Out</strong> for Call Output. For incoming audio you can also use <strong>Tab Audio</strong> in the toolbar. See <code>docs/linux.md</code> in the repo.",
     "endpointing": "STT Endpointing (sentence boundary sensitivity)",
     "endpointingHint": "Lower = faster response, may cut sentences. Higher = waits longer for complete sentences.",
     "badgeActiveLocal": "Active: Local Opus-MT ru↔en",

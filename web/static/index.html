@@ -248,7 +248,8 @@
           <div class="sp-label"><span data-i18n="settings.callOutput">Call Output</span> <span class="badge" data-i18n="settings.badgeTelegramOut">app → Telegram</span></div>
           <select class="sp-input" id="cfg-meet-out"></select>
         </div>
-        <div class="sp-hint" style="margin-top:8px" data-i18n="settings.audioLevelHint">Input level bars show signal while Settings are open. Speak into the MacBook mic to test Microphone; play audio into Call Input (e.g. Telegram) to test the virtual device.</div>
+        <div class="sp-hint linux-virtual-audio-hint" id="linux-virtual-audio-hint" hidden data-i18n-html="settings.linuxVirtualAudioHint">Linux call routing uses PulseAudio/PipeWire null sinks. See Settings hint after creating virtual devices.</div>
+        <div class="sp-hint" id="audio-level-hint" style="margin-top:8px" data-i18n="settings.audioLevelHint">Input level bars show signal while Settings are open. Speak into the MacBook mic to test Microphone; play audio into Call Input (e.g. Telegram) to test the virtual device.</div>
       </div>
     </div>
 

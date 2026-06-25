@@ -156,7 +156,9 @@
     "rateLimitRetry": "Retry in ~{seconds}s. ",
     "rateLimitedUpstream": "Model rate-limited upstream",
     "rateLimitMeta": "{prefix}{error}{wait}",
-    "rateLimitWait": " — wait {seconds}s or switch model"
+    "rateLimitWait": " — wait {seconds}s or switch model",
+    "audioLevelHintLinux": "Input level bars show signal while Settings are open. Speak into your microphone to test Microphone; play audio into Call Input to test the virtual sink.",
+    "linuxVirtualAudioHint": "Call routing on Linux uses PulseAudio/PipeWire <strong>null sinks</strong>. In a terminal:<br><code>pactl load-module module-null-sink sink_name=OpenPolySphere-Meet-Out</code><br><code>pactl load-module module-null-sink sink_name=OpenPolySphere-Meet-In</code><br>Then pick <strong>OpenPolySphere-Meet-In.monitor</strong> for Call Input and <strong>OpenPolySphere-Meet-Out</strong> for Call Output. For incoming audio you can also use <strong>Tab Audio</strong> in the toolbar. See <code>docs/linux.md</code> in the repo."
   },
   "logs": {
     "title": "Логи",
