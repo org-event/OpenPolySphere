@@ -49,7 +49,8 @@ impl SttEngine {
             "apple" | "system" | "macos" => {
                 info!("STT backend: PolySphere Speech (system, on-device)");
                 Capabilities::current().require_apple_stt()?;
-                apple::apple_speech_ensure_authorized().context("PolySphere Speech authorization")?;
+                apple::apple_speech_ensure_authorized()
+                    .context("PolySphere Speech authorization")?;
                 apple::apple_speech_backend().context("Failed to load PolySphere Speech STT")?;
                 SttPipeline::Local { apple_speech: true }
             }

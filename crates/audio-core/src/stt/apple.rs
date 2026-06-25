@@ -87,8 +87,8 @@ mod imp {
     }
 
     pub fn request_authorization() -> Result<serde_json::Value> {
-        let app =
-            auth_app_path().context("PolySphereSpeech.app not found (rebuild translator on macOS)")?;
+        let app = auth_app_path()
+            .context("PolySphereSpeech.app not found (rebuild translator on macOS)")?;
         let out = std::env::temp_dir().join(format!(
             "call-translator-speech-auth-{}.json",
             std::process::id()
@@ -172,8 +172,8 @@ mod imp {
         pcm: Option<&[f32]>,
         context: Option<&str>,
     ) -> Result<HelperResponse> {
-        let app =
-            auth_app_path().context("PolySphereSpeech.app not found (rebuild translator on macOS)")?;
+        let app = auth_app_path()
+            .context("PolySphereSpeech.app not found (rebuild translator on macOS)")?;
         let seq = HELPER_SEQ.fetch_add(1, Ordering::Relaxed);
         let out = std::env::temp_dir().join(format!("lt-speech-{}-{seq}.json", std::process::id()));
         let _ = std::fs::remove_file(&out);
