@@ -4,8 +4,11 @@
 
 use std::io::{Read, Write};
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
+
+/// Upper bound for a single JSON message body (length-prefixed wire format).
+pub const MAX_MESSAGE_LEN: usize = 16 * 1024 * 1024;
 
 /// Commands sent from Elixir to Rust.
 #[derive(Debug, Deserialize)]
@@ -96,6 +99,9 @@ pub fn read_command(reader: &mut impl Read) -> Result<Option<Command>> {
     }
 
     let len = u32::from_be_bytes(len_buf) as usize;
+    if len > MAX_MESSAGE_LEN {
+        bail!("message length {len} exceeds maximum {MAX_MESSAGE_LEN}");
+    }
 
     let mut payload = vec![0u8; len];
     reader
