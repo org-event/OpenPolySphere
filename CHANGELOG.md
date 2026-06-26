@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-26
+
+### Added
+
+- Linux CI build and GitHub Release zip (`openpolysphere-*-linux-x64`)
+- Linux virtual-sink defaults and Settings UI hint (PulseAudio/PipeWire)
+- `just fetch-ort`, `just check-linux-clippy`, `just install-linux-deps`
+- `docs/linux.md` and unified `just`-based dev workflow across macOS / Linux / Windows
+
+### Changed
+
+- OpenPolySphere rebrand (logos, PolySphere Speech/Translate helpers)
+- CONTRIBUTING and platform docs aligned on `just` recipes
+
+## [0.3.0] - 2026-06-23
+
+_Pre-0.4.0 tags shipped Windows CI artifacts and macOS bundles; see GitHub Releases._
+
 ### All-Rust rewrite
 
 - Single binary `translator` (Axum :5050 + in-process audio engine)

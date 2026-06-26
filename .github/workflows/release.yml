@@ -164,3 +164,72 @@ jobs:
           files: dist/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-linux:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      ORT_VERSION: "1.20.1"
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake pkg-config libopenblas-dev libasound2-dev espeak-ng
+
+      - name: Install ONNX Runtime
+        run: |
+          ORT_DIR="ort/onnxruntime-linux-x64-${ORT_VERSION}"
+          if [ ! -f "$ORT_DIR/lib/libonnxruntime.so" ]; then
+            mkdir -p ort
+            curl -fsSL -o ort.tgz \
+              "https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz"
+            tar -xzf ort.tgz -C ort
+            rm -f ort.tgz
+          fi
+          echo "ORT_DYLIB_PATH=$GITHUB_WORKSPACE/$ORT_DIR/lib/libonnxruntime.so" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/$ORT_DIR/lib" >> "$GITHUB_ENV"
+
+      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+        with:
+          toolchain: stable
+
+      - name: Build release
+        run: cargo build --release -p translator
+
+      - name: Package
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ORT_DIR="ort/onnxruntime-linux-x64-${ORT_VERSION}"
+          NAME="openpolysphere-${VERSION}-linux-x64"
+          STAGING="dist/${NAME}"
+          mkdir -p dist
+          rm -rf "$STAGING"
+          mkdir -p "$STAGING"
+          cp target/release/translator "$STAGING/"
+          cp "$ORT_DIR/lib/libonnxruntime.so" "$STAGING/"
+          cp -R web "$STAGING/web"
+          cp .env.example README.md "$STAGING/"
+          [[ -f README.ru.md ]] && cp README.ru.md "$STAGING/"
+          printf '%s\n' \
+            'OpenPolySphere Linux release (Ubuntu 22.04+ x64)' \
+            '' \
+            '1. Unzip to a folder' \
+            '2. chmod +x translator' \
+            '3. export ORT_DYLIB_PATH=$PWD/libonnxruntime.so' \
+            '4. export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH' \
+            '5. ./translator setup   (downloads models)' \
+            '6. ./translator         then open http://127.0.0.1:5050' \
+            '' \
+            'Virtual audio: PipeWire/PulseAudio null sinks (see docs/linux.md)' \
+            'espeak-ng: sudo apt install espeak-ng if TTS phonemization fails' \
+            > "$STAGING/LINUX.txt"
+          (cd dist && zip -r "${NAME}.zip" "${NAME}")
+
+      - uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+        with:
+          files: dist/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
