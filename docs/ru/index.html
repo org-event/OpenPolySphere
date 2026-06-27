@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenPolySphere — переводчик звонков в реальном времени</title>
+  <meta name="description" content="Переводчик речи в реальном времени для видео- и голосовых звонков. Rust, Whisper + Opus-MT, Piper TTS, 29 языков.">
+  <link rel="icon" href="../img/openpolysphere-tree-icon.svg" type="image/svg+xml">
+  <link rel="alternate" hreflang="en" href="../">
+  <link rel="alternate" hreflang="ru" href="./">
+  <link rel="stylesheet" href="../css/site.css">
+</head>
+<body>
+  <header>
+    <a href="./"><img src="../readme-logo.png" alt="OpenPolySphere" width="400" height="auto"></a>
+    <nav class="lang-nav" aria-label="Язык">
+      <a href="../" hreflang="en">English</a>
+      <a href="./" class="active" hreflang="ru">Русский</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Переводчик звонков в реальном времени</h1>
+    <p class="lead">Переводит обе стороны разговора на лету: вы говорите на своём языке, собеседник слышит на своём, и наоборот.</p>
+
+    <div class="badges">
+      <span class="badge">macOS 14+</span>
+      <span class="badge">Windows и Linux (CI-сборки)</span>
+      <span class="badge">29 языков</span>
+      <span class="badge">MIT</span>
+    </div>
+
+    <p><strong>Как это работает:</strong> Микрофон → распознавание речи → перевод → синтез речи → обратно в звонок. По умолчанию локальный режим Whisper + Opus-MT; облачные бэкенды опционально.</p>
+
+    <section>
+      <h2>Быстрый старт</h2>
+      <pre><code>git clone https://github.com/org-event/OpenPolySphere.git
+cd OpenPolySphere
+./scripts/bootstrap
+cargo run --release -p translator -- setup   # первый раз: модели
+cargo run --release -p translator            # открыть http://127.0.0.1:5050</code></pre>
+      <p>Для звонка и веб-интерфейса используйте <strong>Google Chrome</strong>.</p>
+    </section>
+
+    <section>
+      <h2>Скачать</h2>
+      <p>Готовые сборки для macOS, Windows и Linux:</p>
+      <p><a href="https://github.com/org-event/OpenPolySphere/releases/latest">Последний релиз на GitHub</a></p>
+    </section>
+
+    <section>
+      <h2>Ссылки</h2>
+      <div class="links">
+        <a href="https://github.com/org-event/OpenPolySphere">Исходный код и issues</a>
+        <a href="https://github.com/org-event/OpenPolySphere/blob/main/README.ru.md">Полный README (русский)</a>
+        <a href="https://github.com/org-event/OpenPolySphere/blob/main/README.md">README (English)</a>
+        <a href="https://github.com/org-event/OpenPolySphere/blob/main/CONTRIBUTING.md">Contributing</a>
+        <a href="https://github.com/org-event/OpenPolySphere/blob/main/docs/linux.md">Linux</a>
+        <a href="https://github.com/org-event/OpenPolySphere/blob/main/docs/windows.md">Windows</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><a href="https://github.com/org-event/OpenPolySphere">OpenPolySphere</a> — лицензия MIT</p>
+  </footer>
+</body>
+</html>
