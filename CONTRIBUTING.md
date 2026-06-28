@@ -15,6 +15,12 @@ Open an [issue](../../issues/new?template=bug_report.md) with:
 
 Open an [issue](../../issues/new?template=feature_request.md) describing the use case and why it matters.
 
+### Roadmap & planned work
+
+The product backlog lives in the **private** [OpenPolySphere GitHub Project](https://github.com/users/org-event/projects/5) as **draft issues** — they do not appear in the public Issues list until a maintainer converts and closes them after shipping.
+
+Want to pick up planned work? Open an issue or comment on a PR and ask a maintainer for **Read** access to the project.
+
 ### Pull requests
 
 1. Fork the repo
