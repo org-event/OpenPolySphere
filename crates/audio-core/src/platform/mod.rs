@@ -15,4 +15,7 @@ pub use bundle::{
 };
 pub use capabilities::Capabilities;
 pub use defaults::{default_meet_input_device, default_meet_output_device};
-pub use paths::{default_ort_dylib, find_espeak_ng, ort_dylib_exists, ort_missing_hint};
+pub use paths::{
+    bundled_ort_dylib, default_ort_dylib, find_espeak_ng, ort_dylib_exists, ort_missing_hint,
+    resolve_ort_dylib,
+};

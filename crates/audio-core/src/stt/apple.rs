@@ -72,9 +72,13 @@ mod imp {
         }
         if let Ok(exe) = std::env::current_exe() {
             if let Some(dir) = exe.parent() {
-                let p = dir.join(SPEECH_AUTH_APP);
-                if p.is_dir() {
-                    return Some(p);
+                let helpers = dir.join("Helpers").join(SPEECH_AUTH_APP);
+                if helpers.is_dir() {
+                    return Some(helpers);
+                }
+                let bundled = dir.join(SPEECH_AUTH_APP);
+                if bundled.is_dir() {
+                    return Some(bundled);
                 }
             }
         }
