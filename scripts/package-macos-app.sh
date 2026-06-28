@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Build OpenPolySphere.app from a release `cargo build --release -p translator`.
+# Build OpenPolySphere.app + standard macOS .dmg (drag to Applications).
 #
 # Usage: ./scripts/package-macos-app.sh <version> [output-dir]
-# Example: ./scripts/package-macos-app.sh 0.4.0 dist
-#
-# Produces: dist/openpolysphere-<version>-macos-<arch>.zip  (contains OpenPolySphere.app only)
+# Outputs:
+#   dist/openpolysphere-<version>-macos-<arch>.dmg  (recommended)
+#   dist/openpolysphere-<version>-macos-<arch>.zip  (fallback)
 
 set -euo pipefail
 
@@ -15,9 +15,11 @@ case "$ARCH" in
   x86_64) ARCH_LABEL="x64" ;;
   *) ARCH_LABEL="$ARCH" ;;
 esac
-ZIP_BASE="openpolysphere-${VERSION}-macos-${ARCH_LABEL}"
-WORK="$OUT_DIR/.pack-${ZIP_BASE}"
+ARTIFACT_BASE="openpolysphere-${VERSION}-macos-${ARCH_LABEL}"
+WORK="$OUT_DIR/.pack-${ARTIFACT_BASE}"
 APP="$WORK/OpenPolySphere.app"
+DMG="$OUT_DIR/${ARTIFACT_BASE}.dmg"
+ZIP="$OUT_DIR/${ARTIFACT_BASE}.zip"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD="$ROOT/target/release"
@@ -46,12 +48,17 @@ if [[ -z "$ORT_SRC" ]]; then
   exit 1
 fi
 
+chmod +x "$ROOT/scripts/build-macos-app-icon.sh"
+"$ROOT/scripts/build-macos-app-icon.sh"
+
 rm -rf "$WORK"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/Helpers" "$APP/Contents/Frameworks"
 
 sed "s/__VERSION__/${VERSION}/g" "$ROOT/packaging/macos/Info.plist" > "$APP/Contents/Info.plist"
 cp "$ROOT/packaging/macos/OpenPolySphere" "$APP/Contents/MacOS/OpenPolySphere"
 chmod +x "$APP/Contents/MacOS/OpenPolySphere"
+
+cp "$ROOT/packaging/macos/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 
 cp "$BUILD/translator" "$APP/Contents/Resources/"
 chmod +x "$APP/Contents/Resources/translator"
@@ -64,22 +71,54 @@ fi
 cp -R "$BUILD/PolySphereSpeech.app" "$APP/Contents/Resources/Helpers/"
 cp -R "$ROOT/web" "$APP/Contents/Resources/"
 cp "$ROOT/.env.example" "$APP/Contents/Resources/"
-
 cp "$ORT_SRC" "$APP/Contents/Frameworks/libonnxruntime.dylib"
 
-rm -f "$OUT_DIR/${ZIP_BASE}.zip"
+# Ad-hoc sign (local/Gatekeeper hint only — not notarized).
+if command -v codesign >/dev/null 2>&1; then
+  codesign --force --sign - "$APP/Contents/Resources/Helpers/PolySphereSpeech.app" 2>/dev/null || true
+  codesign --force --sign - "$APP" 2>/dev/null || true
+fi
+
 mkdir -p "$OUT_DIR"
+rm -f "$ZIP" "$DMG"
+
 (
   cd "$WORK"
-  zip -r "../${ZIP_BASE}.zip" OpenPolySphere.app
+  zip -r "$ZIP" OpenPolySphere.app
 )
+
+if command -v create-dmg >/dev/null 2>&1; then
+  create-dmg \
+    --volname "OpenPolySphere" \
+    --volicon "$ROOT/packaging/macos/AppIcon.icns" \
+    --window-pos 200 120 \
+    --window-size 660 400 \
+    --icon-size 128 \
+    --icon "OpenPolySphere.app" 180 185 \
+    --hide-extension "OpenPolySphere.app" \
+    --app-drop-link 480 185 \
+    --no-internet-enable \
+    "$DMG" \
+    "$WORK" >/dev/null
+else
+  DMG_STAGING="$OUT_DIR/.dmg-${ARTIFACT_BASE}"
+  rm -rf "$DMG_STAGING"
+  mkdir -p "$DMG_STAGING"
+  cp -R "$APP" "$DMG_STAGING/"
+  ln -s /Applications "$DMG_STAGING/Applications"
+  hdiutil create -volname "OpenPolySphere" -srcfolder "$DMG_STAGING" -ov -format UDZO "$DMG" >/dev/null
+  rm -rf "$DMG_STAGING"
+fi
+
 rm -rf "$WORK"
 
-echo "Created $OUT_DIR/${ZIP_BASE}.zip ($(file "$BUILD/translator" | sed 's/.*: //'))"
-echo "Install: unzip, drag OpenPolySphere.app to Applications, double-click."
-echo "First run downloads models — also install: brew install espeak-ng"
+echo "Created $DMG ($(file "$BUILD/translator" | sed 's/.*: //'))"
+echo "Created $ZIP"
+echo "Install: open the .dmg, drag OpenPolySphere to Applications, launch from Launchpad."
+echo "First run: /Applications/OpenPolySphere.app/Contents/MacOS/OpenPolySphere setup"
+echo "Also: brew install espeak-ng"
 if [[ "$ARCH" == "arm64" ]]; then
-  echo "This build is for Apple Silicon (M1/M2/M3). Intel Macs need the macos-x64 artifact."
+  echo "Build: Apple Silicon (M1/M2/M3). Intel Macs → macos-x64."
 elif [[ "$ARCH" == "x86_64" ]]; then
-  echo "This build is for Intel Macs. Apple Silicon needs the macos-arm64 artifact."
+  echo "Build: Intel Mac. Apple Silicon → macos-arm64."
 fi

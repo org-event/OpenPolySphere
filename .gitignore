@@ -34,7 +34,9 @@ scripts/__pycache__/
 *.swp
 *.swo
 
-# Docs (dev only)
+# macOS app bundle assets (generated)
+packaging/macos/AppIcon.iconset
+packaging/macos/AppIcon.icns
 article.md
 LAUNCH_PLAN.md
 HANDOFF.md

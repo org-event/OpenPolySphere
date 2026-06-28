@@ -22,6 +22,10 @@
 	<string>14.0</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>OpenPolySphere needs speech recognition to transcribe your voice during calls.</string>
 </dict>
