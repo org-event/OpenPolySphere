@@ -89,8 +89,11 @@ fi
 rm -f "$OUT_DIR"/openpolysphere_"${VERSION}"_amd64.deb
 rm -f "$OUT_DIR"/openpolysphere-"${VERSION}"-*.x86_64.rpm
 
-"$NFPM_BIN" pkg -f "$ROOT/packaging/linux/nfpm.yaml" -t "$OUT_DIR" --packager deb -v "$VERSION"
-"$NFPM_BIN" pkg -f "$ROOT/packaging/linux/nfpm.yaml" -t "$OUT_DIR" --packager rpm -v "$VERSION"
+NFPM_CFG="$ROOT/packaging/linux/.nfpm.yaml"
+sed "s/^version:.*/version: \"${VERSION}\"/" "$ROOT/packaging/linux/nfpm.yaml" > "$NFPM_CFG"
+
+"$NFPM_BIN" pkg -f "$NFPM_CFG" -t "$OUT_DIR" --packager deb
+"$NFPM_BIN" pkg -f "$NFPM_CFG" -t "$OUT_DIR" --packager rpm
 
 echo "Created:"
 echo "  $OUT_DIR/${ZIP_NAME}.zip"

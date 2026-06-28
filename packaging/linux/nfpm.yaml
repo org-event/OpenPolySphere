@@ -19,15 +19,15 @@ depends:
 recommends:
   - ca-certificates
 contents:
-  - src: ./.pack-root/usr/lib/openpolysphere/bin/translator
+  - src: ./packaging/linux/.pack-root/usr/lib/openpolysphere/bin/translator
     dst: /usr/lib/openpolysphere/bin/translator
     file_info:
       mode: 0755
-  - src: ./.pack-root/usr/lib/openpolysphere/lib/libonnxruntime.so
+  - src: ./packaging/linux/.pack-root/usr/lib/openpolysphere/lib/libonnxruntime.so
     dst: /usr/lib/openpolysphere/lib/libonnxruntime.so
     file_info:
       mode: 0644
-  - src: ./.pack-root/usr/share/openpolysphere/web
+  - src: ./packaging/linux/.pack-root/usr/share/openpolysphere/web
     dst: /usr/share/openpolysphere/web
   - src: ./packaging/linux/openpolysphere-wrapper.sh
     dst: /usr/bin/openpolysphere

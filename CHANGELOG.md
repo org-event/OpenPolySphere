@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Linux release: nfpm version injection and `.pack-root` paths in `nfpm.yaml`
+- macOS Intel release: migrate `macos-13` → `macos-15-intel` (retired runner)
+
+### Added
+
+- CI smoke tests for `package-linux.sh` and `package-macos-app.sh` on PR builds
+
 ## [0.4.2] - 2026-06-28
 
 ### Added

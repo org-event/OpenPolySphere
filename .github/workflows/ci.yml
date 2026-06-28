@@ -136,6 +136,13 @@ jobs:
           test -x target/release/translator
           test -d target/release/PolySphereSpeech.app
           ./target/release/translator --help
+      - name: Smoke-test release packaging
+        run: |
+          brew install create-dmg librsvg
+          chmod +x scripts/package-macos-app.sh scripts/build-macos-app-icon.sh
+          ./scripts/package-macos-app.sh 0.0.0-ci dist
+          test -f dist/openpolysphere-0.0.0-ci-macos-arm64.dmg
+          test -f dist/openpolysphere-0.0.0-ci-macos-arm64.zip
 
   windows:
     runs-on: windows-latest
@@ -290,6 +297,14 @@ jobs:
         run: |
           test -x target/release/translator
           ./target/release/translator --help
+
+      - name: Smoke-test release packaging
+        run: |
+          chmod +x scripts/package-linux.sh
+          ./scripts/package-linux.sh 0.0.0-ci dist
+          test -f dist/openpolysphere_0.0.0-ci_amd64.deb
+          test -f dist/openpolysphere-0.0.0-ci-1.x86_64.rpm
+          test -f dist/openpolysphere-0.0.0-ci-linux-x64.zip
 
       - name: Package artifact
         run: |

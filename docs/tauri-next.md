@@ -22,6 +22,6 @@ The All-Rust stack runs as a single `translator` binary (Axum on `127.0.0.1:5050
 - Code signing / notarization
 - GPU Whisper / whisper-tiny optimizations
 
-Auto-update is tracked in the **private** [GitHub Project](https://github.com/users/org-event/projects/5) as draft issues **U1–U5**: versioning and GitHub Releases check first on the Axum stack; full signed self-update with `tauri-plugin-updater` in phase 7. Contributors: ask a maintainer for project access — tasks are not listed in public Issues until converted when done.
+Auto-update: tracked publicly in [#37 — in-app update check and self-update on all platforms](https://github.com/org-event/OpenPolySphere/issues/37). Phase 1 — GitHub Releases check on the Axum stack; full signed self-update (Sparkle / `tauri-plugin-updater`) later.
 
 When starting Phase 5, add a `crates/translator-tauri/` workspace member or a top-level `src-tauri/` that depends on the existing static assets and sidecar build.

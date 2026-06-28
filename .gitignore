@@ -39,6 +39,7 @@ packaging/macos/AppIcon.iconset
 packaging/macos/AppIcon.icns
 packaging/linux/.pack-root
 packaging/linux/.nfpm
+packaging/linux/.nfpm.yaml
 packaging/windows/staging
 article.md
 LAUNCH_PLAN.md
