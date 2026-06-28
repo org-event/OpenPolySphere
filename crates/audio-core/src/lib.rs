@@ -7,8 +7,7 @@ pub mod translation;
 pub mod tts;
 
 pub fn init_ort() {
-    let ort_dylib = std::env::var("ORT_DYLIB_PATH")
-        .unwrap_or_else(|_| platform::default_ort_dylib().to_string());
+    let ort_dylib = platform::resolve_ort_dylib();
     ort::init_from(&ort_dylib)
         .unwrap_or_else(|e| panic!("Failed to load ONNX Runtime from {ort_dylib}: {e}"))
         .commit();

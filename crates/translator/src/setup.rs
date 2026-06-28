@@ -6,7 +6,7 @@ use crate::downloads::{
     self, download_default_voices, download_polish_model, download_translation_models,
     download_whisper_model,
 };
-use crate::paths::{base_dir, ensure_parent};
+use crate::paths::{base_dir, ensure_parent, is_packaged_macos_app, user_data_dir};
 use crate::settings::Settings;
 
 pub async fn run() -> Result<()> {
@@ -34,8 +34,12 @@ pub async fn run() -> Result<()> {
     println!("\n=== Setup complete ===");
     downloads::print_setup_status();
     println!("\nStart server:");
-    println!("  cargo run --release -p translator");
-    println!("  # or: ./target/release/translator");
+    if is_packaged_macos_app() {
+        println!("  Open OpenPolySphere.app");
+    } else {
+        println!("  cargo run --release -p translator");
+        println!("  # or: ./target/release/translator");
+    }
     println!("Open http://127.0.0.1:5050");
     Ok(())
 }
@@ -54,8 +58,7 @@ fn check_toolchain() {
 }
 
 fn check_ort_hint() {
-    let dylib = std::env::var("ORT_DYLIB_PATH")
-        .unwrap_or_else(|_| audio_core::platform::default_ort_dylib().to_string());
+    let dylib = audio_core::platform::resolve_ort_dylib();
     if audio_core::platform::ort_dylib_exists(&dylib) {
         println!("[OK] ONNX Runtime ({dylib})");
     } else {
@@ -64,13 +67,14 @@ fn check_ort_hint() {
 }
 
 fn ensure_env_file() -> Result<()> {
-    let env = base_dir().join(".env");
+    let env = user_data_dir().join(".env");
     if env.is_file() {
         println!("[OK] .env");
         return Ok(());
     }
     let example = base_dir().join(".env.example");
     if example.is_file() {
+        ensure_parent(&env)?;
         std::fs::copy(&example, &env)?;
         println!(
             "[!] Created .env from .env.example — add API keys if using cloud STT/translation"

@@ -23,6 +23,60 @@ pub fn default_ort_dylib() -> &'static str {
     }
 }
 
+/// Resolve ONNX Runtime dylib: env → bundled .app Frameworks → dev default.
+pub fn resolve_ort_dylib() -> String {
+    if let Ok(path) = std::env::var("ORT_DYLIB_PATH") {
+        if !path.is_empty() {
+            return path;
+        }
+    }
+    if let Some(path) = bundled_ort_dylib() {
+        return path.to_string_lossy().into_owned();
+    }
+    default_ort_dylib().to_string()
+}
+
+/// ONNX Runtime shipped inside OpenPolySphere.app (Frameworks/) or next to the binary.
+pub fn bundled_ort_dylib() -> Option<std::path::PathBuf> {
+    let exe = std::env::current_exe().ok()?;
+    let parent = exe.parent()?;
+
+    #[cfg(target_os = "macos")]
+    {
+        if parent.file_name().and_then(|n| n.to_str()) == Some("Resources") {
+            let frameworks = parent
+                .parent()?
+                .join("Frameworks")
+                .join("libonnxruntime.dylib");
+            if frameworks.is_file() {
+                return Some(frameworks);
+            }
+        }
+        if parent.file_name().and_then(|n| n.to_str()) == Some("MacOS") {
+            let frameworks = parent
+                .parent()?
+                .join("Frameworks")
+                .join("libonnxruntime.dylib");
+            if frameworks.is_file() {
+                return Some(frameworks);
+            }
+        }
+    }
+
+    let sibling = parent.join(
+        #[cfg(target_os = "macos")]
+        "libonnxruntime.dylib",
+        #[cfg(target_os = "windows")]
+        "onnxruntime.dll",
+        #[cfg(all(not(target_os = "macos"), not(target_os = "windows")))]
+        "libonnxruntime.so",
+    );
+    if sibling.is_file() {
+        return Some(sibling);
+    }
+    None
+}
+
 /// User-facing hint when ONNX Runtime is missing at setup time.
 pub fn ort_missing_hint(path: &str) -> String {
     #[cfg(target_os = "windows")]
