@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-06-28
+
 ### Fixed
 
 - Linux release: nfpm version injection and `.pack-root` paths in `nfpm.yaml`
