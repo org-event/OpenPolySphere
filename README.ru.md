@@ -14,11 +14,13 @@
 
 Поддерживает **29 языков** с STT, переводом и TTS. Голосовые модели от [Piper](https://github.com/rhasspy/piper) — скачиваются прямо из веб-интерфейса.
 
-![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
+![macOS](https://img.shields.io/badge/macOS-14+-lightgrey)
+![Linux](https://img.shields.io/badge/Linux-supported-lightgrey)
+![Windows](https://img.shields.io/badge/Windows-10%2F11-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13385/badge)](https://www.bestpractices.dev/projects/13385)
 
-> **Внимание:** macOS — основная платформа (14+). Порт на Windows в разработке ([`docs/windows.md`](docs/windows.md)). Порт на Linux начат в [`feat/linux`](docs/linux.md) — контрибуции приветствуются.
+> **Внимание:** macOS 14+ — основная платформа (CoreAudio, BlackHole). Linux и Windows поддерживаются: CI-сборки и локальная разработка — см. [`docs/linux.md`](docs/linux.md) и [`docs/windows.md`](docs/windows.md).
 
 ---
 

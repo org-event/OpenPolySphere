@@ -14,12 +14,14 @@ Real-time speech translator for video/voice calls. Translates both sides of the 
 
 Supports **29 languages** with STT, translation, and TTS. Voice models from [Piper](https://github.com/rhasspy/piper) — download any language directly from the web UI.
 
-![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
+![macOS](https://img.shields.io/badge/macOS-14+-lightgrey)
+![Linux](https://img.shields.io/badge/Linux-supported-lightgrey)
+![Windows](https://img.shields.io/badge/Windows-10%2F11-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13385/badge)](https://www.bestpractices.dev/projects/13385)
 ![GitHub stars](https://img.shields.io/github/stars/org-event/OpenPolySphere)
 
-> **Note:** macOS production today (14+). Windows port in active development ([`docs/windows.md`](docs/windows.md)). Linux port started on [`feat/linux`](docs/linux.md) — contributions welcome.
+> **Note:** macOS 14+ is the primary platform (CoreAudio, BlackHole). Linux and Windows are supported with CI builds and local dev — see [`docs/linux.md`](docs/linux.md) and [`docs/windows.md`](docs/windows.md).
 
 ---
 
