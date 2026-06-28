@@ -93,6 +93,7 @@ just run               # start server
 | `just check-windows-clippy` | Full Windows clippy (native Windows, CI parity) |
 | `just fetch-ort` | ONNX Runtime download / path hints |
 | `just build` | Release build of `translator` |
+| `just test` | Unit tests (`audio-core` VAD/downsample) |
 | `just run` | Start server |
 | `just setup` | Download Whisper, Opus-MT, default Piper voices |
 
@@ -104,6 +105,13 @@ On **Linux/Windows** Swift and Apple-only checks are skipped automatically; plat
 - **Rust**: `cargo fmt` + `cargo clippy`
 - **JS**: `bun run lint:js`
 - Pre-commit hook runs `just check` automatically after `just install`
+
+### Automated tests
+
+- **Run unit tests:** `just test` or `cargo test -p audio-core@0.1.0 --lib`
+- **Major new features:** add or update unit tests in the automated suite when practical (see `crates/audio-core/src/vad/mod.rs` for examples)
+- **User-facing audio changes:** also verify with a real call (Google Meet, Zoom, etc.) before merging
+- **CI:** macOS, Windows, and Linux jobs run `cargo test -p audio-core@0.1.0 --lib` on Rust changes
 
 ### What we especially welcome
 

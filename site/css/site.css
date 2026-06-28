@@ -87,6 +87,12 @@ h1 {
   color: var(--muted);
 }
 
+.ossf-badge img {
+  display: block;
+  height: 20px;
+  width: auto;
+}
+
 section {
   margin-top: 2rem;
 }

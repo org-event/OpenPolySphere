@@ -129,6 +129,7 @@ jobs:
         run: brew install espeak-ng onnxruntime
       - run: bun install --frozen-lockfile
       - run: just check
+      - run: cargo test -p audio-core@0.1.0 --lib
       - run: just build
       - name: Verify build
         run: |
@@ -194,6 +195,9 @@ jobs:
 
       - name: Clippy
         run: cargo clippy -p translator -p audio-core@0.1.0 --all-targets -- -D warnings
+
+      - name: Unit tests
+        run: cargo test -p audio-core@0.1.0 --lib
 
       - name: Build release
         run: cargo build --release -p translator
@@ -275,6 +279,9 @@ jobs:
 
       - name: Clippy
         run: cargo clippy -p translator -p audio-core@0.1.0 --all-targets -- -D warnings
+
+      - name: Unit tests
+        run: cargo test -p audio-core@0.1.0 --lib
 
       - name: Build release
         run: cargo build --release -p translator

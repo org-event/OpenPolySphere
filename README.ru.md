@@ -1,6 +1,6 @@
 <div align="center">
 
-[![OpenPolySphere](docs/readme-logo.png)](https://github.com/org-event/OpenPolySphere)
+[![OpenPolySphere](site/readme-logo.png)](https://github.com/org-event/OpenPolySphere)
 
 </div>
 
@@ -16,6 +16,7 @@
 
 ![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13385/badge)](https://www.bestpractices.dev/projects/13385)
 
 > **Внимание:** macOS — основная платформа (14+). Порт на Windows в разработке ([`docs/windows.md`](docs/windows.md)). Порт на Linux начат в [`feat/linux`](docs/linux.md) — контрибуции приветствуются.
 

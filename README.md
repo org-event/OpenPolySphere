@@ -1,6 +1,6 @@
 <div align="center">
 
-[![OpenPolySphere](docs/readme-logo.png)](https://github.com/org-event/OpenPolySphere)
+[![OpenPolySphere](site/readme-logo.png)](https://github.com/org-event/OpenPolySphere)
 
 </div>
 
@@ -16,6 +16,7 @@ Supports **29 languages** with STT, translation, and TTS. Voice models from [Pip
 
 ![macOS](https://img.shields.io/badge/platform-macOS_14+-lightgrey)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13385/badge)](https://www.bestpractices.dev/projects/13385)
 ![GitHub stars](https://img.shields.io/github/stars/org-event/OpenPolySphere)
 
 > **Note:** macOS production today (14+). Windows port in active development ([`docs/windows.md`](docs/windows.md)). Linux port started on [`feat/linux`](docs/linux.md) — contributions welcome.

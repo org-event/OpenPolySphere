@@ -13,6 +13,7 @@ install: install-rust install-system install-js install-git install-hooks
     @echo "  just check-linux-clippy       # full Linux clippy (native Linux only)"
     @echo "  just check-windows-clippy     # full Windows clippy (native Windows only)"
     @echo "  just fetch-ort                # ONNX Runtime path hints / download"
+    @echo "  just test                     # unit tests (audio-core)"
     @echo "  just setup                    # download models (first run)"
     @echo "  just run                      # start server"
 
@@ -25,6 +26,9 @@ prepush: prepush-fmt check-js check-windows-static
 
 build:
     cargo build --release -p translator
+
+test:
+    cargo test -p audio-core@0.1.0 --lib
 
 run:
     cargo run --release -p translator
