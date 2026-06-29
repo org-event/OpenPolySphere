@@ -139,7 +139,7 @@ jobs:
       - name: Smoke-test release packaging
         run: |
           brew install create-dmg librsvg
-          chmod +x scripts/package-macos-app.sh scripts/build-macos-app-icon.sh
+          chmod +x scripts/package-macos-app.sh scripts/build-macos-app-icon.sh scripts/build-macos-shell.sh
           ./scripts/package-macos-app.sh 0.0.0-ci dist
           test -f dist/openpolysphere-0.0.0-ci-macos-arm64.dmg
           test -f dist/openpolysphere-0.0.0-ci-macos-arm64.zip

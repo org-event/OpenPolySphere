@@ -37,6 +37,7 @@ scripts/__pycache__/
 # macOS app bundle assets (generated)
 packaging/macos/AppIcon.iconset
 packaging/macos/AppIcon.icns
+packaging/macos/OpenPolySphere
 packaging/linux/.pack-root
 packaging/linux/.nfpm
 packaging/linux/.nfpm.yaml

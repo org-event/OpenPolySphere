@@ -163,7 +163,7 @@ Edit `.env`:
 
 ```
 DEEPGRAM_API_KEY=your_key_here
-GROQ_API_KEY=your_key_here
+OPENROUTER_API_KEY=your_key_here
 ORT_DYLIB_PATH=/opt/homebrew/lib/libonnxruntime.dylib
 ```
 

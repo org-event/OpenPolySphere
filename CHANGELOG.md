@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- macOS `.app`: native window with embedded WebView (no default browser); server stops when the window closes
+
+### Fixed
+
+- `GROQ_API_KEY` legacy alias maps to `OPENROUTER_API_KEY` when loading `.env`
+- macOS Dock bounce (bash launcher without GUI replaced by Swift shell)
+
 ## [0.4.3] - 2026-06-28
 
 ### Fixed

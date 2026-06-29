@@ -50,15 +50,14 @@ if [[ -z "$ORT_SRC" ]]; then
   exit 1
 fi
 
-chmod +x "$ROOT/scripts/build-macos-app-icon.sh"
+chmod +x "$ROOT/scripts/build-macos-app-icon.sh" "$ROOT/scripts/build-macos-shell.sh"
 "$ROOT/scripts/build-macos-app-icon.sh"
 
 rm -rf "$WORK"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/Helpers" "$APP/Contents/Frameworks"
 
 sed "s/__VERSION__/${VERSION}/g" "$ROOT/packaging/macos/Info.plist" > "$APP/Contents/Info.plist"
-cp "$ROOT/packaging/macos/OpenPolySphere" "$APP/Contents/MacOS/OpenPolySphere"
-chmod +x "$APP/Contents/MacOS/OpenPolySphere"
+"$ROOT/scripts/build-macos-shell.sh" "$APP/Contents/MacOS/OpenPolySphere"
 
 cp "$ROOT/packaging/macos/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 

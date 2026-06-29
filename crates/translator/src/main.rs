@@ -123,18 +123,32 @@ mod dotenvy {
 
     pub fn optional() -> Result<(), ()> {
         let path = user_data_dir().join(".env");
-        let Ok(raw) = fs::read_to_string(path) else {
+        let Ok(raw) = fs::read_to_string(&path) else {
             return Err(());
         };
+        let mut groq_value: Option<String> = None;
         for line in raw.lines() {
             let line = line.trim();
             if line.is_empty() || line.starts_with('#') {
                 continue;
             }
             if let Some((k, v)) = line.split_once('=') {
-                if std::env::var(k).is_err() {
-                    std::env::set_var(k, v.trim_matches('"'));
+                let key = k.trim();
+                let value = v.trim().trim_matches('"').trim_matches('\'');
+                if key == "GROQ_API_KEY" && !value.is_empty() {
+                    groq_value = Some(value.to_string());
                 }
+                if std::env::var(key).is_err() {
+                    std::env::set_var(key, value);
+                }
+            }
+        }
+        if let Some(groq) = groq_value {
+            if std::env::var("OPENROUTER_API_KEY")
+                .map(|s| s.trim().is_empty())
+                .unwrap_or(true)
+            {
+                std::env::set_var("OPENROUTER_API_KEY", &groq);
             }
         }
         Ok(())

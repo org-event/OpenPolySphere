@@ -164,7 +164,7 @@ cp .env.example .env
 
 ```
 DEEPGRAM_API_KEY=ваш_ключ
-GROQ_API_KEY=ваш_ключ
+OPENROUTER_API_KEY=ваш_ключ
 ORT_DYLIB_PATH=/opt/homebrew/lib/libonnxruntime.dylib
 ```
 

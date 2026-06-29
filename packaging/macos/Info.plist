@@ -28,5 +28,7 @@
 	<string>AppIcon</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>OpenPolySphere needs speech recognition to transcribe your voice during calls.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>OpenPolySphere needs microphone access for real-time call translation.</string>
 </dict>
 </plist>
