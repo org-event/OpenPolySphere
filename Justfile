@@ -15,7 +15,8 @@ install: install-rust install-system install-js install-git install-hooks
     @echo "  just fetch-ort                # ONNX Runtime path hints / download"
     @echo "  just test                     # unit tests (audio-core)"
     @echo "  just setup                    # download models (first run)"
-    @echo "  just run                      # start server"
+    @echo "  just run                      # start server (browser)"
+    @echo "  just app                      # desktop window (dev, needs: just build)"
 
 # All pre-commit checks in one command.
 check: check-rust check-js check-swift
@@ -32,6 +33,10 @@ test:
 
 run:
     cargo run --release -p translator
+
+# Desktop shell in dev: repo-root .env, target/release/translator, embedded WebView.
+app: build
+    cargo run --release -p openpolysphere-app
 
 setup:
     cargo run --release -p translator -- setup

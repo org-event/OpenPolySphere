@@ -4,7 +4,16 @@ use std::path::PathBuf;
 
 const APP_NAME: &str = "OpenPolySphere";
 
+/// True when running from a shipped install (.app, FHS, Program Files), not `cargo run`.
+pub fn is_packaged() -> bool {
+    macos_resources_dir().is_some() || packaged_user_data_dir().is_some()
+}
+
 pub fn apply_packaged_env() {
+    if !is_packaged() {
+        apply_dev_env();
+        return;
+    }
     if let Some(home) = bundle_home() {
         std::env::set_var("CALL_TRANSLATOR_HOME", &home);
     }
@@ -18,6 +27,47 @@ pub fn apply_packaged_env() {
     if let Some(speech) = speech_helper_app() {
         std::env::set_var("POLYSPHERE_SPEECH_AUTH_APP", &speech);
     }
+}
+
+fn apply_dev_env() {
+    if std::env::var("OPENPOLYSPHERE_TRANSLATOR").is_err() {
+        if let Some(exe) = dev_translator_exe() {
+            std::env::set_var("OPENPOLYSPHERE_TRANSLATOR", &exe);
+        }
+    }
+    if std::env::var("CALL_TRANSLATOR_HOME").is_err() {
+        if let Some(root) = workspace_root() {
+            std::env::set_var("CALL_TRANSLATOR_HOME", &root);
+        }
+    }
+    if std::env::var("TRANSLATOR_DATA_DIR").is_err() {
+        if let Some(root) = workspace_root() {
+            std::env::set_var("TRANSLATOR_DATA_DIR", &root);
+        }
+    }
+}
+
+fn workspace_root() -> Option<PathBuf> {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .ok()
+}
+
+fn dev_translator_exe() -> Option<PathBuf> {
+    let root = workspace_root()?;
+    for profile in ["release", "debug"] {
+        let name = if cfg!(windows) {
+            "translator.exe"
+        } else {
+            "translator"
+        };
+        let candidate = root.join("target").join(profile).join(name);
+        if candidate.is_file() {
+            return Some(candidate);
+        }
+    }
+    None
 }
 
 fn bundle_home() -> Option<PathBuf> {

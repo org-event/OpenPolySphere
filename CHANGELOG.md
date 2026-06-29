@@ -8,7 +8,7 @@
 
 ### Fixed
 
-- Deprecated OpenRouter env/settings aliases migrated on load (`legacy_config.rs`)
+- Desktop shell stops the translator server when the window closes (all platforms)
 
 ## [0.4.3] - 2026-06-28
 

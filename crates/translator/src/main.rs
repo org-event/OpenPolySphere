@@ -2,7 +2,6 @@ mod db;
 mod downloads;
 mod engine_service;
 mod events;
-mod legacy_config;
 mod openrouter;
 mod paths;
 mod port;
@@ -119,13 +118,11 @@ async fn serve() -> Result<()> {
 
 // Minimal .env loader without extra dep — read .env from base dir if present
 mod dotenvy {
-    use crate::legacy_config;
     use crate::paths::user_data_dir;
     use std::fs;
 
     pub fn optional() -> Result<(), ()> {
         let path = user_data_dir().join(".env");
-        legacy_config::migrate_dotenv_file(&path);
         let Ok(raw) = fs::read_to_string(&path) else {
             return Err(());
         };
