@@ -320,7 +320,11 @@ impl Engine {
                 vec![self.audio_levels_event()]
             }
 
-            Command::TtsPreview { lang, voice } => {
+            Command::TtsPreview {
+                lang,
+                voice,
+                speaker,
+            } => {
                 let models_base =
                     std::env::var("TRANSLATOR_MODELS_DIR").unwrap_or_else(|_| "./models".into());
                 let model_path = format!("{}/piper-{}/{}.onnx", models_base, lang, voice);
@@ -346,8 +350,11 @@ impl Engine {
                     Ok(mut tts) => {
                         match tts.synthesize(text) {
                             Ok(samples) => {
-                                // Play through default speakers
-                                let speaker = self.config.speaker_device.clone();
+                                let speaker = if speaker.is_empty() {
+                                    self.config.speaker_device.clone()
+                                } else {
+                                    speaker
+                                };
                                 let sr = self.config.sample_rate;
                                 let (tx, rx) = crossbeam_channel::bounded(4);
                                 match AudioPlayback::new(&speaker, sr, rx) {

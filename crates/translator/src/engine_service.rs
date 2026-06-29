@@ -172,6 +172,7 @@ impl EngineService {
                     self.command(Command::TtsPreview {
                         lang: parts[1].to_string(),
                         voice: parts[2..].join(":"),
+                        speaker: String::new(),
                     });
                     "ok:previewing".into()
                 } else {

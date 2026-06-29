@@ -12,7 +12,7 @@ use crate::settings::{
 use crate::voices;
 use crate::AppState;
 use audio_core::audio;
-use audio_core::protocol::Command;
+use audio_core::protocol::{Command, Event};
 use axum::{
     extract::{Path, Query, State},
     http::{header, StatusCode},
@@ -75,6 +75,8 @@ struct PreviewBody {
     lang: String,
     #[serde(default)]
     voice: String,
+    #[serde(default)]
+    speaker: String,
 }
 
 #[derive(Deserialize, Default)]
@@ -386,19 +388,29 @@ async fn tts_preview(
     Json(body): Json<PreviewBody>,
 ) -> Json<Value> {
     let mut voice = body.voice;
+    let mut speaker = body.speaker;
+    let settings = state.settings.read().await;
     if voice.is_empty() {
-        let settings = state.settings.read().await;
         voice = if body.lang == "en" {
             settings.outgoing_voice()
         } else {
             settings.incoming_voice()
         };
     }
+    if speaker.is_empty() {
+        speaker = settings.str_field("speaker_device");
+    }
     let engine = state.engine.read().await.clone();
-    engine.command(Command::TtsPreview {
+    let events = engine.command(Command::TtsPreview {
         lang: body.lang,
         voice,
+        speaker,
     });
+    for event in &events {
+        if let Event::Error { message } = event {
+            return Json(json!({ "status": format!("error:{message}") }));
+        }
+    }
     Json(json!({ "status": "ok:previewing" }))
 }
 

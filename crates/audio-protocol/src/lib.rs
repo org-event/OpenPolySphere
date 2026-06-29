@@ -33,6 +33,8 @@ pub enum Command {
     TtsPreview {
         lang: String,
         voice: String,
+        #[serde(default)]
+        speaker: String,
     },
 }
 

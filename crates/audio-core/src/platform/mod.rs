@@ -7,6 +7,8 @@
 mod bundle;
 mod capabilities;
 mod defaults;
+#[cfg(target_os = "macos")]
+mod macos_mic;
 mod paths;
 
 pub use bundle::{
@@ -19,3 +21,11 @@ pub use paths::{
     bundled_ort_dylib, default_ort_dylib, find_espeak_ng, ort_dylib_exists, ort_missing_hint,
     resolve_ort_dylib,
 };
+
+#[cfg(target_os = "macos")]
+pub use macos_mic::ensure_microphone_access;
+
+#[cfg(not(target_os = "macos"))]
+pub fn ensure_microphone_access() -> anyhow::Result<()> {
+    Ok(())
+}

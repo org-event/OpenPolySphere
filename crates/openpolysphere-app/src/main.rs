@@ -97,6 +97,7 @@ fn run_gui() {
     let window = WindowBuilder::new()
         .with_title("OpenPolySphere")
         .with_inner_size(tao::dpi::LogicalSize::new(1180.0, 820.0))
+        .with_min_inner_size(tao::dpi::LogicalSize::new(960.0, 640.0))
         .build(&event_loop)
         .unwrap_or_else(|e| {
             eprintln!("could not create window: {e}");

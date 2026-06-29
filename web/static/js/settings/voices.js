@@ -196,14 +196,19 @@ export async function previewVoice(dir) {
     const r = await fetch('/api/tts-preview', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lang, voice }),
+      body: JSON.stringify({
+        lang,
+        voice,
+        speaker: document.getElementById('cfg-speaker')?.value || '',
+      }),
     });
     const data = await r.json();
     if (data.status && data.status.startsWith('ok')) {
       showToast('Playing preview...');
       await sleep(3500);
     } else {
-      showToast('Preview failed: ' + (data.status || 'engine not running'));
+      const err = (data.status || '').replace(/^error:/, '') || 'engine not running';
+      showToast('Preview failed: ' + err);
     }
   } catch {
     showToast('Preview error: engine not running');

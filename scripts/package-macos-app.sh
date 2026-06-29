@@ -70,6 +70,10 @@ cp "$ROOT/packaging/macos/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 cp "$BUILD/translator" "$APP/Contents/Resources/"
 chmod +x "$APP/Contents/Resources/translator"
 
+if command -v codesign >/dev/null 2>&1; then
+  codesign --force --sign - "$APP/Contents/Resources/translator" 2>/dev/null || true
+fi
+
 if [[ -f "$BUILD/polysphere-translate" ]]; then
   cp "$BUILD/polysphere-translate" "$APP/Contents/Resources/"
   chmod +x "$APP/Contents/Resources/polysphere-translate"

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- macOS `.app`: request microphone permission at startup; sign `translator` helper in bundle
+- Settings: wider panel, no horizontal scroll; desktop window minimum size 960×640
+- Voice preview: play through selected speakers; surface engine errors in UI
+
 ## [0.4.4] - 2026-06-29
 
 ### Added
