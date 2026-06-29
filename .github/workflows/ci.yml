@@ -131,15 +131,17 @@ jobs:
       - run: just check
       - run: cargo test -p audio-core@0.1.0 --lib
       - run: just build
+      - run: cargo build --release -p openpolysphere-app
       - name: Verify build
         run: |
           test -x target/release/translator
+          test -x target/release/openpolysphere
           test -d target/release/PolySphereSpeech.app
           ./target/release/translator --help
       - name: Smoke-test release packaging
         run: |
           brew install create-dmg librsvg
-          chmod +x scripts/package-macos-app.sh scripts/build-macos-app-icon.sh scripts/build-macos-shell.sh
+          chmod +x scripts/package-macos-app.sh scripts/build-macos-app-icon.sh
           ./scripts/package-macos-app.sh 0.0.0-ci dist
           test -f dist/openpolysphere-0.0.0-ci-macos-arm64.dmg
           test -f dist/openpolysphere-0.0.0-ci-macos-arm64.zip
@@ -207,16 +209,21 @@ jobs:
         run: cargo test -p audio-core@0.1.0 --lib
 
       - name: Build release
-        run: cargo build --release -p translator
+        run: cargo build --release -p translator -p openpolysphere-app
 
       - name: Verify binary
-        run: .\target\release\translator.exe --help
+        shell: pwsh
+        run: |
+          if (-not (Test-Path target/release/translator.exe)) { exit 1 }
+          if (-not (Test-Path target/release/openpolysphere.exe)) { exit 1 }
+          .\target\release\translator.exe --help
 
       - name: Package artifact
         shell: pwsh
         run: |
           $dest = "dist/openpolysphere-windows-x64"
           New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          Copy-Item target/release/openpolysphere.exe $dest/
           Copy-Item target/release/translator.exe $dest/
           Copy-Item ort/onnxruntime-win-x64-$env:ORT_VERSION/lib/onnxruntime.dll $dest/
           Copy-Item -Recurse web $dest/web
@@ -225,9 +232,8 @@ jobs:
             "OpenPolySphere Windows CI artifact (Windows 10/11 x64)",
             "",
             "1. Unzip to a folder",
-            "2. .\translator.exe --help",
-            "3. .\translator.exe setup   (downloads models)",
-            "4. .\translator.exe         then open http://127.0.0.1:5050",
+            "2. .\openpolysphere.exe setup",
+            "3. .\openpolysphere.exe   (embedded window)",
             "",
             "Virtual audio for calls: VB-Audio Virtual Cable (see docs/windows.md)",
             "espeak-ng: install via choco if TTS phonemization fails"
@@ -259,7 +265,8 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake pkg-config libopenblas-dev libasound2-dev espeak-ng
+          sudo apt-get install -y cmake pkg-config libopenblas-dev libasound2-dev espeak-ng \
+            libgtk-3-dev libwebkit2gtk-4.1-dev
 
       - name: Install ONNX Runtime
         run: |
@@ -291,11 +298,12 @@ jobs:
         run: cargo test -p audio-core@0.1.0 --lib
 
       - name: Build release
-        run: cargo build --release -p translator
+        run: cargo build --release -p translator -p openpolysphere-app
 
       - name: Verify binary
         run: |
           test -x target/release/translator
+          test -x target/release/openpolysphere
           ./target/release/translator --help
 
       - name: Smoke-test release packaging
@@ -311,6 +319,7 @@ jobs:
           ORT_DIR="ort/onnxruntime-linux-x64-${ORT_VERSION}"
           dest="dist/openpolysphere-linux-x64"
           mkdir -p "$dest"
+          cp target/release/openpolysphere "$dest/"
           cp target/release/translator "$dest/"
           cp "$ORT_DIR/lib/libonnxruntime.so" "$dest/"
           cp -R web "$dest/web"
@@ -322,9 +331,8 @@ jobs:
             '2. chmod +x translator' \
             '3. export ORT_DYLIB_PATH=$PWD/libonnxruntime.so' \
             '4. export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH' \
-            '5. ./translator --help' \
-            '6. ./translator setup   (downloads models)' \
-            '7. ./translator         then open http://127.0.0.1:5050' \
+            '5. ./openpolysphere setup' \
+            '6. ./openpolysphere   (embedded window)' \
             '' \
             'Virtual audio for calls: PipeWire/PulseAudio null sinks (see docs/linux.md)' \
             'espeak-ng: sudo apt install espeak-ng if TTS phonemization fails' \

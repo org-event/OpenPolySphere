@@ -10,6 +10,7 @@ use serde_json::{Map, Value};
 
 use audio_core::platform::{default_meet_input_device, default_meet_output_device};
 
+use crate::legacy_config;
 use crate::paths::{ensure_parent, settings_path};
 
 pub const DEEPGRAM_API_URL: &str = "https://api.deepgram.com/v1/projects";
@@ -92,7 +93,7 @@ impl Settings {
         } else {
             Settings::default()
         };
-        settings.migrate_groq_key();
+        settings.migrate_legacy_settings_keys();
         settings.apply_env_keys();
         Ok(settings)
     }
@@ -101,7 +102,7 @@ impl Settings {
         let path = settings_path();
         ensure_parent(&path)?;
         let mut to_save = self.fields.clone();
-        to_save.remove("groq_api_key");
+        to_save.remove(legacy_config::LEGACY_SETTINGS_OPENROUTER);
         if env_deepgram_key().is_some()
             && self.str_field("deepgram_api_key") == env_deepgram_key().unwrap_or_default()
         {
@@ -123,8 +124,11 @@ impl Settings {
         self.apply_env_keys();
     }
 
-    fn migrate_groq_key(&mut self) {
-        if let Some(legacy) = self.fields.remove("groq_api_key") {
+    fn migrate_legacy_settings_keys(&mut self) {
+        if let Some(legacy) = self
+            .fields
+            .remove(legacy_config::LEGACY_SETTINGS_OPENROUTER)
+        {
             if self.str_field("openrouter_api_key").is_empty() {
                 if let Value::String(s) = legacy {
                     self.fields
@@ -299,22 +303,16 @@ pub fn env_deepgram_key() -> Option<String> {
 }
 
 pub fn env_openrouter_key() -> Option<String> {
-    ["OPENROUTER_API_KEY", "GROQ_API_KEY", "TRANSLATION_API_KEY"]
-        .iter()
-        .find_map(|var| {
-            std::env::var(var)
-                .ok()
-                .map(|s| s.trim().to_string())
-                .filter(|s| !is_placeholder(s))
-        })
+    std::env::var("OPENROUTER_API_KEY")
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !is_placeholder(s))
 }
 
 fn is_placeholder(key: &str) -> bool {
     matches!(
         key.trim(),
-        "" | "your_deepgram_api_key_here"
-            | "your_groq_api_key_here"
-            | "your_openrouter_api_key_here"
+        "" | "your_deepgram_api_key_here" | "your_openrouter_api_key_here"
     )
 }
 

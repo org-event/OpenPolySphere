@@ -25,7 +25,7 @@ check: check-rust check-js check-swift
 prepush: prepush-fmt check-js check-windows-static
 
 build:
-    cargo build --release -p translator
+    cargo build --release -p translator -p openpolysphere-app
 
 test:
     cargo test -p audio-core@0.1.0 --lib

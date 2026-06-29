@@ -44,7 +44,7 @@ jobs:
       - name: Install system dependencies
         run: brew install espeak-ng onnxruntime librsvg create-dmg
       - name: Build release
-        run: cargo build --release -p translator
+        run: cargo build --release -p translator -p openpolysphere-app
       - name: Package OpenPolySphere.app
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -85,7 +85,7 @@ jobs:
       - name: Install system dependencies
         run: brew install espeak-ng onnxruntime librsvg create-dmg
       - name: Build release
-        run: cargo build --release -p translator
+        run: cargo build --release -p translator -p openpolysphere-app
       - name: Package OpenPolySphere.app
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -145,7 +145,7 @@ jobs:
         run: choco install innosetup -y
 
       - name: Build release
-        run: cargo build --release -p translator
+        run: cargo build --release -p translator -p openpolysphere-app
 
       - name: Package
         shell: pwsh
@@ -173,7 +173,8 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake pkg-config libopenblas-dev libasound2-dev espeak-ng
+          sudo apt-get install -y cmake pkg-config libopenblas-dev libasound2-dev espeak-ng \
+            libgtk-3-dev libwebkit2gtk-4.1-dev
 
       - name: Install ONNX Runtime
         run: |
@@ -193,7 +194,7 @@ jobs:
           toolchain: stable
 
       - name: Build release
-        run: cargo build --release -p translator
+        run: cargo build --release -p translator -p openpolysphere-app
 
       - name: Package
         run: |

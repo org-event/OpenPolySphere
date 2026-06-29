@@ -17,8 +17,10 @@ $ZipName = "openpolysphere-$Version-windows-x64"
 $ZipStaging = Join-Path $OutDir $ZipName
 $OrtDll = Join-Path $Root "ort\onnxruntime-win-x64-$OrtVersion\lib\onnxruntime.dll"
 $Exe = Join-Path $Root "target\release\translator.exe"
+$AppExe = Join-Path $Root "target\release\openpolysphere.exe"
 
 if (-not (Test-Path $Exe)) { throw "missing $Exe — build release first" }
+if (-not (Test-Path $AppExe)) { throw "missing $AppExe — run: cargo build --release -p openpolysphere-app" }
 if (-not (Test-Path $OrtDll)) { throw "missing $OrtDll" }
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
@@ -26,6 +28,7 @@ New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 # Staging for Inno (and zip)
 if (Test-Path $Staging) { Remove-Item -Recurse -Force $Staging }
 New-Item -ItemType Directory -Force -Path $Staging | Out-Null
+Copy-Item $AppExe $Staging\
 Copy-Item $Exe $Staging\
 Copy-Item $OrtDll $Staging\
 Copy-Item -Recurse (Join-Path $Root "web") (Join-Path $Staging "web")
@@ -41,8 +44,8 @@ if (Test-Path (Join-Path $Root "README.ru.md")) {
     "",
     "Portable zip:",
     "  1. Unzip to a folder",
-    "  2. .\translator.exe setup",
-    "  3. .\translator.exe  →  http://127.0.0.1:5050",
+    "  2. .\openpolysphere.exe setup",
+    "  3. .\openpolysphere.exe   (embedded window — close to quit)",
     "",
     "Virtual audio: VB-Audio Virtual Cable (see docs/windows.md)",
     "espeak-ng: choco install espeak-ng if TTS phonemization fails"

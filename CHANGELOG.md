@@ -4,12 +4,11 @@
 
 ### Added
 
-- macOS `.app`: native window with embedded WebView (no default browser); server stops when the window closes
+- Cross-platform desktop shell (`openpolysphere`): embedded WebView on macOS, Windows, and Linux; server stops when the window closes
 
 ### Fixed
 
-- `GROQ_API_KEY` legacy alias maps to `OPENROUTER_API_KEY` when loading `.env`
-- macOS Dock bounce (bash launcher without GUI replaced by Swift shell)
+- Deprecated OpenRouter env/settings aliases migrated on load (`legacy_config.rs`)
 
 ## [0.4.3] - 2026-06-28
 

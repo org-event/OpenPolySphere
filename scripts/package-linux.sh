@@ -12,6 +12,7 @@ ORT_VERSION="${ORT_VERSION:-1.20.1}"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD="$ROOT/target/release"
+APP_BUILD="$BUILD/openpolysphere"
 ORT_DIR="$ROOT/ort/onnxruntime-linux-x64-${ORT_VERSION}"
 PACK_ROOT="$ROOT/packaging/linux/.pack-root"
 ZIP_NAME="openpolysphere-${VERSION}-linux-x64"
@@ -23,6 +24,10 @@ if [[ ! -x "$BUILD/translator" ]]; then
   echo "missing $BUILD/translator" >&2
   exit 1
 fi
+if [[ ! -x "$APP_BUILD" ]]; then
+  echo "missing $APP_BUILD — run: cargo build --release -p openpolysphere-app" >&2
+  exit 1
+fi
 if [[ ! -f "$ORT_DIR/lib/libonnxruntime.so" ]]; then
   echo "missing $ORT_DIR/lib/libonnxruntime.so — run fetch-ort or release ORT step" >&2
   exit 1
@@ -30,9 +35,12 @@ fi
 
 # FHS tree for nfpm
 rm -rf "$PACK_ROOT"
+mkdir -p "$PACK_ROOT/usr/bin"
 mkdir -p "$PACK_ROOT/usr/lib/openpolysphere/bin" "$PACK_ROOT/usr/lib/openpolysphere/lib"
 mkdir -p "$PACK_ROOT/usr/share/openpolysphere"
 
+cp "$APP_BUILD" "$PACK_ROOT/usr/bin/openpolysphere"
+chmod +x "$PACK_ROOT/usr/bin/openpolysphere"
 cp "$BUILD/translator" "$PACK_ROOT/usr/lib/openpolysphere/bin/"
 chmod +x "$PACK_ROOT/usr/lib/openpolysphere/bin/translator"
 cp "$ORT_DIR/lib/libonnxruntime.so" "$PACK_ROOT/usr/lib/openpolysphere/lib/"
@@ -41,6 +49,8 @@ cp -R "$ROOT/web" "$PACK_ROOT/usr/share/openpolysphere/"
 # Portable zip (flat layout, same as before)
 rm -rf "$PORTABLE"
 mkdir -p "$PORTABLE"
+cp "$APP_BUILD" "$PORTABLE/openpolysphere"
+chmod +x "$PORTABLE/openpolysphere"
 cp "$BUILD/translator" "$PORTABLE/"
 chmod +x "$PORTABLE/translator"
 cp "$ORT_DIR/lib/libonnxruntime.so" "$PORTABLE/"
@@ -55,8 +65,8 @@ Portable zip:
   1. unzip, cd into folder
   2. export ORT_DYLIB_PATH=\$PWD/libonnxruntime.so
   3. export LD_LIBRARY_PATH=\$PWD:\$LD_LIBRARY_PATH
-  4. ./translator setup
-  5. ./translator  →  http://127.0.0.1:5050
+  4. ./openpolysphere setup
+  5. ./openpolysphere   (embedded window — close to quit)
 
 Package install (recommended):
   sudo apt install ./openpolysphere_${VERSION}_amd64.deb   # Debian/Ubuntu

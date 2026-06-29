@@ -40,7 +40,10 @@ fn packaged_user_data_dir() -> Option<PathBuf> {
 
     #[cfg(target_os = "linux")]
     {
-        if path.contains("/usr/lib/openpolysphere/") {
+        if path.contains("/usr/lib/openpolysphere/")
+            || path.ends_with("/openpolysphere")
+            || path.ends_with("/bin/openpolysphere")
+        {
             return linux_xdg_data_dir();
         }
     }
