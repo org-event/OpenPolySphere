@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OpenPolySphere</title>
 <link rel="icon" href="/static/img/openpolysphere-tree-icon.svg?v=6" type="image/svg+xml">
-<link rel="stylesheet" href="/static/css/style.css?v=11">
+<link rel="stylesheet" href="/static/css/style.css?v=12">
 </head>
 <body>
 
@@ -261,6 +261,17 @@
       </div>
       <div class="sp-section-body">
         <div class="sp-field">
+          <div class="sp-label" data-i18n="settings.updatesTitle">Updates</div>
+          <label class="sp-check sp-check-prominent">
+            <input type="checkbox" id="cfg-check-updates" checked>
+            <span data-i18n="settings.updatesEnable">Check for updates on GitHub</span>
+          </label>
+          <div class="sp-input-row" style="margin-top:8px">
+            <button type="button" class="sp-test-btn" id="btn-check-updates" onclick="checkForUpdates()" data-i18n="settings.updatesCheck">Check for updates</button>
+          </div>
+          <div class="sp-hint" id="update-hint"></div>
+        </div>
+        <div class="sp-field">
           <div class="sp-label" data-i18n="settings.uiLocale">Interface language</div>
           <select class="sp-input" id="cfg-ui-locale"></select>
         </div>
@@ -305,6 +316,7 @@
       <span id="engine-label" data-i18n="header.stopped">Stopped</span>
     </div>
     <div id="status" data-i18n="app.connectedHeader">Connected</div>
+    <span class="app-version" id="app-version" title=""></span>
     <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" data-i18n-title="theme.toggle" title="Toggle theme"></button>
   </div>
 </header>

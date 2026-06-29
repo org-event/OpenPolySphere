@@ -1,5 +1,8 @@
 mod env;
+#[cfg(target_os = "macos")]
+mod macos_mic;
 
+use std::fs::OpenOptions;
 use std::process::{Child, Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -19,14 +22,25 @@ struct ServerGuard(Option<Child>);
 impl ServerGuard {
     fn spawn() -> std::io::Result<Self> {
         env::apply_packaged_env();
+        #[cfg(target_os = "macos")]
+        if let Err(e) = macos_mic::ensure_microphone_access() {
+            log::warn!("Microphone access: {e:#}");
+        }
         let translator = env::translator_exe();
-        let child = Command::new(&translator)
-            .arg("serve")
-            .envs(std::env::vars())
-            .stdin(Stdio::null())
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn()?;
+        let mut cmd = Command::new(&translator);
+        cmd.arg("serve").envs(std::env::vars()).stdin(Stdio::null());
+        if env::is_packaged() {
+            let log_path = env::user_data_dir().join("translator.log");
+            let _ = std::fs::create_dir_all(log_path.parent().unwrap_or(std::path::Path::new(".")));
+            let log_file = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&log_path)?;
+            cmd.stdout(Stdio::null()).stderr(Stdio::from(log_file));
+        } else {
+            cmd.stdout(Stdio::null()).stderr(Stdio::null());
+        }
+        let child = cmd.spawn()?;
         Ok(Self(Some(child)))
     }
 
@@ -94,8 +108,9 @@ fn run_gui() {
     }
 
     let event_loop = EventLoop::new();
+    let version = env!("OPENPOLYSPHERE_VERSION");
     let window = WindowBuilder::new()
-        .with_title("OpenPolySphere")
+        .with_title(format!("OpenPolySphere {version}"))
         .with_inner_size(tao::dpi::LogicalSize::new(1180.0, 820.0))
         .with_min_inner_size(tao::dpi::LogicalSize::new(960.0, 640.0))
         .build(&event_loop)

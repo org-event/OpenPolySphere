@@ -211,19 +211,7 @@ pub fn translator_exe() -> PathBuf {
     if let Ok(p) = std::env::var("OPENPOLYSPHERE_TRANSLATOR") {
         return PathBuf::from(p);
     }
-    if let Some(res) = macos_resources_dir() {
-        let p = res.join("translator");
-        if p.is_file() {
-            return p;
-        }
-    }
-    #[cfg(target_os = "linux")]
-    {
-        let fhs = PathBuf::from("/usr/lib/openpolysphere/bin/translator");
-        if fhs.is_file() {
-            return fhs;
-        }
-    }
+    // Packaged macOS: translator lives next to the GUI binary in Contents/MacOS/.
     if let Ok(exe) = std::env::current_exe() {
         if let Some(dir) = exe.parent() {
             let name = if cfg!(windows) {
@@ -237,9 +225,23 @@ pub fn translator_exe() -> PathBuf {
             }
         }
     }
-    PathBuf::from(if cfg!(windows) {
+    if let Some(res) = macos_resources_dir() {
+        let p = res.join("translator");
+        if p.is_file() {
+            return p;
+        }
+    }
+    #[cfg(target_os = "linux")]
+    {
+        let fhs = PathBuf::from("/usr/lib/openpolysphere/bin/translator");
+        if fhs.is_file() {
+            return fhs;
+        }
+    }
+    let name = if cfg!(windows) {
         "translator.exe"
     } else {
         "translator"
-    })
+    };
+    PathBuf::from(name)
 }

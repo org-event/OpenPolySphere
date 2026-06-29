@@ -8,6 +8,7 @@ mod port;
 mod routes;
 mod settings;
 mod setup;
+mod update;
 mod voices;
 
 use std::net::SocketAddr;

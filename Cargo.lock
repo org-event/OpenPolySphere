@@ -3142,7 +3142,10 @@ dependencies = [
 name = "openpolysphere-app"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "cpal",
  "gtk",
+ "log",
  "tao",
  "wry",
 ]

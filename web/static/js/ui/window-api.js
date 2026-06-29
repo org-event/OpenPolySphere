@@ -21,6 +21,7 @@ import {
   downloadSelectedVoice,
   downloadDefaultVoice,
 } from '../settings/voices.js';
+import { checkForUpdates } from '../settings/updates.js';
 
 const handlers = {
   toggleTheme,
@@ -49,6 +50,7 @@ const handlers = {
   previewVoice,
   downloadSelectedVoice,
   downloadDefaultVoice,
+  checkForUpdates,
 };
 
 export function exposeWindowApi() {

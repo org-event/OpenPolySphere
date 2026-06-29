@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-06-29
+
+### Added
+
+- App version shown in the header (`/api/app-info`)
+- Settings → Advanced: **Check for updates** button and **Allow update checks** toggle
+- macOS: in-app self-update from GitHub Releases (download zip, relaunch)
+
+### Fixed
+
+- macOS `.app`: microphone permission from main GUI process; `translator` in `Contents/MacOS/`
+- Settings panel no longer opens automatically on launch
+- Voice preview: clear error when Piper model is missing
+- Packaged app logs translator stderr to `~/Library/Application Support/OpenPolySphere/translator.log`
+
 ## [0.4.5] - 2026-06-29
 
 ### Fixed
