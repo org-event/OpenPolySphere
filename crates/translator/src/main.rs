@@ -66,7 +66,6 @@ async fn serve() -> Result<()> {
 
     audio_core::init_ort();
 
-    #[cfg(target_os = "macos")]
     if let Err(e) = audio_core::platform::ensure_microphone_access() {
         log::warn!("Microphone access: {e:#}");
     }
