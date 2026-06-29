@@ -5,7 +5,7 @@
 #define MyAppName "OpenPolySphere"
 #define MyAppPublisher "org-event"
 #define MyAppURL "https://github.com/org-event/OpenPolySphere"
-#define MyAppExeName "translator.exe"
+#define MyAppExeName "openpolysphere.exe"
 
 #ifndef MyAppVersion
   #define MyAppVersion "0.0.0"
@@ -43,7 +43,7 @@ Source: "staging\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs creat
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Comment: "Start OpenPolySphere"
-Name: "{group}\{#MyAppName} Setup (download models)"; Filename: "{app}\{#MyAppExeName}"; Parameters: "setup"; WorkingDir: "{app}"
+Name: "{group}\{#MyAppName} Setup (download models)"; Filename: "{app}\translator.exe"; Parameters: "setup"; WorkingDir: "{app}"
 Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon
 

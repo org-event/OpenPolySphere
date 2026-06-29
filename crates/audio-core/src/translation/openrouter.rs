@@ -74,10 +74,7 @@ impl OpenRouterClient {
     }
 
     fn from_env(optional: bool) -> Result<Self> {
-        let api_key = std::env::var("OPENROUTER_API_KEY")
-            .or_else(|_| std::env::var("GROQ_API_KEY"))
-            .or_else(|_| std::env::var("TRANSLATION_API_KEY"))
-            .unwrap_or_default();
+        let api_key = std::env::var("OPENROUTER_API_KEY").unwrap_or_default();
         if api_key.is_empty() {
             if optional {
                 bail!("no OpenRouter API key");

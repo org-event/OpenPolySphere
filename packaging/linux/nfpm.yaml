@@ -16,6 +16,8 @@ depends:
   - espeak-ng
   - libasound2
   - libopenblas0-pthread | libopenblas0
+  - libgtk-3-0
+  - libwebkit2gtk-4.1-0
 recommends:
   - ca-certificates
 contents:
@@ -29,7 +31,7 @@ contents:
       mode: 0644
   - src: ./packaging/linux/.pack-root/usr/share/openpolysphere/web
     dst: /usr/share/openpolysphere/web
-  - src: ./packaging/linux/openpolysphere-wrapper.sh
+  - src: ./packaging/linux/.pack-root/usr/bin/openpolysphere
     dst: /usr/bin/openpolysphere
     file_info:
       mode: 0755
@@ -39,3 +41,5 @@ overrides:
       - espeak-ng
       - alsa-lib
       - openblas
+      - gtk3
+      - webkit2gtk4.1

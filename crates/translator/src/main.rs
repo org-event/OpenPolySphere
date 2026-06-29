@@ -2,6 +2,7 @@ mod db;
 mod downloads;
 mod engine_service;
 mod events;
+mod legacy_config;
 mod openrouter;
 mod paths;
 mod port;
@@ -118,15 +119,16 @@ async fn serve() -> Result<()> {
 
 // Minimal .env loader without extra dep — read .env from base dir if present
 mod dotenvy {
+    use crate::legacy_config;
     use crate::paths::user_data_dir;
     use std::fs;
 
     pub fn optional() -> Result<(), ()> {
         let path = user_data_dir().join(".env");
+        legacy_config::migrate_dotenv_file(&path);
         let Ok(raw) = fs::read_to_string(&path) else {
             return Err(());
         };
-        let mut groq_value: Option<String> = None;
         for line in raw.lines() {
             let line = line.trim();
             if line.is_empty() || line.starts_with('#') {
@@ -135,20 +137,9 @@ mod dotenvy {
             if let Some((k, v)) = line.split_once('=') {
                 let key = k.trim();
                 let value = v.trim().trim_matches('"').trim_matches('\'');
-                if key == "GROQ_API_KEY" && !value.is_empty() {
-                    groq_value = Some(value.to_string());
-                }
                 if std::env::var(key).is_err() {
                     std::env::set_var(key, value);
                 }
-            }
-        }
-        if let Some(groq) = groq_value {
-            if std::env::var("OPENROUTER_API_KEY")
-                .map(|s| s.trim().is_empty())
-                .unwrap_or(true)
-            {
-                std::env::set_var("OPENROUTER_API_KEY", &groq);
             }
         }
         Ok(())

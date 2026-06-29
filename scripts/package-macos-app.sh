@@ -25,11 +25,16 @@ ZIP="$OUT_DIR/${ARTIFACT_BASE}.zip"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUILD="$ROOT/target/release"
+APP_BUILD="$BUILD/openpolysphere"
 
 cd "$ROOT"
 
 if [[ ! -x "$BUILD/translator" ]]; then
   echo "missing $BUILD/translator — run: cargo build --release -p translator" >&2
+  exit 1
+fi
+if [[ ! -x "$APP_BUILD" ]]; then
+  echo "missing $APP_BUILD — run: cargo build --release -p openpolysphere-app" >&2
   exit 1
 fi
 
@@ -50,14 +55,15 @@ if [[ -z "$ORT_SRC" ]]; then
   exit 1
 fi
 
-chmod +x "$ROOT/scripts/build-macos-app-icon.sh" "$ROOT/scripts/build-macos-shell.sh"
+chmod +x "$ROOT/scripts/build-macos-app-icon.sh"
 "$ROOT/scripts/build-macos-app-icon.sh"
 
 rm -rf "$WORK"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/Helpers" "$APP/Contents/Frameworks"
 
 sed "s/__VERSION__/${VERSION}/g" "$ROOT/packaging/macos/Info.plist" > "$APP/Contents/Info.plist"
-"$ROOT/scripts/build-macos-shell.sh" "$APP/Contents/MacOS/OpenPolySphere"
+cp "$APP_BUILD" "$APP/Contents/MacOS/OpenPolySphere"
+chmod +x "$APP/Contents/MacOS/OpenPolySphere"
 
 cp "$ROOT/packaging/macos/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 

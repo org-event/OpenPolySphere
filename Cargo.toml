@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/audio-core", "crates/audio-protocol", "crates/translator"]
+members = ["crates/audio-core", "crates/audio-protocol", "crates/translator", "crates/openpolysphere-app"]
 exclude = ["fuzz"]
 resolver = "2"
 
