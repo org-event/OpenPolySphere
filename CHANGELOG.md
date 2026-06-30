@@ -2,13 +2,17 @@
 
 ## [Unreleased]
 
-## [0.4.6] - 2026-06-29
+## [0.4.6] - 2026-06-30
 
 ### Added
 
 - App version shown in the header (`/api/app-info`)
 - Settings → Advanced: **Check for updates** button and **Allow update checks** toggle
 - macOS: in-app self-update from GitHub Releases (download zip, relaunch)
+
+### Changed
+
+- Desktop shell: tao 0.35.3, wry 0.55.1
 
 ### Fixed
 
