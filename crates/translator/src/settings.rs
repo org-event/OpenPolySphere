@@ -74,6 +74,7 @@ impl Default for Settings {
         fields.insert("my_language".into(), Value::String("ru".into()));
         fields.insert("their_language".into(), Value::String("en".into()));
         fields.insert("ui_locale".into(), Value::String(String::new()));
+        fields.insert("check_updates".into(), Value::Bool(true));
         Self { fields }
     }
 }

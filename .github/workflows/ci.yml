@@ -132,6 +132,8 @@ jobs:
       - run: cargo test -p audio-core@0.1.0 --lib
       - run: just build
       - run: cargo build --release -p openpolysphere-app
+        env:
+          OPENPOLYSPHERE_VERSION: 0.0.0-ci
       - name: Verify build
         run: |
           test -x target/release/translator
@@ -210,6 +212,8 @@ jobs:
 
       - name: Build release
         run: cargo build --release -p translator -p openpolysphere-app
+        env:
+          OPENPOLYSPHERE_VERSION: 0.0.0-ci
 
       - name: Verify binary
         shell: pwsh
@@ -299,6 +303,8 @@ jobs:
 
       - name: Build release
         run: cargo build --release -p translator -p openpolysphere-app
+        env:
+          OPENPOLYSPHERE_VERSION: 0.0.0-ci
 
       - name: Verify binary
         run: |

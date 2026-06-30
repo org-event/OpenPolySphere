@@ -329,6 +329,13 @@ impl Engine {
                     std::env::var("TRANSLATOR_MODELS_DIR").unwrap_or_else(|_| "./models".into());
                 let model_path = format!("{}/piper-{}/{}.onnx", models_base, lang, voice);
                 let config_path = format!("{}/piper-{}/{}.onnx.json", models_base, lang, voice);
+                if !std::path::Path::new(&model_path).is_file() {
+                    return vec![Event::Error {
+                        message: format!(
+                            "Voice model not found at {model_path}. Download the voice in Settings first."
+                        ),
+                    }];
+                }
                 let text = match lang.as_str() {
                     "ru" => "Привет, это тест голоса для перевода.",
                     "de" => "Hallo, dies ist ein Stimmtest.",

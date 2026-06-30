@@ -104,6 +104,10 @@
     filter: brightness(1.1);
   }
   .header-controls { display: flex; gap: 10px; align-items: center; }
+  .app-version {
+    font-size: 11px; color: var(--text3); font-variant-numeric: tabular-nums;
+    padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border);
+  }
   #timer {
     font-family: 'SF Mono', 'Menlo', monospace;
     font-size: 13px; color: var(--text2); min-width: 48px;

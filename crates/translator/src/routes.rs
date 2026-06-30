@@ -125,6 +125,9 @@ pub fn api_routes() -> Router<Arc<AppState>> {
         .route("/api/poll-audio", get(poll_audio))
         .route("/api/audio-levels", get(audio_levels))
         .route("/api/monitor-levels", post(monitor_levels))
+        .route("/api/app-info", get(app_info))
+        .route("/api/update/check", post(update_check))
+        .route("/api/update/apply", post(update_apply))
         .route("/api/translate", post(api_translate))
         .route("/api/calls/new-session", post(new_session))
         .route("/api/calls/end", post(end_call))
@@ -217,6 +220,7 @@ async fn get_settings(State(state): State<Arc<AppState>>) -> Json<Value> {
         json!(settings.effective_ui_locale()),
     );
     out.insert("_host_os".into(), json!(std::env::consts::OS));
+    out.insert("_app_version".into(), json!(crate::update::app_version()));
     Json(Value::Object(out))
 }
 
@@ -458,6 +462,31 @@ async fn monitor_levels(
     let engine = state.engine.read().await.clone();
     let status = engine.handle_text(&format!("monitor_levels {}", payload), &settings);
     Json(json!({ "status": status }))
+}
+
+async fn app_info() -> Json<Value> {
+    Json(crate::update::app_info())
+}
+
+async fn update_check(State(state): State<Arc<AppState>>) -> Json<Value> {
+    let settings = state.settings.read().await.clone();
+    match crate::update::check_for_update(&settings).await {
+        Ok(v) => Json(v),
+        Err(e) => Json(json!({ "status": "error", "message": e.to_string() })),
+    }
+}
+
+#[derive(Deserialize)]
+struct UpdateApplyBody {
+    #[serde(default)]
+    download_url: String,
+}
+
+async fn update_apply(Json(body): Json<UpdateApplyBody>) -> Json<Value> {
+    match crate::update::apply_update(&body.download_url).await {
+        Ok(v) => Json(v),
+        Err(e) => Json(json!({ "status": "error", "message": e.to_string() })),
+    }
 }
 
 async fn api_translate(Json(body): Json<TranslateBody>) -> Json<Value> {

@@ -18,6 +18,7 @@ import {
 } from './translation.js';
 import { loadDevices, applyPlatformAudioHints } from './devices.js';
 import { populateCallLangSelect } from '../core/call-languages.js';
+import { showAppVersion } from './updates.js';
 import { applyEngineButton } from '../engine/control.js';
 
 function refreshSettingsButtonLabels() {
@@ -105,7 +106,10 @@ export function populateForm(s) {
   document.getElementById('cfg-endpointing').value = s.endpointing_ms || 500;
   document.getElementById('endpointing-val').textContent = (s.endpointing_ms || 500) + 'ms';
   populateUiLocaleSelect(s.ui_locale || '', s._system_locale);
+  const checkUp = document.getElementById('cfg-check-updates');
+  if (checkUp) checkUp.checked = s.check_updates !== false;
   applyPlatformAudioHints(s);
+  showAppVersion();
 }
 
 function populateUiLocaleSelect(selected, systemLocale) {
@@ -166,6 +170,7 @@ export function readForm() {
       'default',
     endpointing_ms: parseInt(document.getElementById('cfg-endpointing').value),
     ui_locale: document.getElementById('cfg-ui-locale')?.value || '',
+    check_updates: document.getElementById('cfg-check-updates')?.checked !== false,
   };
 }
 

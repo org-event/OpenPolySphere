@@ -1,4 +1,6 @@
 # OSV-Scanner ignores for OpenSSF Scorecard (mirrors .cargo/audit.toml).
+# Scorecard alert #34 stays open until these are ignored or dependencies are upgraded.
+
 [[IgnoredVulns]]
 id = "RUSTSEC-2024-0436"
 reason = "Transitive via ct2rs/tokenizers; proc-macro only"
@@ -6,3 +8,60 @@ reason = "Transitive via ct2rs/tokenizers; proc-macro only"
 [[IgnoredVulns]]
 id = "RUSTSEC-2026-0173"
 reason = "Transitive via optional defmt integration"
+
+# Linux WebView stack (tao/wry → gtk 0.18 / GTK3 bindings, unmaintained not exploitable in our use)
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0411"
+reason = "Transitive gtk-rs GTK3 via wry Linux build; no GTK3 in macOS/Windows packages"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0412"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0413"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0414"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0415"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0416"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0417"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0418"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0419"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0420"
+reason = "Transitive gtk-rs GTK3 via wry Linux build"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0370"
+reason = "Transitive proc-macro-error via gtk3-macros; compile-time only"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2025-0057"
+reason = "Transitive fxhash; unmaintained, no known exploit path"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2024-0429"
+reason = "Transitive glib via Linux GTK stack; VariantStrIter not used in app code"
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0097"
+reason = "Transitive rand 0.7; unsound only with custom logger, not used"

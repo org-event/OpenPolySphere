@@ -44,7 +44,11 @@ jobs:
       - name: Install system dependencies
         run: brew install espeak-ng onnxruntime librsvg create-dmg
       - name: Build release
-        run: cargo build --release -p translator -p openpolysphere-app
+        env:
+          OPENPOLYSPHERE_VERSION: ${{ github.ref_name }}
+        run: |
+          export OPENPOLYSPHERE_VERSION="${GITHUB_REF_NAME#v}"
+          cargo build --release -p translator -p openpolysphere-app
       - name: Package OpenPolySphere.app
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -85,7 +89,11 @@ jobs:
       - name: Install system dependencies
         run: brew install espeak-ng onnxruntime librsvg create-dmg
       - name: Build release
-        run: cargo build --release -p translator -p openpolysphere-app
+        env:
+          OPENPOLYSPHERE_VERSION: ${{ github.ref_name }}
+        run: |
+          export OPENPOLYSPHERE_VERSION="${GITHUB_REF_NAME#v}"
+          cargo build --release -p translator -p openpolysphere-app
       - name: Package OpenPolySphere.app
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -145,7 +153,11 @@ jobs:
         run: choco install innosetup -y
 
       - name: Build release
-        run: cargo build --release -p translator -p openpolysphere-app
+        env:
+          OPENPOLYSPHERE_VERSION: ${{ github.ref_name }}
+        run: |
+          export OPENPOLYSPHERE_VERSION="${GITHUB_REF_NAME#v}"
+          cargo build --release -p translator -p openpolysphere-app
 
       - name: Package
         shell: pwsh
@@ -194,7 +206,11 @@ jobs:
           toolchain: stable
 
       - name: Build release
-        run: cargo build --release -p translator -p openpolysphere-app
+        env:
+          OPENPOLYSPHERE_VERSION: ${{ github.ref_name }}
+        run: |
+          export OPENPOLYSPHERE_VERSION="${GITHUB_REF_NAME#v}"
+          cargo build --release -p translator -p openpolysphere-app
 
       - name: Package
         run: |

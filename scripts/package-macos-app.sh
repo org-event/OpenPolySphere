@@ -65,14 +65,14 @@ sed "s/__VERSION__/${VERSION}/g" "$ROOT/packaging/macos/Info.plist" > "$APP/Cont
 cp "$APP_BUILD" "$APP/Contents/MacOS/OpenPolySphere"
 chmod +x "$APP/Contents/MacOS/OpenPolySphere"
 
-cp "$ROOT/packaging/macos/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
-
-cp "$BUILD/translator" "$APP/Contents/Resources/"
-chmod +x "$APP/Contents/Resources/translator"
+cp "$BUILD/translator" "$APP/Contents/MacOS/translator"
+chmod +x "$APP/Contents/MacOS/translator"
 
 if command -v codesign >/dev/null 2>&1; then
-  codesign --force --sign - "$APP/Contents/Resources/translator" 2>/dev/null || true
+  codesign --force --sign - "$APP/Contents/MacOS/translator" 2>/dev/null || true
 fi
+
+cp "$ROOT/packaging/macos/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 
 if [[ -f "$BUILD/polysphere-translate" ]]; then
   cp "$BUILD/polysphere-translate" "$APP/Contents/Resources/"

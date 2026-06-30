@@ -1,4 +1,3 @@
-import { state } from '../core/state.js';
 import { startLevelMonitoring, stopLevelMonitoring } from '../audio/levels.js';
 import { refreshSttStatus, updateSttEngineUI } from './stt.js';
 import {
@@ -38,8 +37,5 @@ export function toggleSection(id) {
 }
 
 export function initSettingsPanel() {
-  const sttBackend = state.currentSettings.stt_backend || 'local';
-  if (sttBackend === 'deepgram' && !state.currentSettings.deepgram_api_key) {
-    openSettings();
-  }
+  // Settings open only on user action (gear button), not at startup.
 }
