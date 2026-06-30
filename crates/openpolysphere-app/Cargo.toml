@@ -10,7 +10,7 @@ name = "openpolysphere"
 path = "src/main.rs"
 
 [dependencies]
-tao = "0.34.5"
+tao = "0.35.3"
 wry = "0.53.5"
 anyhow = "1"
 log = "0.4"
