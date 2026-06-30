@@ -46,9 +46,7 @@ jobs:
       - name: Build release
         env:
           OPENPOLYSPHERE_VERSION: ${{ github.ref_name }}
-        run: |
-          export OPENPOLYSPHERE_VERSION="${GITHUB_REF_NAME#v}"
-          cargo build --release -p translator -p openpolysphere-app
+        run: cargo build --release -p translator -p openpolysphere-app
       - name: Package OpenPolySphere.app
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -91,9 +89,7 @@ jobs:
       - name: Build release
         env:
           OPENPOLYSPHERE_VERSION: ${{ github.ref_name }}
-        run: |
-          export OPENPOLYSPHERE_VERSION="${GITHUB_REF_NAME#v}"
-          cargo build --release -p translator -p openpolysphere-app
+        run: cargo build --release -p translator -p openpolysphere-app
       - name: Package OpenPolySphere.app
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -155,9 +151,7 @@ jobs:
       - name: Build release
         env:
           OPENPOLYSPHERE_VERSION: ${{ github.ref_name }}
-        run: |
-          export OPENPOLYSPHERE_VERSION="${GITHUB_REF_NAME#v}"
-          cargo build --release -p translator -p openpolysphere-app
+        run: cargo build --release -p translator -p openpolysphere-app
 
       - name: Package
         shell: pwsh
@@ -208,9 +202,7 @@ jobs:
       - name: Build release
         env:
           OPENPOLYSPHERE_VERSION: ${{ github.ref_name }}
-        run: |
-          export OPENPOLYSPHERE_VERSION="${GITHUB_REF_NAME#v}"
-          cargo build --release -p translator -p openpolysphere-app
+        run: cargo build --release -p translator -p openpolysphere-app
 
       - name: Package
         run: |

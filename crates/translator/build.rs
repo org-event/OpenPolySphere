@@ -88,14 +88,12 @@ fn build_swift_tool(manifest: &Path, out_dir: &Path, tool_name: &str, sources_di
 }
 
 fn main() {
-    let version = std::env::var("OPENPOLYSPHERE_VERSION")
-        .ok()
-        .or_else(|| {
-            std::env::var("GITHUB_REF_NAME")
-                .ok()
-                .map(|s| s.trim_start_matches('v').to_string())
-        })
-        .unwrap_or_else(|| "dev".to_string());
+    let version = match std::env::var("OPENPOLYSPHERE_VERSION")
+        .or_else(|_| std::env::var("GITHUB_REF_NAME"))
+    {
+        Ok(v) => v.trim_start_matches('v').to_string(),
+        Err(_) => "dev".into(),
+    };
     println!("cargo:rustc-env=OPENPOLYSPHERE_VERSION={version}");
 
     if !cfg!(target_os = "macos") {

@@ -20,6 +20,7 @@
 - Settings panel no longer opens automatically on launch
 - Voice preview: clear error when Piper model is missing
 - Packaged app logs translator stderr to `~/Library/Application Support/OpenPolySphere/translator.log`
+- Windows release CI: build step compatible with PowerShell (no bash `export`)
 
 ## [0.4.5] - 2026-06-29
 
