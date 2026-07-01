@@ -61,7 +61,7 @@ jobs:
     if: needs.changes.outputs.rust == 'true' || needs.changes.outputs.workflows == 'true' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
         with:
           toolchain: stable
           components: rustfmt
@@ -115,7 +115,7 @@ jobs:
           echo "Using $selected"
           xcodebuild -version
           swift --version
-      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
         with:
           toolchain: stable
           components: clippy
@@ -194,7 +194,7 @@ jobs:
             Expand-Archive $zip -DestinationPath ort -Force
           }
 
-      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
         with:
           toolchain: stable
           components: clippy
@@ -285,7 +285,7 @@ jobs:
           echo "ORT_DYLIB_PATH=$GITHUB_WORKSPACE/$ORT_DIR/lib/libonnxruntime.so" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/$ORT_DIR/lib" >> "$GITHUB_ENV"
 
-      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
         with:
           toolchain: stable
           components: clippy
