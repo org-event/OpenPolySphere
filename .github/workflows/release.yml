@@ -38,7 +38,7 @@ jobs:
           fi
           echo "Using $selected"
           xcodebuild -version
-      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
         with:
           toolchain: stable
       - name: Install system dependencies
@@ -52,7 +52,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           chmod +x scripts/package-macos-app.sh scripts/build-macos-app-icon.sh
           ./scripts/package-macos-app.sh "$VERSION" dist
-      - uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+      - uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           generate_release_notes: true
           files: |
@@ -81,7 +81,7 @@ jobs:
             echo "Using $selected"
           fi
           xcodebuild -version
-      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
         with:
           toolchain: stable
       - name: Install system dependencies
@@ -95,7 +95,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           chmod +x scripts/package-macos-app.sh scripts/build-macos-app-icon.sh
           ./scripts/package-macos-app.sh "$VERSION" dist
-      - uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+      - uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           files: |
             dist/openpolysphere-*-macos-x64.dmg
@@ -141,7 +141,7 @@ jobs:
             Expand-Archive $zip -DestinationPath ort -Force
           }
 
-      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
         with:
           toolchain: stable
 
@@ -159,7 +159,7 @@ jobs:
           $VERSION = "${{ github.ref_name }}".Substring(1)
           & ./scripts/package-windows.ps1 -Version $VERSION -OutDir dist
 
-      - uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+      - uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           files: |
             dist/openpolysphere-*-windows-x64.zip
@@ -195,7 +195,7 @@ jobs:
           echo "ORT_DYLIB_PATH=$GITHUB_WORKSPACE/$ORT_DIR/lib/libonnxruntime.so" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/$ORT_DIR/lib" >> "$GITHUB_ENV"
 
-      - uses: dtolnay/rust-toolchain@67ef31d5b988238dd797d409d6f9574278e20537 # stable
+      - uses: dtolnay/rust-toolchain@fa04a1451ff1842e2626ccb99004d0195b455a88 # stable
         with:
           toolchain: stable
 
@@ -210,7 +210,7 @@ jobs:
           chmod +x scripts/package-linux.sh
           ./scripts/package-linux.sh "$VERSION" dist
 
-      - uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
+      - uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           files: |
             dist/openpolysphere-*-linux-x64.zip
