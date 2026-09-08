@@ -133,10 +133,25 @@ fn pick_asset_url(assets: &[GhAsset]) -> Option<String> {
     assets.first().map(|a| a.browser_download_url.clone())
 }
 
+/// Only allow GitHub Release asset URLs for this repository (SSRF guard).
+fn assert_trusted_download_url(download_url: &str) -> Result<()> {
+    let url = reqwest::Url::parse(download_url).context("invalid download URL")?;
+    if url.scheme() != "https" {
+        anyhow::bail!("download URL must be https");
+    }
+    let host = url.host_str().unwrap_or("");
+    let prefix = format!("/{REPO}/releases/download/");
+    if host == "github.com" && url.path().starts_with(&prefix) {
+        return Ok(());
+    }
+    anyhow::bail!("untrusted download URL host/path");
+}
+
 pub async fn apply_update(download_url: &str) -> Result<Value> {
     if download_url.is_empty() {
         anyhow::bail!("empty download URL");
     }
+    assert_trusted_download_url(download_url)?;
     match std::env::consts::OS {
         "macos" => apply_update_macos(download_url).await,
         "windows" => Ok(json!({
