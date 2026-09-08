@@ -340,11 +340,8 @@ fn peak_amplitude(samples: &[f32]) -> f32 {
 }
 
 pub fn whisper_language(code: &str) -> &str {
-    match code {
-        "pt" => "pt",
-        "no" => "no",
-        other => other,
-    }
+    // Whisper accepts ISO codes as-is (including "pt" / "no").
+    code
 }
 
 pub fn models_base_dir() -> PathBuf {
