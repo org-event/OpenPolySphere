@@ -184,7 +184,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "audio-protocol",
- "base64 0.22.1",
+ "base64 0.23.1",
  "cpal",
  "crossbeam-channel",
  "ct2rs",
