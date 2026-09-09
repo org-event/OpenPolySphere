@@ -23,7 +23,7 @@ cpal = "0.18.1"
 ringbuf = "0.5.0"
 ort = { version = "2.0.0-rc.12", features = ["load-dynamic"] }
 ndarray = "0.17.2"
-rubato = "3.0.0"
+rubato = "5.0.0"
 ureq = { version = "3.3.0", features = ["json"] }
 tungstenite = { version = "0.30.0", features = ["native-tls"] }
 base64 = "0.23.1"
