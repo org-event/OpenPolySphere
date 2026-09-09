@@ -28,6 +28,7 @@ calls.db-*
 # IDE
 .idea/
 .vscode/
+.cursor/
 node_modules/
 scripts/.venv-trace/
 scripts/__pycache__/
