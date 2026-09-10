@@ -935,9 +935,9 @@ dependencies = [
 
 [[package]]
 name = "ct2rs"
-version = "0.9.19"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18422a847d4db4f89dc71ec2b4b449b465b2e5422ddc04fbd7e1ff4527c8a600"
+checksum = "b68f8baf9feaac18f4380e1079ed2c633f7703cee391d34521f5dded6c005725"
 dependencies = [
  "anyhow",
  "cmake",
@@ -3747,7 +3747,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b570b25f7617e43d59005d0990ccb79e950a423952cea19671b7a876da390adf"
 dependencies = [
  "anyhow",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 2.0.119",
