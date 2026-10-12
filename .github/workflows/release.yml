@@ -38,7 +38,7 @@ jobs:
           fi
           echo "Using $selected"
           xcodebuild -version
-      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # stable
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # stable
         with:
           toolchain: stable
       - name: Install system dependencies
@@ -81,7 +81,7 @@ jobs:
             echo "Using $selected"
           fi
           xcodebuild -version
-      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # stable
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # stable
         with:
           toolchain: stable
       - name: Install system dependencies
@@ -141,7 +141,7 @@ jobs:
             Expand-Archive $zip -DestinationPath ort -Force
           }
 
-      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # stable
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # stable
         with:
           toolchain: stable
 
@@ -195,7 +195,7 @@ jobs:
           echo "ORT_DYLIB_PATH=$GITHUB_WORKSPACE/$ORT_DIR/lib/libonnxruntime.so" >> "$GITHUB_ENV"
           echo "LD_LIBRARY_PATH=$GITHUB_WORKSPACE/$ORT_DIR/lib" >> "$GITHUB_ENV"
 
-      - uses: dtolnay/rust-toolchain@d1031067263f94b142dd6c0ce24c5eb9d02d52a0 # stable
+      - uses: dtolnay/rust-toolchain@e2a55d2ffb04f378e9626c28d38b36d230d1e12f # stable
         with:
           toolchain: stable
 
