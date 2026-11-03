@@ -133,27 +133,36 @@ fn pick_asset_url(assets: &[GhAsset]) -> Option<String> {
     assets.first().map(|a| a.browser_download_url.clone())
 }
 
-/// Only allow GitHub Release asset URLs for this repository (SSRF guard).
-fn assert_trusted_download_url(download_url: &str) -> Result<()> {
-    let url = reqwest::Url::parse(download_url).context("invalid download URL")?;
-    if url.scheme() != "https" {
-        anyhow::bail!("download URL must be https");
-    }
-    let host = url.host_str().unwrap_or("");
-    let prefix = format!("/{REPO}/releases/download/");
-    if host == "github.com" && url.path().starts_with(&prefix) {
-        return Ok(());
-    }
-    anyhow::bail!("untrusted download URL host/path");
-}
-
-pub async fn apply_update(download_url: &str) -> Result<Value> {
+/// Rebuild a GitHub Release asset URL for this repository.
+///
+/// The request target is always `https://github.com/{repo}/releases/download/…`,
+/// not the raw client string. Query, userinfo, and other hosts are rejected.
+fn trusted_download_url(download_url: &str) -> Result<String> {
     if download_url.is_empty() {
         anyhow::bail!("empty download URL");
     }
-    assert_trusted_download_url(download_url)?;
+    let url = reqwest::Url::parse(download_url).context("invalid download URL")?;
+    if url.scheme() != "https" || url.host_str() != Some("github.com") {
+        anyhow::bail!("untrusted download URL host/path");
+    }
+    if !url.username().is_empty() || url.password().is_some() {
+        anyhow::bail!("untrusted download URL host/path");
+    }
+    let prefix = format!("/{REPO}/releases/download/");
+    let rest = url
+        .path()
+        .strip_prefix(&prefix)
+        .filter(|rest| {
+            !rest.is_empty() && !rest.contains("..") && !rest.contains('\\') && !rest.contains("//")
+        })
+        .context("untrusted download URL host/path")?;
+    Ok(format!("https://github.com{prefix}{rest}"))
+}
+
+pub async fn apply_update(download_url: &str) -> Result<Value> {
+    let download_url = trusted_download_url(download_url)?;
     match std::env::consts::OS {
-        "macos" => apply_update_macos(download_url).await,
+        "macos" => apply_update_macos(&download_url).await,
         "windows" => Ok(json!({
             "status": "manual",
             "message": "Download the installer from GitHub Releases and run it.",
@@ -239,4 +248,40 @@ fn detect_macos_app_path() -> Option<PathBuf> {
         return Some(default);
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::trusted_download_url;
+
+    #[test]
+    fn rebuilds_github_release_asset_url() {
+        let url = "https://github.com/org-event/OpenPolySphere/releases/download/v0.4.6/OpenPolySphere.zip";
+        assert_eq!(trusted_download_url(url).unwrap(), url);
+    }
+
+    #[test]
+    fn rejects_untrusted_download_urls() {
+        assert!(trusted_download_url("").is_err());
+        assert!(trusted_download_url(
+            "http://github.com/org-event/OpenPolySphere/releases/download/v1/a.zip"
+        )
+        .is_err());
+        assert!(trusted_download_url(
+            "https://evil.example/org-event/OpenPolySphere/releases/download/v1/a.zip"
+        )
+        .is_err());
+        assert!(
+            trusted_download_url("https://github.com/other/repo/releases/download/v1/a.zip")
+                .is_err()
+        );
+        assert!(trusted_download_url(
+            "https://user:pass@github.com/org-event/OpenPolySphere/releases/download/v1/a.zip"
+        )
+        .is_err());
+        assert!(trusted_download_url(
+            "https://github.com/org-event/OpenPolySphere/releases/download/../../secret"
+        )
+        .is_err());
+    }
 }
